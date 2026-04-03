@@ -138,6 +138,11 @@ claude-log-visualization/
 └── README.md
 ```
 
+## 页面截图
+<img width="1672" height="682" alt="image" src="https://github.com/user-attachments/assets/6315d561-b42c-45da-9265-87c03415ffd1" />
+
+
+
 ## 许可证
 
 MIT
