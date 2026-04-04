@@ -13,7 +13,8 @@
 </p>
 
 <p align="center">
-  <img width="1835" alt="Screenshot" src="https://github.com/user-attachments/assets/b9fa357b-fd04-40b2-ba95-c5825fe2b6cd" />
+  <img width="1835" alt="Screenshot" src="https://github.com/user-attachments/assets/84b01bfa-dd56-4405-8d5d-08353753b752" />
+
 </p>
 
 ## ✨ 功能特性
