@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { BarChart2, MessageSquare, Clock, Wrench, Zap, FileText, Upload, History, Download } from 'lucide-react'
+import { BarChart2, MessageSquare, Clock, Wrench, Zap, FileText, Upload, History, Download, Bug } from 'lucide-react'
 import { parseLog } from './utils/logParser'
 import type { ParsedLogData } from './types/log'
 import { FileUpload } from './components/FileUpload'
@@ -12,8 +12,9 @@ import { PerformanceView } from './components/PerformanceView'
 import { RealTimeLog } from './components/RealTimeLog'
 import { FileHistory } from './components/FileHistory'
 import { ExportPanel } from './components/ExportPanel'
+import { DebugPanel } from './components/DebugPanel'
 
-type ViewId = 'overview' | 'tokens' | 'timeline' | 'conversation' | 'tools' | 'performance' | 'realtime' | 'history' | 'export'
+type ViewId = 'overview' | 'tokens' | 'timeline' | 'conversation' | 'tools' | 'performance' | 'realtime' | 'history' | 'export' | 'debug'
 
 const navItems: { id: ViewId; label: string; icon: React.ReactNode }[] = [
   { id: 'overview', label: '会话概览', icon: <BarChart2 className="w-4 h-4" /> },
@@ -25,6 +26,7 @@ const navItems: { id: ViewId; label: string; icon: React.ReactNode }[] = [
   { id: 'realtime', label: '日志查看', icon: <FileText className="w-4 h-4" /> },
   { id: 'history', label: '文件历史', icon: <History className="w-4 h-4" /> },
   { id: 'export', label: '导出', icon: <Download className="w-4 h-4" /> },
+  { id: 'debug', label: '调试面板', icon: <Bug className="w-4 h-4" /> },
 ]
 
 export default function App() {
@@ -56,6 +58,7 @@ export default function App() {
       case 'realtime': return <RealTimeLog data={logData} onDataUpdate={setLogData} />
       case 'history': return <FileHistory data={logData} />
       case 'export': return <ExportPanel data={logData} />
+      case 'debug': return <DebugPanel data={logData} />
     }
   }
 
