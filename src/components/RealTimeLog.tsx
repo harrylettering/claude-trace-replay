@@ -56,20 +56,20 @@ export function RealTimeLog({ data, onDataUpdate }: RealTimeLogProps) {
 
   const getCategoryInfo = (category: EntryCategory): { label: string; color: string } => {
     switch (category) {
-      case 'USER_INPUT': return { label: '用户输入', color: 'bg-green-500/20 text-green-400 border-green-500/30' };
-      case 'USER_INPUT_WITH_IMAGE': return { label: '用户输入(图片)', color: 'bg-green-500/20 text-green-400 border-green-500/30' };
-      case 'SLASH_COMMAND': return { label: '斜杠命令', color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' };
-      case 'TOOL_RESULT': return { label: '工具结果', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' };
-      case 'TOOL_ERROR': return { label: '工具错误', color: 'bg-red-500/20 text-red-400 border-red-500/30' };
-      case 'AGENT_RESULT': return { label: 'Agent结果', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' };
-      case 'ASSISTANT_TEXT': return { label: '助手回复', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' };
-      case 'ASSISTANT_TOOL_CALL': return { label: '助手工具调用', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' };
-      case 'ASSISTANT_THINKING_RESPONSE': return { label: '思考+回复', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' };
-      case 'SYSTEM': return { label: '系统消息', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' };
-      case 'SUMMARY': return { label: '会话摘要', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' };
-      case 'FILE_HISTORY': return { label: '文件快照', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' };
+      case 'USER_INPUT': return { label: 'User Input', color: 'bg-green-500/20 text-green-400 border-green-500/30' };
+      case 'USER_INPUT_WITH_IMAGE': return { label: 'User Input (Image)', color: 'bg-green-500/20 text-green-400 border-green-500/30' };
+      case 'SLASH_COMMAND': return { label: 'Slash Command', color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' };
+      case 'TOOL_RESULT': return { label: 'Tool Result', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' };
+      case 'TOOL_ERROR': return { label: 'Tool Error', color: 'bg-red-500/20 text-red-400 border-red-500/30' };
+      case 'AGENT_RESULT': return { label: 'Agent Result', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' };
+      case 'ASSISTANT_TEXT': return { label: 'Assistant Reply', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' };
+      case 'ASSISTANT_TOOL_CALL': return { label: 'Assistant Tool Call', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' };
+      case 'ASSISTANT_THINKING_RESPONSE': return { label: 'Thinking + Reply', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' };
+      case 'SYSTEM': return { label: 'System Message', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' };
+      case 'SUMMARY': return { label: 'Session Summary', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' };
+      case 'FILE_HISTORY': return { label: 'File Snapshot', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' };
       case 'UNKNOWN':
-      default: return { label: '未知', color: 'bg-slate-500/20 text-slate-400 border-slate-500/30' };
+      default: return { label: 'Unknown', color: 'bg-slate-500/20 text-slate-400 border-slate-500/30' };
     }
   };
 
@@ -83,11 +83,11 @@ export function RealTimeLog({ data, onDataUpdate }: RealTimeLogProps) {
         if (Array.isArray(msg.content)) {
           return msg.content.map((c: any) => {
             if (c.type === 'text') return c.text;
-            if (c.type === 'thinking') return `[思考] ${c.thinking}`;
-            if (c.type === 'tool_use') return `[工具调用] ${c.name}\n输入: ${JSON.stringify(c.input, null, 2)}`;
+            if (c.type === 'thinking') return `[Thinking] ${c.thinking}`;
+            if (c.type === 'tool_use') return `[Tool Call] ${c.name}\nInput: ${JSON.stringify(c.input, null, 2)}`;
             if (c.type === 'tool_result') {
               const result = typeof c.content === 'string' ? c.content : JSON.stringify(c.content, null, 2);
-              return `[工具结果]${c.is_error ? ' [错误]' : ''}\n${result}`;
+              return `[Tool Result]${c.is_error ? ' [Error]' : ''}\n${result}`;
             }
             return JSON.stringify(c);
           }).join('\n\n');
@@ -101,8 +101,8 @@ export function RealTimeLog({ data, onDataUpdate }: RealTimeLogProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold mb-2">实时日志流</h2>
-          <p className="text-slate-400">查看原始日志流并实时更新</p>
+          <h2 className="text-2xl font-bold mb-2">Live Log Stream</h2>
+          <p className="text-slate-400">View the raw log stream with live updates</p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -114,7 +114,7 @@ export function RealTimeLog({ data, onDataUpdate }: RealTimeLogProps) {
             }`}
           >
             {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-            {isPaused ? '继续' : '暂停'}
+            {isPaused ? 'Resume' : 'Pause'}
           </button>
         </div>
       </div>
@@ -137,11 +137,11 @@ export function RealTimeLog({ data, onDataUpdate }: RealTimeLogProps) {
             onChange={(e) => setAutoScroll(e.target.checked)}
             className="w-4 h-4 rounded border-slate-600 bg-slate-900 text-blue-500 focus:ring-blue-500"
           />
-          <span className="text-sm text-slate-300">自动滚动</span>
+          <span className="text-sm text-slate-300">Auto-scroll</span>
         </label>
         <div className="text-sm text-slate-400">
           {filters.query && (
-            <span>匹配: {searchResult.matchCount} 条</span>
+            <span>Matches: {searchResult.matchCount}</span>
           )}
         </div>
       </div>
@@ -193,8 +193,8 @@ export function RealTimeLog({ data, onDataUpdate }: RealTimeLogProps) {
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center py-12">
               <FileText className="w-12 h-12 text-slate-600 mb-4" />
-              <p className="text-slate-400 mb-2">没有匹配的日志条目</p>
-              <p className="text-slate-500 text-sm">尝试调整搜索条件或过滤器</p>
+              <p className="text-slate-400 mb-2">No matching log entries</p>
+              <p className="text-slate-500 text-sm">Try adjusting the search query or filters</p>
             </div>
           )}
           <div ref={logEndRef} />
@@ -204,7 +204,7 @@ export function RealTimeLog({ data, onDataUpdate }: RealTimeLogProps) {
       {/* 拖放提示 */}
       <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 border-dashed text-center">
         <Download className="w-5 h-5 text-slate-400 mx-auto mb-2" />
-        <p className="text-slate-400 text-sm">拖放新的日志文件到此处加载</p>
+        <p className="text-slate-400 text-sm">Drop a new log file here to load it</p>
       </div>
     </div>
   );

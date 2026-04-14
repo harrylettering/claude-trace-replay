@@ -21,12 +21,12 @@ interface TemplateLibraryProps {
 }
 
 const CATEGORIES: { value: PromptTemplate['category']; label: string }[] = [
-  { value: 'general', label: '通用' },
-  { value: 'coding', label: '编程' },
-  { value: 'analysis', label: '分析' },
-  { value: 'writing', label: '写作' },
-  { value: 'planning', label: '规划' },
-  { value: 'other', label: '其他' },
+  { value: 'general', label: 'General' },
+  { value: 'coding', label: 'Coding' },
+  { value: 'analysis', label: 'Analysis' },
+  { value: 'writing', label: 'Writing' },
+  { value: 'planning', label: 'Planning' },
+  { value: 'other', label: 'Other' },
 ];
 
 export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
@@ -72,7 +72,7 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
   }, []);
 
   const handleDelete = useCallback((id: string) => {
-    if (confirm('确定要删除这个模板吗？')) {
+    if (confirm('Are you sure you want to delete this template?')) {
       templateManager.deleteTemplate(id);
     }
   }, []);
@@ -100,10 +100,10 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
     try {
       const data = await templateManager.readJSONFile(file);
       const imported = templateManager.importLibrary(data);
-      alert(`成功导入 ${imported} 个模板！`);
+      alert(`Imported ${imported} templates successfully.`);
       setShowImport(false);
     } catch (err) {
-      alert('导入失败：文件格式不正确');
+      alert('Import failed: invalid file format.');
       console.error('Import failed:', err);
     }
   }, []);
@@ -117,8 +117,8 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">提示词模板库</h3>
-          <p className="text-slate-400 text-sm">保存和复用优质提示词</p>
+          <h3 className="text-lg font-semibold">Prompt Template Library</h3>
+          <p className="text-slate-400 text-sm">Save and reuse high-quality prompts</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -126,21 +126,21 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
             className="flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
           >
             <Upload className="w-4 h-4" />
-            导入
+            Import
           </button>
           <button
             onClick={handleExport}
             className="flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
           >
             <Download className="w-4 h-4" />
-            导出
+            Export
           </button>
           <button
             onClick={handleCreate}
             className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-colors"
           >
             <Plus className="w-4 h-4" />
-            新建模板
+            New Template
           </button>
         </div>
       </div>
@@ -152,7 +152,7 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder="搜索模板..."
+              placeholder="Search templates..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
@@ -168,7 +168,7 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
                 : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
             }`}
           >
-            全部
+            All
           </button>
           {CATEGORIES.map((cat) => (
             <button
@@ -199,7 +199,7 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
                   <h4 className="font-medium truncate">{template.name}</h4>
                   {template.isBuiltIn && (
                     <span className="px-1.5 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded-full">
-                      内置
+                      Built-in
                     </span>
                   )}
                 </div>
@@ -211,14 +211,14 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
                     <button
                       onClick={() => handleEdit(template)}
                       className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition-colors"
-                      title="编辑"
+                      title="Edit"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(template.id)}
                       className="p-1 hover:bg-red-600/20 rounded text-slate-400 hover:text-red-400 transition-colors"
-                      title="删除"
+                      title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -227,7 +227,7 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
                 <button
                   onClick={() => handleDuplicate(template.id)}
                   className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition-colors"
-                  title="复制"
+                  title="Duplicate"
                 >
                   <Copy className="w-4 h-4" />
                 </button>
@@ -254,18 +254,18 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
               <div className="flex items-center gap-2 text-xs text-slate-500">
                 <span className="flex items-center gap-1">
                   <FileText className="w-3 h-3" />
-                  {template.variables.length} 变量
+                  {template.variables.length} variables
                 </span>
                 <span className="flex items-center gap-1">
                   <Star className="w-3 h-3" />
-                  {template.usageCount} 次
+                  {template.usageCount} uses
                 </span>
               </div>
               <div className="flex gap-1">
                 <button
                   onClick={() => handleCopy(template.content, template.id)}
                   className="p-1.5 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition-colors"
-                  title="复制内容"
+                  title="Copy content"
                 >
                   {copiedId === template.id ? (
                     <Check className="w-4 h-4 text-green-400" />
@@ -278,7 +278,7 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
                     onClick={() => handleUse(template)}
                     className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm text-white transition-colors"
                   >
-                    使用
+                    Use
                   </button>
                 )}
               </div>
@@ -289,8 +289,8 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
         {filteredTemplates.length === 0 && (
           <div className="col-span-full text-center py-12">
             <Bookmark className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-            <p className="text-slate-400">没有找到模板</p>
-            <p className="text-slate-500 text-sm mt-1">尝试调整搜索条件或创建新模板</p>
+            <p className="text-slate-400">No templates found</p>
+            <p className="text-slate-500 text-sm mt-1">Try changing the search criteria or create a new template</p>
           </div>
         )}
       </div>
@@ -320,7 +320,7 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
           />
           <div className="relative bg-slate-800 rounded-2xl border border-slate-700 shadow-2xl w-full max-w-md mx-4">
             <div className="flex items-center justify-between p-6 border-b border-slate-700">
-              <h3 className="text-lg font-semibold">导入模板库</h3>
+              <h3 className="text-lg font-semibold">Import Template Library</h3>
               <button
                 onClick={() => setShowImport(false)}
                 className="p-2 hover:bg-slate-700 rounded-lg"
@@ -331,7 +331,7 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
             <div className="p-6">
               <div className="border-2 border-dashed border-slate-600 rounded-xl p-8 text-center">
                 <Upload className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-                <p className="text-slate-300 mb-4">选择要导入的 JSON 文件</p>
+                <p className="text-slate-300 mb-4">Choose a JSON file to import</p>
                 <input
                   type="file"
                   accept=".json"
@@ -347,7 +347,7 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
                   className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white cursor-pointer transition-colors"
                 >
                   <Upload className="w-4 h-4" />
-                  选择文件
+                  Choose File
                 </label>
               </div>
             </div>
@@ -394,7 +394,7 @@ function TemplateEditor({
       <div className="relative bg-slate-800 rounded-2xl border border-slate-700 shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-hidden">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-between p-6 border-b border-slate-700">
-            <h3 className="text-lg font-semibold">{template ? '编辑模板' : '新建模板'}</h3>
+            <h3 className="text-lg font-semibold">{template ? 'Edit Template' : 'New Template'}</h3>
             <button
               type="button"
               onClick={onClose}
@@ -405,30 +405,30 @@ function TemplateEditor({
           </div>
           <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)] space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">名称</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Name</label>
               <input
                 type="text"
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
-                placeholder="模板名称"
+                placeholder="Template name"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">描述</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Description</label>
               <input
                 type="text"
                 required
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
-                placeholder="简短描述"
+                placeholder="Short description"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">分类</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Category</label>
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
@@ -440,19 +440,19 @@ function TemplateEditor({
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">标签（逗号分隔）</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Tags (comma-separated)</label>
                 <input
                   type="text"
                   value={formData.tags}
                   onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
-                  placeholder="标签1, 标签2, 标签3"
+                  placeholder="tag1, tag2, tag3"
                 />
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">
-                提示词内容 <span className="text-slate-500">（使用 {'{{变量名}}'} 定义变量）</span>
+                Prompt Content <span className="text-slate-500">(use {'{{variable_name}}'} to define variables)</span>
               </label>
               <textarea
                 required
@@ -460,12 +460,12 @@ function TemplateEditor({
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                 className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500 font-mono text-sm"
-                placeholder="请在此输入提示词内容，使用 {{变量名}} 来定义可替换的变量..."
+                placeholder="Enter the prompt content here. Use {{variable_name}} to define replaceable variables..."
               />
             </div>
             {templateManager.extractVariables(formData.content).length > 0 && (
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
-                <p className="text-sm text-blue-300 mb-2">检测到的变量：</p>
+                <p className="text-sm text-blue-300 mb-2">Detected variables:</p>
                 <div className="flex flex-wrap gap-2">
                   {templateManager.extractVariables(formData.content).map((v) => {
                     const varStr = `{{${v}}}`;
@@ -485,13 +485,13 @@ function TemplateEditor({
               onClick={onClose}
               className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
             >
-              取消
+              Cancel
             </button>
             <button
               type="submit"
               className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-colors"
             >
-              保存
+              Save
             </button>
           </div>
         </form>

@@ -123,8 +123,8 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">对话流程图</h2>
-        <p className="text-slate-400">可视化消息层级和父子关系（共 {flatNodes.length} 条）</p>
+        <h2 className="text-2xl font-bold mb-2">Conversation Flow</h2>
+        <p className="text-slate-400">Visualize message hierarchy and parent-child relationships ({flatNodes.length} total)</p>
       </div>
 
       <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
@@ -175,7 +175,7 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
                         )}
                         {node.depth > 0 && (
                           <span className="text-slate-600 text-xs flex items-center gap-0.5">
-                            <GitBranch className="w-3 h-3" />深度 {node.depth}
+                            <GitBranch className="w-3 h-3" />Depth {node.depth}
                           </span>
                         )}
                         <span className="text-slate-500 text-xs">{new Date(node.entry.timestamp).toLocaleTimeString()}</span>
@@ -190,7 +190,7 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
                       <button
                         onClick={() => toggleDetails(key)}
                         className="p-1 hover:bg-slate-700 rounded text-slate-500 hover:text-slate-300"
-                        title="查看详情"
+                        title="View details"
                       >
                         {isDetailExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                       </button>
@@ -198,7 +198,7 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
                         <button
                           onClick={() => toggleCollapse(key)}
                           className="px-1.5 py-0.5 text-xs rounded bg-slate-700 hover:bg-slate-600 text-slate-400 hover:text-slate-200"
-                          title={isCollapsed ? '展开子消息' : '折叠子消息'}
+                          title={isCollapsed ? 'Expand child messages' : 'Collapse child messages'}
                         >
                           {isCollapsed ? `+${messageMap.get(key)!.children.length}` : '−'}
                         </button>
@@ -221,7 +221,7 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
             );
           }) : (
             <div className="text-center py-12 text-slate-400">
-              没有找到结构化的对话流
+              No structured conversation flow found
             </div>
           )}
         </div>
@@ -229,13 +229,13 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
 
       {/* 图例 */}
       <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
-        <h3 className="font-semibold mb-3 text-sm">图例</h3>
+        <h3 className="font-semibold mb-3 text-sm">Legend</h3>
         <div className="flex flex-wrap gap-4">
           {[
-            { color: 'bg-blue-500', icon: <User className="w-3 h-3 text-white" />, label: '用户' },
-            { color: 'bg-purple-500', icon: <Bot className="w-3 h-3 text-white" />, label: '助手' },
-            { color: 'bg-amber-500', icon: <MessageSquare className="w-3 h-3 text-white" />, label: '文件' },
-            { color: 'bg-gray-500', icon: <MessageSquare className="w-3 h-3 text-white" />, label: '系统' },
+            { color: 'bg-blue-500', icon: <User className="w-3 h-3 text-white" />, label: 'User' },
+            { color: 'bg-purple-500', icon: <Bot className="w-3 h-3 text-white" />, label: 'Assistant' },
+            { color: 'bg-amber-500', icon: <MessageSquare className="w-3 h-3 text-white" />, label: 'File' },
+            { color: 'bg-gray-500', icon: <MessageSquare className="w-3 h-3 text-white" />, label: 'System' },
           ].map(({ color, icon, label }) => (
             <div key={label} className="flex items-center gap-2">
               <div className={`w-5 h-5 rounded-full ${color} flex items-center justify-center`}>{icon}</div>
@@ -244,7 +244,7 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
           ))}
           <div className="flex items-center gap-2">
             <GitBranch className="w-4 h-4 text-slate-400" />
-            <span className="text-sm text-slate-300">分支深度</span>
+            <span className="text-sm text-slate-300">Branch Depth</span>
           </div>
         </div>
       </div>

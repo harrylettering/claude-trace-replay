@@ -15,12 +15,12 @@ type ViewId = 'overview' | 'tokens' | 'timeline' | 'conversation' | 'compare' | 
 
 const navItems: { id: ViewId; label: string; icon: React.ReactNode }[] = [
   { id: 'agent-flow', label: 'Agent Flow', icon: <Share2 className="w-4 h-4" /> },
-  { id: 'overview', label: '会话概览', icon: <BarChart2 className="w-4 h-4" /> },
-  { id: 'prompt-optimizer', label: '智能复盘', icon: <Sparkles className="w-4 h-4" /> },
-  { id: 'compare', label: '会话对比', icon: <GitMerge className="w-4 h-4" /> },
-  { id: 'tokens', label: 'Token 统计', icon: <Zap className="w-4 h-4" /> },
-  { id: 'timeline', label: '时间轴', icon: <Clock className="w-4 h-4" /> },
-  { id: 'conversation', label: '对话流程', icon: <MessageSquare className="w-4 h-4" /> },
+  { id: 'overview', label: 'Session Overview', icon: <BarChart2 className="w-4 h-4" /> },
+  { id: 'prompt-optimizer', label: 'Retrospective', icon: <Sparkles className="w-4 h-4" /> },
+  { id: 'compare', label: 'Session Compare', icon: <GitMerge className="w-4 h-4" /> },
+  { id: 'tokens', label: 'Token Stats', icon: <Zap className="w-4 h-4" /> },
+  { id: 'timeline', label: 'Timeline', icon: <Clock className="w-4 h-4" /> },
+  { id: 'conversation', label: 'Conversation Flow', icon: <MessageSquare className="w-4 h-4" /> },
 ]
 
 export default function App() {
@@ -46,13 +46,13 @@ export default function App() {
 
     ws.onopen = () => {
       setIsWsConnected(true)
-      console.log('[WS] 已连接到日志监听服务')
+      console.log('[WS] Connected to log watcher service')
       ws.send(JSON.stringify({ type: 'get-discovery-list' }))
     }
 
     ws.onclose = () => {
       setIsWsConnected(false)
-      console.log('[WS] 连接已断开')
+      console.log('[WS] Connection closed')
     }
 
     ws.onmessage = (event) => {
@@ -82,7 +82,7 @@ export default function App() {
           setClaudeCliError(payload)
         }
       } catch (e) {
-        console.error('[WS] 消息解析失败', e)
+        console.error('[WS] Failed to parse message', e)
       }
     }
 
@@ -100,12 +100,12 @@ export default function App() {
   }
 
   const runClaudeCliAnalysis = useCallback((prompt?: string) => {
-    console.log('[DEBUG] 准备发送分析请求. WS状态:', wsRef.current?.readyState, '路径:', activePathRef.current, '自定义prompt:', prompt);
+    console.log('[DEBUG] Preparing analysis request. WS state:', wsRef.current?.readyState, 'path:', activePathRef.current, 'custom prompt:', prompt);
     if (wsRef.current && isWsConnected && activePathRef.current) {
-      console.log('[DEBUG] 发送 run-claude-analysis 消息:', activePathRef.current);
+      console.log('[DEBUG] Sending run-claude-analysis message:', activePathRef.current);
       wsRef.current.send(JSON.stringify({ type: 'run-claude-analysis', data: { path: activePathRef.current, prompt } }))
     } else {
-      console.warn('[DEBUG] 条件不满足: wsConnected:', isWsConnected, 'path:', activePathRef.current);
+      console.warn('[DEBUG] Requirements not met: wsConnected:', isWsConnected, 'path:', activePathRef.current);
     }
   }, [isWsConnected])
 
@@ -135,7 +135,7 @@ export default function App() {
         setLogData(result.data)
         setCurrentView('overview')
       } catch (e) {
-        setError('解析日志失败，请检查文件格式')
+        setError('Failed to parse log. Please check the file format.')
       } finally {
         setIsLoading(false)
       }
@@ -152,7 +152,7 @@ export default function App() {
           <h2 className="text-4xl font-black text-white tracking-tighter italic">
             CLAUDE<span className="text-blue-500">OBSERVER</span>
           </h2>
-          <p className="text-slate-400 text-lg">自动发现最近 24 小时内的活跃会话，或手动指定路径</p>
+          <p className="text-slate-400 text-lg">Automatically discover active sessions from the last 24 hours, or enter a path manually.</p>
         </div>
 
         {/* 自动发现列表 */}
@@ -204,13 +204,13 @@ export default function App() {
           {discoveryList.length === 0 && (
             <div className="md:col-span-3 py-20 text-center border-2 border-dashed border-slate-800 rounded-3xl bg-slate-900/20">
               <Search className="w-12 h-12 text-slate-800 mx-auto mb-4 animate-bounce" />
-              <p className="text-slate-500 text-lg font-bold">没有发现最近 24 小时的活跃会话</p>
-              <p className="text-slate-600 text-sm mt-1">请确保您已经在终端启动了 Claude 并发送了消息</p>
+              <p className="text-slate-500 text-lg font-bold">No active sessions found in the last 24 hours</p>
+              <p className="text-slate-600 text-sm mt-1">Make sure Claude has been started in your terminal and at least one message has been sent.</p>
               <button 
                 onClick={() => wsRef.current?.send(JSON.stringify({ type: 'get-discovery-list' }))}
                 className="mt-8 px-8 py-3 bg-slate-800 hover:bg-slate-700 text-white text-xs font-black rounded-full transition-all uppercase tracking-widest"
               >
-                强制重新扫描目录
+                Force Rescan
               </button>
             </div>
           )}
@@ -223,14 +223,14 @@ export default function App() {
                 <div className="p-2 rounded-lg bg-orange-500/10 text-orange-500">
                    <HardDrive className="w-5 h-5" />
                 </div>
-                <h3 className="text-sm font-black text-slate-300 uppercase tracking-widest">实时监听指定路径</h3>
+                <h3 className="text-sm font-black text-slate-300 uppercase tracking-widest">Watch Specific Path</h3>
               </div>
               <div className="space-y-4">
                 <input 
                   type="text" 
                   value={manualPath}
                   onChange={(e) => setManualPath(e.target.value)}
-                  placeholder="粘贴 .jsonl 的绝对路径..."
+                  placeholder="Paste the absolute path to a .jsonl file..."
                   className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-sm text-slate-300 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/20 transition-all placeholder:text-slate-700"
                 />
                 <button 
@@ -238,7 +238,7 @@ export default function App() {
                   disabled={!manualPath}
                   className="w-full py-4 bg-orange-600 hover:bg-orange-500 disabled:opacity-20 text-white rounded-2xl text-xs font-black transition-all shadow-xl shadow-orange-900/20 uppercase tracking-widest"
                 >
-                  开始监听该文件
+                  Start Watching File
                 </button>
               </div>
             </div>
@@ -248,11 +248,11 @@ export default function App() {
                 <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
                    <Upload className="w-5 h-5" />
                 </div>
-                <h3 className="text-sm font-black text-slate-300 uppercase tracking-widest">离线分析历史文件</h3>
+                <h3 className="text-sm font-black text-slate-300 uppercase tracking-widest">Offline Analysis</h3>
               </div>
               <div className="h-full">
                 <FileUpload onFileLoad={handleFileLoad} isDark={true} disabled={isLoading} />
-                <p className="mt-4 text-[10px] text-slate-600 font-bold uppercase tracking-tight text-center">支持拖拽或点击选择任意 JSONL 文件</p>
+                <p className="mt-4 text-[10px] text-slate-600 font-bold uppercase tracking-tight text-center">Drag a file here or click to select any JSONL file</p>
               </div>
             </div>
         </div>
@@ -322,7 +322,7 @@ export default function App() {
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-900 hover:bg-white transition-all shadow-xl"
             >
               <Search className="w-4 h-4" />
-              切换会话
+              Switch Session
             </button>
           )}
         </div>
@@ -359,7 +359,7 @@ export default function App() {
           {isLoading && (
             <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
               <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
-              <p className="text-slate-500 font-medium">正在解析数据...</p>
+              <p className="text-slate-500 font-medium">Parsing data...</p>
             </div>
           )}
 

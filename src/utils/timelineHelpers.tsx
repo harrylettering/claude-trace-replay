@@ -55,20 +55,20 @@ export function getMessagePreview(entry: LogEntry): string {
             return (first.text as string).substring(0, MESSAGE_PREVIEW_LENGTH);
           }
           if (first.type === 'tool_use' && 'name' in first) {
-            return `工具调用: ${first.name}`;
+            return `Tool call: ${first.name}`;
           }
           if (first.type === 'tool_result') {
-            return '工具结果';
+            return 'Tool result';
           }
           if (first.type === 'thinking') {
-            return '思考中...';
+            return 'Thinking...';
           }
         }
       }
     }
   }
   if (entry.type === 'system' && entry.subtype === 'turn_duration') {
-    return `轮次时长: ${entry.durationMs}ms`;
+    return `Turn duration: ${entry.durationMs}ms`;
   }
   return entry.type;
 }

@@ -19,27 +19,27 @@ export const PromptOptimizer: React.FC<PromptOptimizerProps> = ({ data, cliResul
   const [activeTab, setActiveTab] = useState<'cli' | 'rules'>('cli');
   const [customPrompt, setCustomPrompt] = useState<string>('');
 
-  const defaultPrompt = `你是一位顶级的 AI 协作专家。请阅读以下对话日志（已结构化压缩），并进行深度复盘。
-请直接给出以下内容：
-1. 协作总结：一句话概括表现。
-2. 成功经验：哪些做法值得保持？
-3. 避坑指南：哪些做法导致了低效或错误？
-4. 优化建议：针对未来的 3 条具体改进方案。
-请使用清晰的 Markdown 格式输出。`;
+  const defaultPrompt = `You are a top-tier AI collaboration expert. Please read the following conversation log (already structurally compressed) and produce a deep retrospective.
+Please return the following directly:
+1. Collaboration summary: a one-sentence overview of performance.
+2. Wins to keep: which practices should continue?
+3. Pitfalls to avoid: which behaviors caused inefficiency or errors?
+4. Optimization suggestions: three concrete improvements for future sessions.
+Please format the output clearly in Markdown.`;
 
   // 基础规则提取 (启发式)
   const lessons: Lesson[] = useMemo(() => extractLessons(data.entries), [data.entries]);
 
   // 导出复盘文档
   const exportRetrospective = () => {
-    const timestamp = new Date().toLocaleString('zh-CN');
-    let content = `# Claude 会话复盘报告\n\n生成时间：${timestamp}\n\n---\n\n## 终端复盘总结\n\n${cliResult || '暂无终端复盘结果'}\n\n---\n\n## 自动提取经验规则\n\n`;
+    const timestamp = new Date().toLocaleString('en-US');
+    let content = `# Claude Session Retrospective\n\nGenerated: ${timestamp}\n\n---\n\n## Terminal Analysis Summary\n\n${cliResult || 'No terminal analysis available yet'}\n\n---\n\n## Automatically Extracted Rules\n\n`;
 
     if (lessons.length === 0) {
-      content += '暂无提取到的规则';
+      content += 'No rules were extracted.';
     } else {
       lessons.forEach((lesson, index) => {
-        content += `### ${index + 1}. 错误命令\n\`${lesson.errorCommand}\`\n\n### 推荐规则\n${lesson.suggestedRule}\n\n---\n\n`;
+        content += `### ${index + 1}. Failed Command\n\`${lesson.errorCommand}\`\n\n### Suggested Rule\n${lesson.suggestedRule}\n\n---\n\n`;
       });
     }
 
@@ -72,8 +72,8 @@ export const PromptOptimizer: React.FC<PromptOptimizerProps> = ({ data, cliResul
       {/* Tabs */}
       <div className="flex p-1 bg-slate-950/80 rounded-xl border border-slate-800/50 backdrop-blur-sm">
         {[
-          { id: 'cli', label: '智能分析', icon: <Terminal className="w-3 h-3" /> },
-          { id: 'rules', label: '错误日志', icon: <Zap className="w-3 h-3" /> }
+          { id: 'cli', label: 'AI Analysis', icon: <Terminal className="w-3 h-3" /> },
+          { id: 'rules', label: 'Error Log', icon: <Zap className="w-3 h-3" /> }
         ].map(tab => (
           <button
             key={tab.id}
@@ -102,7 +102,7 @@ export const PromptOptimizer: React.FC<PromptOptimizerProps> = ({ data, cliResul
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest animate-pulse">Streaming from Terminal...</p>
-                    <p className="text-[9px] text-slate-500 font-bold uppercase">Claude 正在实时分析当前活跃日志</p>
+                    <p className="text-[9px] text-slate-500 font-bold uppercase">Claude is analyzing the current live log in real time</p>
                   </div>
                </div>
             )}
@@ -111,7 +111,7 @@ export const PromptOptimizer: React.FC<PromptOptimizerProps> = ({ data, cliResul
               <div className="space-y-4">
                 <div className="cyber-card p-4">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">
-                    自定义分析指令（可选）
+                    Custom Analysis Prompt (Optional)
                   </label>
                   <textarea
                     value={customPrompt}
@@ -121,7 +121,7 @@ export const PromptOptimizer: React.FC<PromptOptimizerProps> = ({ data, cliResul
                     style={{ fontFamily: 'var(--font-mono)' }}
                   />
                   <p className="mt-2 text-[9px] text-slate-500">
-                    留空则使用默认复盘指令，支持任意自定义分析需求，比如："总结本次对话的核心需求"、"提取代码修改清单"等。
+                    Leave empty to use the default retrospective prompt. You can also provide custom analysis instructions like "Summarize the core request of this session" or "List all code changes made."
                   </p>
                 </div>
                 <button
@@ -129,7 +129,7 @@ export const PromptOptimizer: React.FC<PromptOptimizerProps> = ({ data, cliResul
                   className="cyber-btn w-full py-3 text-[10px] font-black rounded-xl transition-all uppercase tracking-widest flex items-center justify-center gap-2"
                 >
                   <Terminal className="w-3.5 h-3.5" />
-                  执行智能分析
+                  Run Analysis
                 </button>
               </div>
             )}
@@ -142,7 +142,7 @@ export const PromptOptimizer: React.FC<PromptOptimizerProps> = ({ data, cliResul
                     className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-[9px] font-black rounded-lg transition-all uppercase tracking-widest flex items-center gap-1.5"
                   >
                     <RefreshCw className="w-2.5 h-2.5" />
-                    重新分析
+                    Run Again
                   </button>
                 </div>
                 <div className="cyber-card p-6 shadow-2xl text-slate-300 relative group markdown-content">
@@ -159,11 +159,11 @@ export const PromptOptimizer: React.FC<PromptOptimizerProps> = ({ data, cliResul
         {/* 自动规则提取 */}
         {activeTab === 'rules' && (
           <div className="space-y-4 animate-in fade-in duration-500">
-            <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">错误日志收集</h3>
+            <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Error Log Collection</h3>
             {lessons.length === 0 ? (
               <div className="py-20 text-center border-2 border-dashed border-slate-800 rounded-3xl bg-slate-900/20">
                 <Info className="w-8 h-8 text-slate-700 mx-auto mb-3" />
-                <p className="text-slate-500 text-sm font-medium px-10">会话中暂未发现执行失败的工具操作。</p>
+                <p className="text-slate-500 text-sm font-medium px-10">No failed tool executions were found in this session.</p>
               </div>
             ) : (
               lessons.map((lesson) => (
@@ -184,14 +184,14 @@ export const PromptOptimizer: React.FC<PromptOptimizerProps> = ({ data, cliResul
         <div className="cyber-card p-4 bg-gradient-to-br from-indigo-600/20 to-blue-700/20 border-indigo-500/30 shadow-xl shadow-indigo-900/20">
           <div className="flex items-center gap-3 mb-2 text-white">
             <FileJson className="w-5 h-5 text-indigo-400" />
-            <span className="text-xs font-black uppercase tracking-widest gradient-text">导出复盘文档</span>
+            <span className="text-xs font-black uppercase tracking-widest gradient-text">Export Retrospective</span>
           </div>
-          <p className="text-[10px] text-indigo-100/70 mb-4 font-medium">导出本次会话的复盘总结与错误日志，用于后续参考。</p>
+          <p className="text-[10px] text-indigo-100/70 mb-4 font-medium">Export the retrospective summary and error log for future reference.</p>
           <button
             onClick={exportRetrospective}
             className="cyber-btn w-full py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all flex items-center justify-center gap-2"
           >
-            下载 Markdown 报告 <ArrowRight className="w-3 h-3" />
+            Download Markdown Report <ArrowRight className="w-3 h-3" />
           </button>
         </div>
       )}

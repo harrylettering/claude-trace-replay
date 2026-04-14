@@ -47,7 +47,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
   }, []);
 
   const handleDelete = useCallback((id: string) => {
-    if (confirm('确定要删除这个配置吗？')) {
+    if (confirm('Are you sure you want to delete this configuration?')) {
       llmConfigManager.deleteConfig(id);
       loadConfigs();
     }
@@ -82,13 +82,13 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
       setTestResult({
         id: config.id,
         success,
-        message: success ? '连接成功！' : '连接失败',
+        message: success ? 'Connection successful' : 'Connection failed',
       });
     } catch (err) {
       setTestResult({
         id: config.id,
         success: false,
-        message: err instanceof Error ? err.message : '连接失败',
+        message: err instanceof Error ? err.message : 'Connection failed',
       });
     } finally {
       setIsTesting(null);
@@ -116,8 +116,8 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
               <Server className="w-5 h-5 text-blue-500" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold">API 配置</h2>
-              <p className="text-sm text-slate-400">配置 LLM API 用于深度分析</p>
+              <h2 className="text-lg font-semibold">API Settings</h2>
+              <p className="text-sm text-slate-400">Configure an LLM API for deeper analysis</p>
             </div>
           </div>
           <button
@@ -143,7 +143,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-slate-300 mb-1">
-                          名称
+                          Name
                         </label>
                         <input
                           type="text"
@@ -154,7 +154,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-slate-300 mb-1">
-                          模型
+                          Model
                         </label>
                         <input
                           type="text"
@@ -166,7 +166,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-1">
-                        API 地址
+                        API URL
                       </label>
                       <input
                         type="text"
@@ -202,7 +202,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                         className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-colors"
                       >
                         <Save className="w-4 h-4" />
-                        保存
+                        Save
                       </button>
                       <button
                         onClick={() => {
@@ -211,7 +211,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                         }}
                         className="px-3 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors"
                       >
-                        取消
+                        Cancel
                       </button>
                     </div>
                   </div>
@@ -223,7 +223,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                           <span className="font-medium">{config.name}</span>
                           {config.isDefault && (
                             <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded-full">
-                              默认
+                              Default
                             </span>
                           )}
                         </div>
@@ -259,7 +259,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                             onClick={() => handleTest(config)}
                             disabled={isTesting === config.id}
                             className="p-1.5 hover:bg-slate-600 rounded text-slate-400 hover:text-white transition-colors"
-                            title="测试连接"
+                            title="Test connection"
                           >
                             {isTesting === config.id ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
@@ -270,7 +270,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                           <button
                             onClick={() => handleEdit(config)}
                             className="p-1.5 hover:bg-slate-600 rounded text-slate-400 hover:text-white transition-colors"
-                            title="编辑"
+                            title="Edit"
                           >
                             <Save className="w-4 h-4" />
                           </button>
@@ -278,7 +278,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                             <button
                               onClick={() => handleSetDefault(config.id)}
                               className="p-1.5 hover:bg-slate-600 rounded text-slate-400 hover:text-white transition-colors"
-                              title="设为默认"
+                              title="Set as default"
                             >
                               <Check className="w-4 h-4" />
                             </button>
@@ -286,7 +286,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                           <button
                             onClick={() => handleDelete(config.id)}
                             className="p-1.5 hover:bg-red-600/20 rounded text-slate-400 hover:text-red-400 transition-colors"
-                            title="删除"
+                            title="Delete"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -305,19 +305,19 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-1">
-                        名称
+                        Name
                       </label>
                       <input
                         type="text"
                         value={editingConfig.name || ''}
                         onChange={(e) => setEditingConfig({ ...editingConfig, name: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
-                        placeholder="我的 API"
+                        placeholder="My API"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-1">
-                        模型
+                        Model
                       </label>
                       <input
                         type="text"
@@ -330,7 +330,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-1">
-                      API 地址
+                      API URL
                     </label>
                     <input
                       type="text"
@@ -366,7 +366,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                       className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-colors"
                     >
                       <Save className="w-4 h-4" />
-                      保存
+                      Save
                     </button>
                     <button
                       onClick={() => {
@@ -375,7 +375,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                       }}
                       className="px-3 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors"
                     >
-                      取消
+                      Cancel
                     </button>
                   </div>
                 </div>
@@ -389,22 +389,22 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                 className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-slate-600 hover:border-slate-500 rounded-lg text-slate-400 hover:text-slate-300 transition-colors"
               >
                 <Plus className="w-5 h-5" />
-                添加 API 配置
+                Add API Configuration
               </button>
             )}
           </div>
 
           {/* 说明 */}
           <div className="mt-6 p-4 bg-slate-700/30 rounded-lg">
-            <h3 className="text-sm font-medium text-slate-300 mb-2">支持的 API</h3>
+            <h3 className="text-sm font-medium text-slate-300 mb-2">Supported APIs</h3>
             <p className="text-sm text-slate-400">
-              任何兼容 OpenAI Chat Completions API 格式的服务都可以使用，包括：
+              Any service compatible with the OpenAI Chat Completions API format can be used, including:
             </p>
             <ul className="text-sm text-slate-400 mt-2 space-y-1 list-disc list-inside">
               <li>OpenAI (GPT-4, GPT-3.5)</li>
-              <li>Anthropic Claude (通过兼容层)</li>
+              <li>Anthropic Claude (through a compatibility layer)</li>
               <li>Azure OpenAI Service</li>
-              <li>本地部署的模型 (Ollama, vLLM 等)</li>
+              <li>Locally hosted models (Ollama, vLLM, and others)</li>
             </ul>
           </div>
         </div>

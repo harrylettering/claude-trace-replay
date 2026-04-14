@@ -35,19 +35,19 @@ export function getMessagePreview(entry: LogEntry): string {
       if (typeof msg.content === 'string') {
         if (msg.content.includes('<command-name>')) {
           const match = msg.content.match(/<command-name>(.*?)<\/command-name>/);
-          if (match) return `命令: /${match[1]}`;
+          if (match) return `Command: /${match[1]}`;
         }
         return msg.content.substring(0, CONVERSATION_PREVIEW_LENGTH);
       }
       if (Array.isArray(msg.content)) {
         const first = msg.content[0];
         if (first?.type === 'text' && 'text' in first) return (first.text as string)?.substring(0, CONVERSATION_PREVIEW_LENGTH) || '';
-        if (first?.type === 'tool_use' && 'name' in first) return `工具: ${first.name}`;
-        if (first?.type === 'tool_result') return '工具结果';
-        if (first?.type === 'thinking') return '思考中...';
+        if (first?.type === 'tool_use' && 'name' in first) return `Tool: ${first.name}`;
+        if (first?.type === 'tool_result') return 'Tool result';
+        if (first?.type === 'thinking') return 'Thinking...';
       }
     }
   }
-  if (entry.type === 'system' && entry.subtype === 'turn_duration') return `轮次: ${entry.messageCount} 条消息`;
+  if (entry.type === 'system' && entry.subtype === 'turn_duration') return `Turn: ${entry.messageCount} messages`;
   return entry.type;
 }

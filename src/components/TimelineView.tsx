@@ -60,6 +60,18 @@ const TimelineEntry = memo(function TimelineEntry({
     }
   }, [isExpanded, onMeasure]);
 
+  useEffect(() => {
+    if (!cardRef.current || !onMeasure) return;
+
+    const element = cardRef.current;
+    const observer = new ResizeObserver(() => {
+      onMeasure(element.offsetHeight);
+    });
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [onMeasure]);
+
   return (
     <div ref={cardRef} className="relative flex gap-4">
       {/* 时间点 */}
@@ -136,10 +148,20 @@ function DynamicVirtualList({
   // 使用 ref 存储高度数组，避免状态更新导致的重新渲染
   const heightsRef = useRef<number[]>([]);
   const [version, setVersion] = useState(0); // 用于触发重渲染
+  const measureRafRef = useRef<number | null>(null);
+
+  const scheduleLayoutRefresh = useCallback(() => {
+    if (measureRafRef.current !== null) return;
+    measureRafRef.current = requestAnimationFrame(() => {
+      measureRafRef.current = null;
+      setVersion(v => v + 1);
+    });
+  }, []);
 
   // 初始化高度数组
   useEffect(() => {
     heightsRef.current = new Array(entriesWithKeys.length).fill(BASE_ITEM_HEIGHT);
+    setVersion(v => v + 1);
   }, [entriesWithKeys.length]);
 
   // 当展开状态变化时，重置相关高度
@@ -151,12 +173,21 @@ function DynamicVirtualList({
     return () => clearTimeout(timeout);
   }, [expandedEntries]);
 
+  useEffect(() => {
+    return () => {
+      if (measureRafRef.current !== null) {
+        cancelAnimationFrame(measureRafRef.current);
+      }
+    };
+  }, []);
+
   // 测量单行高度
   const handleMeasure = useCallback((index: number, height: number) => {
     if (heightsRef.current[index] !== height) {
       heightsRef.current[index] = height;
+      scheduleLayoutRefresh();
     }
-  }, []);
+  }, [scheduleLayoutRefresh]);
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop);
@@ -289,7 +320,7 @@ export function TimelineView({ data, cliResult, isCliAnalyzing, cliError, onRunC
     try {
       return filterEntries(data?.entries || [], filters);
     } catch (e) {
-      console.error('过滤条目失败:', e);
+      console.error('Failed to filter entries:', e);
       return { entries: [], filteredCount: 0, totalCount: 0 };
     }
   }, [data?.entries, filters]);
@@ -304,7 +335,7 @@ export function TimelineView({ data, cliResult, isCliAnalyzing, cliError, onRunC
         key: entry.uuid || `fallback-${index}`,
       }));
     } catch (e) {
-      console.error('处理条目失败:', e);
+      console.error('Failed to process entries:', e);
       return [];
     }
   }, [filteredEntries]);
@@ -314,7 +345,7 @@ export function TimelineView({ data, cliResult, isCliAnalyzing, cliError, onRunC
     try {
       return detectLoop(data?.entries || []);
     } catch (e) {
-      console.error('检测死循环失败:', e);
+      console.error('Failed to detect loop:', e);
       return null;
     }
   }, [data?.entries]);
@@ -322,7 +353,7 @@ export function TimelineView({ data, cliResult, isCliAnalyzing, cliError, onRunC
   if (!data || !data.entries) {
     return (
       <div className="p-10 text-center">
-        <p className="text-slate-400">暂无日志数据</p>
+        <p className="text-slate-400">No log data available</p>
       </div>
     );
   }
@@ -331,15 +362,15 @@ export function TimelineView({ data, cliResult, isCliAnalyzing, cliError, onRunC
 
   return (
     <div className="flex gap-10 items-start h-[calc(100vh-180px)] overflow-hidden">
-      {/* 左侧：时间轴 (可滚动) */}
+      {/* Left: Scrollable Timeline */}
       <div className="flex-1 overflow-hidden pr-6 h-full flex flex-col" ref={containerRef}>
         <div className="mb-4">
-          <h2 className="text-2xl font-bold mb-2">会话时间线</h2>
+          <h2 className="text-2xl font-bold mb-2">Session Timeline</h2>
           <p className="text-slate-400 text-sm">
-            实时监控 AI 程序员的每一步动作与思考
+            Track each action and reasoning step from the AI coding session
             {entriesWithKeys.length > 1000 && (
               <span className="ml-2 text-amber-500/70 text-xs">
-                (显示 {entriesWithKeys.length.toLocaleString()} 条中的虚拟滚动)
+                (virtualized list over {entriesWithKeys.length.toLocaleString()} entries)
               </span>
             )}
           </p>
@@ -357,7 +388,7 @@ export function TimelineView({ data, cliResult, isCliAnalyzing, cliError, onRunC
           <div className="flex-1 flex items-center justify-center bg-slate-900/20 rounded-3xl border-2 border-dashed border-slate-800">
             <div className="text-center">
               <Search className="w-8 h-8 text-slate-800 mx-auto mb-2" />
-              <p className="text-slate-600 text-sm font-bold">没有匹配的日志条目</p>
+              <p className="text-slate-600 text-sm font-bold">No matching log entries</p>
             </div>
           </div>
         ) : (
@@ -397,7 +428,7 @@ export function TimelineView({ data, cliResult, isCliAnalyzing, cliError, onRunC
         )}
       </div>
 
-      {/* 右侧：大脑建议面板 */}
+      {/* Right: Insight Panel */}
       <aside className="w-[400px] h-full sticky top-0 animate-in slide-in-from-right-4 duration-500">
         <PromptOptimizer
           data={data}

@@ -15,6 +15,8 @@ type CanvasEdgeData = {
   source: string
   target: string
   linkType: string
+  actionSummary?: string
+  actionDetail?: string
   seqNum: number
 }
 
@@ -26,6 +28,13 @@ type NodeBox = {
   radius: number
 }
 
+type GraphBounds = {
+  minX: number
+  minY: number
+  maxX: number
+  maxY: number
+}
+
 type ActiveParticle = {
   edgeId: string
   progress: number
@@ -35,6 +44,7 @@ type ActiveParticle = {
 type EdgeStatus = {
   edgeId: string | null
   title: string
+  summary?: string
   detail: string
 }
 
@@ -47,7 +57,18 @@ type SceneInfo = {
 type SceneRenderState = {
   opacity: number
   shiftX: number
+  shiftY: number
 }
+
+type ShapeKind =
+  | 'rounded'
+  | 'chamfered'
+  | 'hex'
+  | 'diamond'
+  | 'speech'
+  | 'terminal'
+  | 'stack'
+  | 'bracket'
 
 type EdgePoint = {
   x: number
@@ -133,7 +154,8 @@ const POST_FADE_DURATION = 0.38
 const CAMERA_LERP = 0.12
 const STEP_INTERVAL = 1.7
 const SCENE_HOLD_DURATION = 0.42
-const SCENE_SHIFT_DISTANCE = 140
+const SCENE_SHIFT_DISTANCE = 260
+const SCENE_SHIFT_Y_DISTANCE = 92
 
 function hexToRgb(hex: string) {
   const clean = hex.replace('#', '')
@@ -188,24 +210,212 @@ function getDisplayLabel(node: CanvasNodeData) {
   return node.displayName.replace(/^tool:/i, '')
 }
 
+function getNodeShapeKind(node: CanvasNodeData): ShapeKind {
+  if (node.entityType === 'user') return 'speech'
+  if (node.entityType === 'main_agent') return 'chamfered'
+  if (node.entityType === 'assistant') return 'diamond'
+
+  switch (getToolCategory(node.displayName)) {
+    case 'file': return 'chamfered'
+    case 'shell': return 'terminal'
+    case 'task': return 'stack'
+    case 'agent': return 'hex'
+    case 'plan': return 'diamond'
+    case 'network': return 'hex'
+    case 'user': return 'speech'
+    case 'system': return 'bracket'
+    default: return 'rounded'
+  }
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value))
+}
+
+function getGraphBounds(nodes: Map<string, CanvasNodeData>): GraphBounds {
+  const boxes = [...nodes.values()].map(getNodeBox)
+  return {
+    minX: Math.min(...boxes.map((box) => box.x)),
+    minY: Math.min(...boxes.map((box) => box.y)),
+    maxX: Math.max(...boxes.map((box) => box.x + box.width)),
+    maxY: Math.max(...boxes.map((box) => box.y + box.height)),
+  }
+}
+
+function constrainCamera(
+  nextCamera: { scale: number; offsetX: number; offsetY: number },
+  nodes: Map<string, CanvasNodeData>,
+  dimensions: { width: number; height: number }
+) {
+  if (nodes.size === 0) return nextCamera
+  const bounds = getGraphBounds(nodes)
+  const padding = 120
+  const contentWidth = (bounds.maxX - bounds.minX) * nextCamera.scale
+  const contentHeight = (bounds.maxY - bounds.minY) * nextCamera.scale
+
+  if (contentWidth + padding * 2 <= dimensions.width) {
+    nextCamera.offsetX = dimensions.width / 2 - ((bounds.minX + bounds.maxX) / 2) * nextCamera.scale
+  } else {
+    const minOffsetX = dimensions.width - bounds.maxX * nextCamera.scale - padding
+    const maxOffsetX = -bounds.minX * nextCamera.scale + padding
+    nextCamera.offsetX = clamp(nextCamera.offsetX, minOffsetX, maxOffsetX)
+  }
+
+  if (contentHeight + padding * 2 <= dimensions.height) {
+    nextCamera.offsetY = dimensions.height / 2 - ((bounds.minY + bounds.maxY) / 2) * nextCamera.scale
+  } else {
+    const minOffsetY = dimensions.height - bounds.maxY * nextCamera.scale - padding
+    const maxOffsetY = -bounds.minY * nextCamera.scale + padding
+    nextCamera.offsetY = clamp(nextCamera.offsetY, minOffsetY, maxOffsetY)
+  }
+
+  return nextCamera
+}
+
+function getShapePolygon(node: CanvasNodeData, box: NodeBox) {
+  const kind = getNodeShapeKind(node)
+  switch (kind) {
+    case 'diamond':
+      return [
+        { x: box.x + box.width * 0.14, y: box.y },
+        { x: box.x + box.width, y: box.y },
+        { x: box.x + box.width * 0.86, y: box.y + box.height },
+        { x: box.x, y: box.y + box.height },
+      ]
+    case 'hex': {
+      const inset = 18
+      return [
+        { x: box.x + inset, y: box.y },
+        { x: box.x + box.width - inset, y: box.y },
+        { x: box.x + box.width, y: box.y + box.height / 2 },
+        { x: box.x + box.width - inset, y: box.y + box.height },
+        { x: box.x + inset, y: box.y + box.height },
+        { x: box.x, y: box.y + box.height / 2 },
+      ]
+    }
+    case 'speech':
+      return [
+        { x: box.x + 8, y: box.y },
+        { x: box.x + box.width - 8, y: box.y },
+        { x: box.x + box.width, y: box.y + 18 },
+        { x: box.x + box.width, y: box.y + box.height },
+        { x: box.x + 54, y: box.y + box.height },
+        { x: box.x + 42, y: box.y + box.height + 12 },
+        { x: box.x + 36, y: box.y + box.height },
+        { x: box.x, y: box.y + box.height },
+        { x: box.x, y: box.y + 18 },
+      ]
+    case 'chamfered': {
+      const cut = 14
+      return [
+        { x: box.x + cut, y: box.y },
+        { x: box.x + box.width - cut, y: box.y },
+        { x: box.x + box.width, y: box.y + cut },
+        { x: box.x + box.width, y: box.y + box.height - cut },
+        { x: box.x + box.width - cut, y: box.y + box.height },
+        { x: box.x + cut, y: box.y + box.height },
+        { x: box.x, y: box.y + box.height - cut },
+        { x: box.x, y: box.y + cut },
+      ]
+    }
+    default:
+      return null
+  }
+}
+
+function getPolygonRayIntersection(
+  polygon: { x: number; y: number }[],
+  centerX: number,
+  centerY: number,
+  targetX: number,
+  targetY: number
+) {
+  const dx = targetX - centerX
+  const dy = targetY - centerY
+
+  if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) {
+    return { x: centerX, y: centerY }
+  }
+
+  let bestT = Number.POSITIVE_INFINITY
+  let bestPoint = { x: centerX, y: centerY }
+
+  for (let i = 0; i < polygon.length; i++) {
+    const a = polygon[i]
+    const b = polygon[(i + 1) % polygon.length]
+    const ex = b.x - a.x
+    const ey = b.y - a.y
+    const denom = dx * ey - dy * ex
+    if (Math.abs(denom) < 1e-6) continue
+
+    const ax = a.x - centerX
+    const ay = a.y - centerY
+    const t = (ax * ey - ay * ex) / denom
+    const u = (ax * dy - ay * dx) / denom
+
+    if (t >= 0 && u >= 0 && u <= 1 && t < bestT) {
+      bestT = t
+      bestPoint = {
+        x: centerX + dx * t,
+        y: centerY + dy * t,
+      }
+    }
+  }
+
+  return bestPoint
+}
+
+function getBoxAnchor(node: CanvasNodeData, box: NodeBox, centerX: number, centerY: number, targetX: number, targetY: number) {
+  const dx = targetX - centerX
+  const dy = targetY - centerY
+  const polygon = getShapePolygon(node, box)
+  if (polygon) {
+    return getPolygonRayIntersection(polygon, centerX, centerY, targetX, targetY)
+  }
+
+  const halfW = box.width / 2 - 4
+  const halfH = box.height / 2 - 4
+  const scaleX = Math.abs(dx) > 0.001 ? halfW / Math.abs(dx) : Number.POSITIVE_INFINITY
+  const scaleY = Math.abs(dy) > 0.001 ? halfH / Math.abs(dy) : Number.POSITIVE_INFINITY
+  const scale = Math.min(scaleX, scaleY)
+
+  return {
+    x: centerX + dx * scale,
+    y: centerY + dy * scale,
+  }
+}
+
 function getEdgePath(source: CanvasNodeData, target: CanvasNodeData, offset = 0): EdgePath {
   const sourceBox = getNodeBox(source)
   const targetBox = getNodeBox(target)
-  const direction = target.x >= source.x ? 1 : -1
-  const start = {
-    x: direction > 0 ? sourceBox.x + sourceBox.width : sourceBox.x,
-    y: source.y + offset * 0.2,
-  }
-  const end = {
-    x: direction > 0 ? targetBox.x : targetBox.x + targetBox.width,
-    y: target.y + offset * 0.2,
-  }
+  const sourceCenterX = source.x
+  const sourceCenterY = source.y
+  const targetCenterX = target.x
+  const targetCenterY = target.y
+  const direction = targetCenterX >= sourceCenterX ? 1 : -1
+  const centerDeltaX = targetCenterX - sourceCenterX
+  const centerDeltaY = targetCenterY - sourceCenterY
+  const centerLength = Math.max(1, Math.hypot(centerDeltaX, centerDeltaY))
+  const normalX = -centerDeltaY / centerLength
+  const normalY = centerDeltaX / centerLength
+  const shiftedTargetX = targetCenterX + normalX * offset
+  const shiftedTargetY = targetCenterY + normalY * offset
+  const shiftedSourceX = sourceCenterX + normalX * offset
+  const shiftedSourceY = sourceCenterY + normalY * offset
+  const start = getBoxAnchor(source, sourceBox, sourceCenterX, sourceCenterY, shiftedTargetX, shiftedTargetY)
+  const end = getBoxAnchor(target, targetBox, targetCenterX, targetCenterY, shiftedSourceX, shiftedSourceY)
   const distance = Math.max(80, Math.abs(end.x - start.x))
-  const verticalSwing = (target.y - source.y) * 0.16 + offset
+  const verticalSwing = (targetCenterY - sourceCenterY) * 0.16 + offset * 0.22
   return {
     start,
-    cp1: { x: start.x + direction * distance * 0.42, y: start.y + verticalSwing },
-    cp2: { x: end.x - direction * distance * 0.42, y: end.y - verticalSwing },
+    cp1: {
+      x: start.x + direction * distance * 0.42 + normalX * offset * 0.35,
+      y: start.y + verticalSwing + normalY * offset * 0.35,
+    },
+    cp2: {
+      x: end.x - direction * distance * 0.42 + normalX * offset * 0.35,
+      y: end.y - verticalSwing + normalY * offset * 0.35,
+    },
     end,
   }
 }
@@ -418,6 +628,12 @@ function drawArrowHead(
   ctx.restore()
 }
 
+function getEdgeVisualCategory(source: CanvasNodeData, target: CanvasNodeData): ToolVisualCategory | 'generic' {
+  if (source.entityType === 'tool') return getToolCategory(source.displayName)
+  if (target.entityType === 'tool') return getToolCategory(target.displayName)
+  return 'generic'
+}
+
 function drawEdge(
   ctx: CanvasRenderingContext2D,
   source: CanvasNodeData,
@@ -428,9 +644,17 @@ function drawEdge(
   offset: number
 ) {
   const path = getEdgePath(source, target, offset)
+  const edgeCategory = getEdgeVisualCategory(source, target)
 
   ctx.save()
   ctx.lineCap = 'round'
+  ctx.setLineDash([])
+
+  if (edgeCategory === 'task' || edgeCategory === 'agent') {
+    ctx.setLineDash(active ? [10, 7] : [7, 7])
+  } else if (edgeCategory === 'system' || edgeCategory === 'plan') {
+    ctx.setLineDash(active ? [3, 6] : [2, 6])
+  }
 
   ctx.strokeStyle = withAlpha(color, alpha * 0.78)
   ctx.lineWidth = active ? 4.5 : 2.6
@@ -439,12 +663,32 @@ function drawEdge(
   ctx.bezierCurveTo(path.cp1.x, path.cp1.y, path.cp2.x, path.cp2.y, path.end.x, path.end.y)
   ctx.stroke()
 
+  if (edgeCategory === 'network') {
+    ctx.setLineDash([2, 10])
+    ctx.lineDashOffset = active ? -6 : -2
+  } else if (edgeCategory === 'file') {
+    ctx.setLineDash([18, 999])
+  } else {
+    ctx.setLineDash([])
+  }
+
   ctx.strokeStyle = withAlpha('#ffffff', active ? 0.24 : 0.12)
   ctx.lineWidth = active ? 1.25 : 0.8
   ctx.beginPath()
   ctx.moveTo(path.start.x, path.start.y)
   ctx.bezierCurveTo(path.cp1.x, path.cp1.y, path.cp2.x, path.cp2.y, path.end.x, path.end.y)
   ctx.stroke()
+
+  if (edgeCategory === 'network') {
+    const wavePath = getEdgePath(source, target, offset + (active ? 10 : 6))
+    ctx.setLineDash([])
+    ctx.strokeStyle = withAlpha(color, active ? alpha * 0.26 : alpha * 0.14)
+    ctx.lineWidth = active ? 1.4 : 1
+    ctx.beginPath()
+    ctx.moveTo(wavePath.start.x, wavePath.start.y)
+    ctx.bezierCurveTo(wavePath.cp1.x, wavePath.cp1.y, wavePath.cp2.x, wavePath.cp2.y, wavePath.end.x, wavePath.end.y)
+    ctx.stroke()
+  }
 
   const tip = getBezierXY(path, 1)
   const beforeTip = getBezierXY(path, 0.97)
@@ -463,10 +707,11 @@ function drawParticle(
   const path = getEdgePath(source, target, offset)
   const head = getBezierXY(path, progress)
   const tail = getBezierXY(path, Math.max(0, progress - 0.08))
+  const edgeCategory = getEdgeVisualCategory(source, target)
 
   ctx.save()
   ctx.strokeStyle = withAlpha(color, 0.65)
-  ctx.lineWidth = 4
+  ctx.lineWidth = edgeCategory === 'network' ? 3.2 : 4
   ctx.lineCap = 'round'
   ctx.beginPath()
   ctx.moveTo(tail.x, tail.y)
@@ -483,8 +728,156 @@ function drawParticle(
 
   ctx.fillStyle = color
   ctx.beginPath()
-  ctx.arc(head.x, head.y, 4.5, 0, Math.PI * 2)
+  if (edgeCategory === 'task' || edgeCategory === 'agent') {
+    ctx.rect(head.x - 4, head.y - 4, 8, 8)
+  } else if (edgeCategory === 'network') {
+    ctx.arc(head.x, head.y, 3.8, 0, Math.PI * 2)
+  } else {
+    ctx.arc(head.x, head.y, 4.5, 0, Math.PI * 2)
+  }
   ctx.fill()
+  ctx.restore()
+}
+
+function drawNodeGlyph(
+  ctx: CanvasRenderingContext2D,
+  node: CanvasNodeData,
+  box: NodeBox,
+  accent: string
+) {
+  const category = node.entityType === 'tool' ? getToolCategory(node.displayName) : node.entityType
+  const cx = box.x + 18
+  const cy = node.y
+
+  ctx.save()
+  ctx.strokeStyle = withAlpha(accent, 0.9)
+  ctx.fillStyle = withAlpha(accent, 0.14)
+  ctx.lineWidth = 1.4
+
+  switch (category) {
+    case 'user':
+      ctx.beginPath()
+      ctx.arc(cx, cy - 3, 4, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.arc(cx, cy + 8, 8, Math.PI, 0)
+      ctx.stroke()
+      break
+    case 'main_agent':
+      ctx.beginPath()
+      ctx.roundRect(cx - 8, cy - 8, 16, 16, 4)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(cx - 12, cy)
+      ctx.lineTo(cx - 8, cy)
+      ctx.moveTo(cx + 8, cy)
+      ctx.lineTo(cx + 12, cy)
+      ctx.moveTo(cx, cy - 12)
+      ctx.lineTo(cx, cy - 8)
+      ctx.moveTo(cx, cy + 8)
+      ctx.lineTo(cx, cy + 12)
+      ctx.stroke()
+      break
+    case 'assistant':
+    case 'plan':
+      ctx.beginPath()
+      ctx.moveTo(cx, cy - 9)
+      ctx.lineTo(cx + 8, cy)
+      ctx.lineTo(cx, cy + 9)
+      ctx.lineTo(cx - 8, cy)
+      ctx.closePath()
+      ctx.stroke()
+      break
+    case 'file':
+      ctx.beginPath()
+      ctx.moveTo(cx - 8, cy - 9)
+      ctx.lineTo(cx + 4, cy - 9)
+      ctx.lineTo(cx + 8, cy - 5)
+      ctx.lineTo(cx + 8, cy + 9)
+      ctx.lineTo(cx - 8, cy + 9)
+      ctx.closePath()
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(cx - 4, cy - 3)
+      ctx.lineTo(cx + 4, cy - 3)
+      ctx.moveTo(cx - 4, cy + 1)
+      ctx.lineTo(cx + 4, cy + 1)
+      ctx.moveTo(cx - 4, cy + 5)
+      ctx.lineTo(cx + 1, cy + 5)
+      ctx.stroke()
+      break
+    case 'shell':
+      ctx.beginPath()
+      ctx.roundRect(cx - 10, cy - 8, 20, 16, 4)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(cx - 6, cy - 1)
+      ctx.lineTo(cx - 2, cy + 3)
+      ctx.lineTo(cx - 6, cy + 7)
+      ctx.moveTo(cx, cy + 7)
+      ctx.lineTo(cx + 5, cy + 7)
+      ctx.stroke()
+      break
+    case 'task':
+      ctx.beginPath()
+      ctx.roundRect(cx - 9, cy - 9, 18, 18, 5)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(cx - 5, cy)
+      ctx.lineTo(cx - 1, cy + 4)
+      ctx.lineTo(cx + 6, cy - 4)
+      ctx.stroke()
+      break
+    case 'agent':
+      ctx.beginPath()
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 3) * i - Math.PI / 6
+        const x = cx + Math.cos(angle) * 9
+        const y = cy + Math.sin(angle) * 9
+        if (i === 0) ctx.moveTo(x, y)
+        else ctx.lineTo(x, y)
+      }
+      ctx.closePath()
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.arc(cx, cy, 2.5, 0, Math.PI * 2)
+      ctx.fill()
+      break
+    case 'network':
+      ctx.beginPath()
+      ctx.arc(cx, cy, 8, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.arc(cx, cy, 4, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(cx - 8, cy)
+      ctx.lineTo(cx + 8, cy)
+      ctx.moveTo(cx, cy - 8)
+      ctx.lineTo(cx, cy + 8)
+      ctx.stroke()
+      break
+    case 'system':
+      ctx.beginPath()
+      ctx.moveTo(cx - 8, cy - 7)
+      ctx.lineTo(cx - 3, cy - 7)
+      ctx.moveTo(cx - 8, cy - 7)
+      ctx.lineTo(cx - 8, cy + 7)
+      ctx.lineTo(cx - 3, cy + 7)
+      ctx.moveTo(cx + 8, cy - 7)
+      ctx.lineTo(cx + 3, cy - 7)
+      ctx.moveTo(cx + 8, cy - 7)
+      ctx.lineTo(cx + 8, cy + 7)
+      ctx.lineTo(cx + 3, cy + 7)
+      ctx.stroke()
+      break
+    default:
+      ctx.beginPath()
+      ctx.arc(cx, cy, 7, 0, Math.PI * 2)
+      ctx.stroke()
+      break
+  }
+
   ctx.restore()
 }
 
@@ -492,12 +885,18 @@ function drawNode(
   ctx: CanvasRenderingContext2D,
   node: CanvasNodeData,
   progress: number,
-  emphasis: number
+  emphasis: number,
+  mainPulse: number,
+  actionSummary?: string
 ) {
   const theme = getNodeTheme(node)
   const box = getNodeBox(node)
   const accent = theme.accent
   const label = getDisplayLabel(node)
+  const hasSummary = node.entityType === 'tool' && Boolean(actionSummary)
+  const summaryText = hasSummary ? actionSummary!.trim() : ''
+  const titleY = hasSummary ? node.y - 12 : node.y - 8
+  const metaY = hasSummary ? node.y + 4 : node.y + 13
 
   ctx.save()
   if (emphasis > 0) {
@@ -511,22 +910,22 @@ function drawNode(
   }
 
   if (node.entityType === 'main_agent') {
-    const stage = ctx.createRadialGradient(node.x, node.y, box.width * 0.12, node.x, node.y, box.width * 1.15)
-    stage.addColorStop(0, withAlpha(accent, 0.22 + emphasis * 0.12))
-    stage.addColorStop(0.55, withAlpha(accent, 0.08))
+    const stage = ctx.createRadialGradient(node.x, node.y, box.width * 0.12, node.x, node.y, box.width * (1.15 + mainPulse * 0.18))
+    stage.addColorStop(0, withAlpha(accent, 0.22 + emphasis * 0.12 + mainPulse * 0.16))
+    stage.addColorStop(0.55, withAlpha(accent, 0.08 + mainPulse * 0.08))
     stage.addColorStop(1, withAlpha(accent, 0))
     ctx.fillStyle = stage
     ctx.beginPath()
-    ctx.arc(node.x, node.y, box.width * 1.15, 0, Math.PI * 2)
+    ctx.arc(node.x, node.y, box.width * (1.15 + mainPulse * 0.18), 0, Math.PI * 2)
     ctx.fill()
 
-    ctx.strokeStyle = withAlpha(accent, 0.28)
-    ctx.lineWidth = 1
+    ctx.strokeStyle = withAlpha(accent, 0.28 + mainPulse * 0.2)
+    ctx.lineWidth = 1 + mainPulse * 0.8
     ctx.beginPath()
-    ctx.arc(node.x, node.y, box.width * 0.72, 0, Math.PI * 2)
+    ctx.arc(node.x, node.y, box.width * (0.72 + mainPulse * 0.08), 0, Math.PI * 2)
     ctx.stroke()
     ctx.beginPath()
-    ctx.arc(node.x, node.y, box.width * 0.9, 0, Math.PI * 2)
+    ctx.arc(node.x, node.y, box.width * (0.9 + mainPulse * 0.12), 0, Math.PI * 2)
     ctx.stroke()
   }
 
@@ -560,21 +959,22 @@ function drawNode(
   ctx.lineTo(box.x + box.width - 14, box.y + box.height - 12)
   ctx.stroke()
 
-  ctx.fillStyle = withAlpha(accent, 0.95)
+  ctx.fillStyle = withAlpha(accent, 0.12)
   ctx.beginPath()
-  ctx.arc(box.x + 18, node.y, 5, 0, Math.PI * 2)
+  ctx.roundRect(box.x + 8, node.y - 13, 20, 26, 8)
   ctx.fill()
+  drawNodeGlyph(ctx, node, box, accent)
 
   ctx.fillStyle = COLORS.text
   ctx.font = '600 14px ui-sans-serif, system-ui, sans-serif'
   ctx.textAlign = 'left'
   ctx.textBaseline = 'middle'
-  ctx.fillText(label, box.x + 32, node.y - 8)
+  ctx.fillText(label, box.x + 32, titleY)
 
   ctx.fillStyle = COLORS.textDim
   ctx.font = '11px ui-monospace, SFMono-Regular, monospace'
   const metaText = node.entityType === 'tool' ? getToolCategory(node.displayName).toUpperCase() : node.entityId
-  ctx.fillText(metaText, box.x + 32, node.y + 13)
+  ctx.fillText(metaText, box.x + 32, metaY)
 
   const badgeWidth = 42 + theme.badge.length * 6.2
   ctx.fillStyle = withAlpha(accent, 0.14 + progress * 0.14)
@@ -588,6 +988,32 @@ function drawNode(
   ctx.font = '700 10px ui-sans-serif, system-ui, sans-serif'
   ctx.textAlign = 'center'
   ctx.fillText(theme.badge, box.x + box.width - badgeWidth / 2 - 12, box.y + 21)
+
+  if (summaryText) {
+    const chipX = box.x + 32
+    const chipY = box.y + box.height - 22
+    const chipHeight = 14
+    const maxChipWidth = Math.max(68, box.width - 48)
+    ctx.font = '600 9px ui-sans-serif, system-ui, sans-serif'
+    let chipText = summaryText
+    while (chipText.length > 12 && ctx.measureText(chipText).width > maxChipWidth - 18) {
+      chipText = `${chipText.slice(0, -2).trimEnd()}…`
+    }
+
+    const chipWidth = Math.min(maxChipWidth, ctx.measureText(chipText).width + 14)
+    ctx.fillStyle = withAlpha(accent, 0.16 + emphasis * 0.08)
+    ctx.beginPath()
+    ctx.roundRect(chipX, chipY, chipWidth, chipHeight, 7)
+    ctx.fill()
+    ctx.strokeStyle = withAlpha(accent, 0.26 + emphasis * 0.14)
+    ctx.lineWidth = 1
+    ctx.stroke()
+
+    ctx.fillStyle = withAlpha('#ffffff', 0.92)
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(chipText, chipX + 7, chipY + chipHeight / 2 + 0.5)
+  }
   ctx.restore()
 }
 
@@ -596,6 +1022,7 @@ function getEdgeStatus(edge: CanvasEdgeData | null, nodes: Map<string, CanvasNod
     return {
       edgeId: null,
       title: 'Step Transition',
+      summary: 'Preparing the next scene',
       detail: 'Previous nodes are fading out while the next call prepares to appear.',
     }
   }
@@ -619,7 +1046,32 @@ function getEdgeStatus(edge: CanvasEdgeData | null, nodes: Map<string, CanvasNod
   return {
     edgeId: edge.id,
     title: `${sourceName} -> ${targetName}`,
-    detail: descriptions[edge.linkType] ?? `${sourceName} communicates with ${targetName}.`,
+    summary: edge.actionSummary,
+    detail: edge.actionDetail ?? descriptions[edge.linkType] ?? `${sourceName} communicates with ${targetName}.`,
+  }
+}
+
+function getStepTheme(edge: CanvasEdgeData | null, nodes: Map<string, CanvasNodeData>) {
+  if (!edge) {
+    return { accent: '#7dd3fc', badge: 'FLOW', category: 'generic' as const }
+  }
+
+  const source = nodes.get(edge.source)
+  const target = nodes.get(edge.target)
+  const category = source?.entityType === 'tool'
+    ? getToolCategory(source.displayName)
+    : target?.entityType === 'tool'
+      ? getToolCategory(target.displayName)
+      : edge.linkType === 'user_input' || edge.linkType === 'response'
+        ? 'user'
+        : edge.linkType === 'thinking'
+          ? 'plan'
+          : 'generic'
+
+  return {
+    accent: TOOL_THEME[category]?.accent ?? '#7dd3fc',
+    badge: TOOL_THEME[category]?.badge ?? 'FLOW',
+    category,
   }
 }
 
@@ -645,44 +1097,62 @@ function getEdgeOffset(edge: CanvasEdgeData, edges: Map<string, CanvasEdgeData>)
 
 function getSceneRenderState(currentTime: number, sceneId: number, scenes: Map<number, SceneInfo>): SceneRenderState {
   const scene = scenes.get(sceneId)
-  if (!scene) return { opacity: 0, shiftX: 0 }
+  if (!scene) return { opacity: 0, shiftX: 0, shiftY: 0 }
 
   const previousScene = scenes.get(sceneId - 1)
   const fadeInStart = previousScene ? previousScene.endTime : scene.startTime
+  const verticalDirection = sceneId % 2 === 0 ? 1 : -1
 
   if (currentTime < fadeInStart) {
-    return { opacity: 0, shiftX: SCENE_SHIFT_DISTANCE }
+    return { opacity: 0, shiftX: SCENE_SHIFT_DISTANCE, shiftY: verticalDirection * SCENE_SHIFT_Y_DISTANCE }
   }
 
   if (currentTime <= fadeInStart + POST_FADE_DURATION) {
     const progress = (currentTime - fadeInStart) / POST_FADE_DURATION
+    const easedTravel = 1 - Math.pow(1 - progress, 2.2)
     return {
       opacity: Math.max(0, Math.min(1, progress)),
-      shiftX: (1 - progress) * SCENE_SHIFT_DISTANCE,
+      shiftX: (1 - easedTravel) * SCENE_SHIFT_DISTANCE,
+      shiftY: verticalDirection * (1 - easedTravel) * SCENE_SHIFT_Y_DISTANCE,
     }
   }
 
   if (currentTime <= scene.endTime) {
-    return { opacity: 1, shiftX: 0 }
+    return { opacity: 1, shiftX: 0, shiftY: 0 }
   }
 
   if (currentTime <= scene.endTime + POST_FADE_DURATION) {
     const progress = (currentTime - scene.endTime) / POST_FADE_DURATION
+    const easedTravel = Math.pow(progress, 0.72)
     return {
       opacity: Math.max(0, 1 - progress),
-      shiftX: -progress * SCENE_SHIFT_DISTANCE,
+      shiftX: -easedTravel * SCENE_SHIFT_DISTANCE,
+      shiftY: -verticalDirection * easedTravel * SCENE_SHIFT_Y_DISTANCE,
     }
   }
 
-  return { opacity: 0, shiftX: -SCENE_SHIFT_DISTANCE }
+  return { opacity: 0, shiftX: -SCENE_SHIFT_DISTANCE, shiftY: -verticalDirection * SCENE_SHIFT_Y_DISTANCE }
 }
 
-function shiftNodeForScene(node: CanvasNodeData, shiftX: number): CanvasNodeData {
+function shiftNodeForScene(node: CanvasNodeData, shiftX: number, shiftY: number): CanvasNodeData {
   if (node.entityId === '1') return node
   return {
     ...node,
     x: node.x + shiftX,
+    y: node.y + shiftY,
   }
+}
+
+function getMainAgentPulse(currentTime: number, scenes: Map<number, SceneInfo>) {
+  let pulse = 0
+  for (const scene of scenes.values()) {
+    const delta = currentTime - scene.endTime
+    if (delta >= 0 && delta <= SCENE_HOLD_DURATION + POST_FADE_DURATION) {
+      const progress = delta / (SCENE_HOLD_DURATION + POST_FADE_DURATION)
+      pulse = Math.max(pulse, 1 - progress)
+    }
+  }
+  return pulse
 }
 
 interface AgentCanvasNewProps {
@@ -720,16 +1190,13 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
 
   const activeEdge = getActiveEdgeAtTime(currentTime, canvasEdgesRef.current, edgeTimingRef.current)
   const activeEdgeStatus = getEdgeStatus(activeEdge, canvasNodesRef.current)
+  const activeStepTheme = getStepTheme(activeEdge, canvasNodesRef.current)
 
   const fitToView = useCallback((nodes: Map<string, CanvasNodeData>, width: number, height: number) => {
     if (nodes.size === 0 || width <= 0 || height <= 0) return
-    const boxes = [...nodes.values()].map(getNodeBox)
-    const minX = Math.min(...boxes.map((box) => box.x))
-    const minY = Math.min(...boxes.map((box) => box.y))
-    const maxX = Math.max(...boxes.map((box) => box.x + box.width))
-    const maxY = Math.max(...boxes.map((box) => box.y + box.height))
-    const contentWidth = maxX - minX
-    const contentHeight = maxY - minY
+    const bounds = getGraphBounds(nodes)
+    const contentWidth = bounds.maxX - bounds.minX
+    const contentHeight = bounds.maxY - bounds.minY
     const padding = 120
     const scale = Math.min(
       1.25,
@@ -738,13 +1205,13 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
         Math.min((width - padding) / Math.max(contentWidth, 1), (height - padding) / Math.max(contentHeight, 1))
       )
     )
-    const contentCenterX = (minX + maxX) / 2
-    const contentCenterY = (minY + maxY) / 2
-    setCamera({
+    const contentCenterX = (bounds.minX + bounds.maxX) / 2
+    const contentCenterY = (bounds.minY + bounds.maxY) / 2
+    setCamera(constrainCamera({
       scale,
       offsetX: width / 2 - contentCenterX * scale,
       offsetY: height / 2 - contentCenterY * scale,
-    })
+    }, nodes, { width, height }))
   }, [])
 
   useEffect(() => {
@@ -896,6 +1363,28 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
 
     const highlightedNodes = new Set<string>()
     const visibleNodeOpacity = new Map<string, number>()
+    const activeToolSummaries = new Map<string, string>()
+    const mainPulse = getMainAgentPulse(currentTimeRef.current, sceneInfoRef.current)
+
+    const mainAgentNode = canvasNodesRef.current.get('1')
+    if (mainAgentNode) {
+      const focusGlow = ctx.createRadialGradient(
+        mainAgentNode.x,
+        mainAgentNode.y,
+        0,
+        mainAgentNode.x,
+        mainAgentNode.y,
+        380 + mainPulse * 120
+      )
+      focusGlow.addColorStop(0, withAlpha('#38bdf8', 0.12 + mainPulse * 0.12))
+      focusGlow.addColorStop(0.4, withAlpha('#7dd3fc', 0.06 + mainPulse * 0.06))
+      focusGlow.addColorStop(1, withAlpha('#7dd3fc', 0))
+      ctx.fillStyle = focusGlow
+      ctx.beginPath()
+      ctx.arc(mainAgentNode.x, mainAgentNode.y, 380 + mainPulse * 120, 0, Math.PI * 2)
+      ctx.fill()
+    }
+
     canvasEdgesRef.current.forEach((edge) => {
       const edgeSceneId = edgeSceneRef.current.get(edge.id) ?? 0
       const sceneState = getSceneRenderState(currentTimeRef.current, edgeSceneId, sceneInfoRef.current)
@@ -904,12 +1393,14 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
       const rawSource = canvasNodesRef.current.get(edge.source)
       const rawTarget = canvasNodesRef.current.get(edge.target)
       if (!rawSource || !rawTarget) return
-      const source = shiftNodeForScene(rawSource, sceneState.shiftX)
-      const target = shiftNodeForScene(rawTarget, sceneState.shiftX)
+      const source = shiftNodeForScene(rawSource, sceneState.shiftX, sceneState.shiftY)
+      const target = shiftNodeForScene(rawTarget, sceneState.shiftX, sceneState.shiftY)
       const color = EDGE_COLORS[edge.linkType] ?? COLORS.accent
       const timing = getEdgeTiming(currentTimeRef.current, edgeTimingRef.current.get(edge.id))
       const edgeOffset = getEdgeOffset(edge, canvasEdgesRef.current)
-      const renderAlpha = sceneState.opacity * (timing.active ? Math.max(0.46, timing.pulseAlpha) : 0.24)
+      const reverseExists = canvasEdgesRef.current.has(`${edge.target}-${edge.source}`)
+      const inactiveAlpha = reverseExists ? 0.08 : 0.2
+      const renderAlpha = sceneState.opacity * (timing.active ? Math.max(0.46, timing.pulseAlpha) : inactiveAlpha)
 
       visibleNodeOpacity.set(edge.source, Math.max(visibleNodeOpacity.get(edge.source) ?? 0, Math.min(1, renderAlpha + 0.18)))
       visibleNodeOpacity.set(edge.target, Math.max(visibleNodeOpacity.get(edge.target) ?? 0, Math.min(1, renderAlpha + 0.12)))
@@ -917,6 +1408,15 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
       if (timing.active) {
         highlightedNodes.add(edge.source)
         highlightedNodes.add(edge.target)
+        if (edge.actionSummary) {
+          const sourceNode = canvasNodesRef.current.get(edge.source)
+          const targetNode = canvasNodesRef.current.get(edge.target)
+          if (edge.linkType === 'tool_call' && targetNode?.entityType === 'tool') {
+            activeToolSummaries.set(edge.target, edge.actionSummary)
+          } else if (edge.linkType === 'tool_result' && sourceNode?.entityType === 'tool') {
+            activeToolSummaries.set(edge.source, edge.actionSummary)
+          }
+        }
       }
 
       if (edge.source === edge.target) {
@@ -925,7 +1425,7 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
         drawEdge(ctx, source, target, color, renderAlpha, timing.active, edgeOffset)
       }
 
-      if (renderAlpha > 0.18) {
+      if (renderAlpha > 0.22 && timing.active) {
         const sourceBox = getNodeBox(source)
         const targetBox = getNodeBox(target)
         const midX = (source.x + target.x) / 2
@@ -953,8 +1453,8 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
       const rawSource = canvasNodesRef.current.get(edge.source)
       const rawTarget = canvasNodesRef.current.get(edge.target)
       if (!rawSource || !rawTarget || edge.source === edge.target) return
-      const source = shiftNodeForScene(rawSource, sceneState.shiftX)
-      const target = shiftNodeForScene(rawTarget, sceneState.shiftX)
+      const source = shiftNodeForScene(rawSource, sceneState.shiftX, sceneState.shiftY)
+      const target = shiftNodeForScene(rawTarget, sceneState.shiftX, sceneState.shiftY)
       drawParticle(ctx, source, target, particle.progress, particle.color, getEdgeOffset(edge, canvasEdgesRef.current))
     })
 
@@ -965,19 +1465,24 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
     canvasNodesRef.current.forEach((node) => {
       const sceneShift =
         node.entityId === '1'
-          ? 0
+          ? { x: 0, y: 0 }
           : nodeSceneRef.current.has(node.entityId)
-            ? getSceneRenderState(currentTimeRef.current, nodeSceneRef.current.get(node.entityId)!, sceneInfoRef.current).shiftX
-            : 0
+            ? {
+                x: getSceneRenderState(currentTimeRef.current, nodeSceneRef.current.get(node.entityId)!, sceneInfoRef.current).shiftX,
+                y: getSceneRenderState(currentTimeRef.current, nodeSceneRef.current.get(node.entityId)!, sceneInfoRef.current).shiftY,
+              }
+            : { x: 0, y: 0 }
       const opacity = visibleNodeOpacity.get(node.entityId) ?? 0
       if (opacity <= 0.02) return
       ctx.save()
       ctx.globalAlpha = Math.min(1, opacity)
       drawNode(
         ctx,
-        shiftNodeForScene(node, sceneShift),
+        shiftNodeForScene(node, sceneShift.x, sceneShift.y),
         getNodeProgress(currentTimeRef.current, nodeTimingRef.current.get(node.entityId)),
-        highlightedNodes.has(node.entityId) ? 1 : 0
+        highlightedNodes.has(node.entityId) ? 1 : 0,
+        node.entityId === '1' ? mainPulse : 0,
+        activeToolSummaries.get(node.entityId)
       )
       ctx.restore()
     })
@@ -1018,11 +1523,11 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
             const nextScale = prev.scale
             const targetOffsetX = dimensions.width / 2 - focusX * nextScale
             const targetOffsetY = dimensions.height / 2 - focusY * nextScale
-            return {
+            return constrainCamera({
               scale: nextScale,
               offsetX: prev.offsetX + (targetOffsetX - prev.offsetX) * CAMERA_LERP,
               offsetY: prev.offsetY + (targetOffsetY - prev.offsetY) * CAMERA_LERP,
-            }
+            }, canvasNodesRef.current, dimensions)
           })
         }
       }
@@ -1083,10 +1588,12 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
     e.preventDefault()
     const zoom = e.deltaY > 0 ? 0.92 : 1.08
     setCamera((prev) => ({
-      ...prev,
-      scale: Math.min(2.2, Math.max(0.35, prev.scale * zoom)),
+      ...constrainCamera({
+        ...prev,
+        scale: Math.min(2.2, Math.max(0.35, prev.scale * zoom)),
+      }, canvasNodesRef.current, dimensions),
     }))
-  }, [])
+  }, [dimensions])
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     isDraggingRef.current = true
@@ -1098,12 +1605,12 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
     const dx = e.clientX - lastMousePosRef.current.x
     const dy = e.clientY - lastMousePosRef.current.y
     lastMousePosRef.current = { x: e.clientX, y: e.clientY }
-    setCamera((prev) => ({
+    setCamera((prev) => constrainCamera({
       ...prev,
       offsetX: prev.offsetX + dx,
       offsetY: prev.offsetY + dy,
-    }))
-  }, [])
+    }, canvasNodesRef.current, dimensions))
+  }, [dimensions])
 
   const handleMouseUp = useCallback(() => {
     isDraggingRef.current = false
@@ -1113,7 +1620,7 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
   const progressPct = Math.min(100, (currentTime / totalDuration) * 100)
 
   return (
-    <div className="flex h-full flex-col" style={{ background: COLORS.bg }}>
+    <div className="relative flex h-full flex-col overflow-visible" style={{ background: COLORS.bg }}>
       <div
         className="flex items-center gap-3 border-b px-4"
         style={{ height: 54, background: COLORS.panel, borderColor: COLORS.panelBorder }}
@@ -1178,7 +1685,7 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
 
       <div
         ref={containerRef}
-        className="relative flex-1"
+        className="relative flex-1 overflow-hidden"
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -1187,31 +1694,60 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
         style={{ cursor: isDraggingRef.current ? 'grabbing' : 'grab' }}
       >
         <canvas ref={canvasRef} className="h-full w-full" style={{ width: '100%', height: '100%' }} />
+      </div>
 
-        <div
-          className="absolute right-4 top-4 w-[320px] rounded-2xl border px-4 py-3 text-xs"
-          style={{ background: COLORS.panel, borderColor: COLORS.panelBorder, color: COLORS.textDim }}
-        >
-          <div className="mb-2 text-[11px] font-semibold tracking-[0.18em]" style={{ color: COLORS.textMuted }}>
+      <div
+        className="pointer-events-none absolute right-4 top-[70px] z-30 w-[320px] rounded-2xl border px-4 py-3 text-xs"
+        style={{
+          background: `linear-gradient(180deg, ${withAlpha(activeStepTheme.accent, 0.12)} 0%, ${COLORS.panel} 32%)`,
+          borderColor: withAlpha(activeStepTheme.accent, 0.22),
+          color: COLORS.textDim,
+          boxShadow: `0 18px 40px ${withAlpha(activeStepTheme.accent, 0.12)}`,
+        }}
+      >
+        <div className="mb-2 flex items-center gap-2">
+          <div
+            className="rounded-lg px-2 py-1 text-[10px] font-bold tracking-[0.18em]"
+            style={{
+              background: withAlpha(activeStepTheme.accent, 0.16),
+              color: '#eef6ff',
+              border: `1px solid ${withAlpha(activeStepTheme.accent, 0.28)}`,
+            }}
+          >
+            {activeStepTheme.badge}
+          </div>
+          <div className="text-[11px] font-semibold tracking-[0.18em]" style={{ color: COLORS.textMuted }}>
             CURRENT STEP
           </div>
-          <div className="mb-3">
-            <div className="text-sm font-semibold" style={{ color: COLORS.text }}>
-              {activeEdgeStatus.title}
-            </div>
-            <div className="mt-1 leading-5" style={{ color: COLORS.textDim }}>
-              {activeEdgeStatus.detail}
-            </div>
+        </div>
+        <div className="mb-3">
+          <div className="text-sm font-semibold" style={{ color: COLORS.text }}>
+            {activeEdgeStatus.title}
           </div>
-          <div className="border-t pt-3" style={{ borderColor: COLORS.panelBorder }}>
-            <div className="mb-2 text-[11px] font-semibold tracking-[0.18em]" style={{ color: COLORS.textMuted }}>
-              VISUAL SYSTEM
+          {activeEdgeStatus.summary && (
+            <div
+              className="mt-2 rounded-xl border px-3 py-2 text-[12px] font-medium"
+              style={{
+                background: withAlpha(activeStepTheme.accent, 0.1),
+                borderColor: withAlpha(activeStepTheme.accent, 0.18),
+                color: COLORS.text,
+              }}
+            >
+              {activeEdgeStatus.summary}
             </div>
-            <div className="space-y-1">
-              <div>Only the current step and its nearby transition are visible.</div>
-              <div>Previous nodes fade out while the next call fades in.</div>
-              <div>The camera follows the active edge start so playback stays centered.</div>
-            </div>
+          )}
+          <div className="mt-1 leading-5" style={{ color: COLORS.textDim }}>
+            {activeEdgeStatus.detail}
+          </div>
+        </div>
+        <div className="border-t pt-3" style={{ borderColor: withAlpha(activeStepTheme.accent, 0.18) }}>
+          <div className="mb-2 text-[11px] font-semibold tracking-[0.18em]" style={{ color: COLORS.textMuted }}>
+            VISUAL SYSTEM
+          </div>
+          <div className="space-y-1">
+            <div>Only the current step and its nearby transition are visible.</div>
+            <div>Previous nodes fade out while the next call fades in.</div>
+            <div>The camera follows the active edge start so playback stays centered.</div>
           </div>
         </div>
       </div>

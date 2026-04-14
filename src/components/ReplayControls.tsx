@@ -27,12 +27,12 @@ export function ReplayControls({
 }: ReplayControlsProps) {
   return (
     <div className="flex items-center justify-between bg-slate-800 rounded-xl p-4 border border-slate-700">
-      {/* 左侧控制 */}
+      {/* Left Controls */}
       <div className="flex items-center gap-2">
         <button
           onClick={onPrev}
           className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
-          title="上一条 (左箭头)"
+          title="Previous (Left Arrow)"
         >
           <SkipBack className="w-5 h-5" />
         </button>
@@ -40,7 +40,7 @@ export function ReplayControls({
         <button
           onClick={onPlayPause}
           className="p-3 bg-blue-600 hover:bg-blue-700 rounded-full transition-colors"
-          title={isPlaying ? '暂停 (空格)' : '播放 (空格)'}
+          title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
         >
           {isPlaying ? (
             <Pause className="w-6 h-6" />
@@ -52,13 +52,13 @@ export function ReplayControls({
         <button
           onClick={onNext}
           className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
-          title="下一条 (右箭头)"
+          title="Next (Right Arrow)"
         >
           <SkipForward className="w-5 h-5" />
         </button>
       </div>
 
-      {/* 中间：速度调节 */}
+      {/* Center: Speed Controls */}
       <div className="flex items-center gap-2">
         <Gauge className="w-4 h-4 text-slate-400" />
         <div className="flex items-center gap-1">
@@ -78,14 +78,14 @@ export function ReplayControls({
         </div>
       </div>
 
-      {/* 右侧控制 */}
+      {/* Right Controls */}
       <div className="flex items-center gap-2">
         <button
           onClick={onLoopToggle}
           className={`p-2 rounded-lg transition-colors ${
             isLooping ? 'bg-amber-500/20 text-amber-400' : 'hover:bg-slate-700'
           }`}
-          title={isLooping ? '取消循环' : '循环播放'}
+          title={isLooping ? 'Disable Loop' : 'Loop Playback'}
         >
           <RefreshCw className={`w-5 h-5 ${isLooping ? 'animate-spin' : ''}`} />
         </button>
@@ -93,10 +93,10 @@ export function ReplayControls({
         <button
           onClick={onExport}
           className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
-          title="导出视频"
+          title="Export"
         >
           <Download className="w-4 h-4" />
-          <span className="text-sm">导出</span>
+          <span className="text-sm">Export</span>
         </button>
       </div>
     </div>

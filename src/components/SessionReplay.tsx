@@ -56,12 +56,12 @@ function getEntryPreview(entry: LogEntry): string {
       }
       const toolUse = content.find((c) => c.type === 'tool_use');
       if (toolUse && 'name' in toolUse) {
-        return `工具调用: ${toolUse.name}`;
+        return `Tool call: ${toolUse.name}`;
       }
     }
   }
   if (entry.type === 'system') {
-    return '系统消息';
+    return 'System message';
   }
   return entry.type;
 }
@@ -191,7 +191,7 @@ export function SessionReplay({ data, startIndex = 0 }: SessionReplayProps) {
 
   const handleExport = useCallback(async (_format: 'webm') => {
     if (!viewerRef.current) {
-      throw new Error('无法获取回放视图');
+      throw new Error('Unable to access replay view');
     }
 
     try {
@@ -213,7 +213,7 @@ export function SessionReplay({ data, startIndex = 0 }: SessionReplayProps) {
       });
 
       if (keyFrames.length === 0) {
-        throw new Error('没有找到关键帧');
+        throw new Error('No keyframes found');
       }
 
       // 导出每个关键帧的截图
@@ -244,7 +244,7 @@ export function SessionReplay({ data, startIndex = 0 }: SessionReplayProps) {
         setIsPlaying(true);
       }
 
-      alert(`已导出 ${keyFrames.length} 张关键帧截图！\n\n如需完整视频，请使用浏览器录屏功能（如 Chrome 的 "分享你的屏幕"）。`);
+      alert(`Exported ${keyFrames.length} keyframe screenshots.\n\nFor a full video, please use your browser's screen recording feature.`);
 
     } catch (err) {
       console.error('Export failed:', err);
@@ -257,10 +257,10 @@ export function SessionReplay({ data, startIndex = 0 }: SessionReplayProps) {
       <div>
         <h2 className="text-2xl font-bold mb-2 flex items-center gap-3">
           <PlayCircle className="w-6 h-6" />
-          会话回放
+          Session Replay
         </h2>
         <p className="text-slate-400">
-          回放会话过程 · 空格键暂停/播放 · 左右箭头跳转
+          Replay the session timeline · Space to play/pause · Arrow keys to navigate
         </p>
       </div>
 
@@ -281,14 +281,14 @@ export function SessionReplay({ data, startIndex = 0 }: SessionReplayProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
                     <span className={`font-semibold ${entryStyle.text}`}>
-                      {currentEntry.type === 'user' ? '用户' :
-                       currentEntry.type === 'assistant' ? '助手' :
+                      {currentEntry.type === 'user' ? 'User' :
+                       currentEntry.type === 'assistant' ? 'Assistant' :
                        currentEntry.type}
                     </span>
                     {hasTools && (
                       <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded-full text-xs">
                         <Settings className="w-3 h-3" />
-                        工具调用
+                        Tool Call
                       </span>
                     )}
                     <span className="text-slate-500 text-sm">
@@ -309,7 +309,7 @@ export function SessionReplay({ data, startIndex = 0 }: SessionReplayProps) {
           ) : (
             <div className="flex flex-col items-center justify-center h-[350px] text-slate-500">
               <MessageSquare className="w-12 h-12 mb-4" />
-              <p>选择一条消息开始回放</p>
+              <p>Select a message to start replay</p>
             </div>
           )}
         </div>
@@ -338,16 +338,16 @@ export function SessionReplay({ data, startIndex = 0 }: SessionReplayProps) {
         {/* 快捷键提示 */}
         <div className="flex flex-wrap gap-4 text-xs text-slate-500">
           <span className="flex items-center gap-1">
-            <kbd className="px-2 py-0.5 bg-slate-700 rounded">空格</kbd>
-            暂停/播放
+            <kbd className="px-2 py-0.5 bg-slate-700 rounded">Space</kbd>
+            Play/Pause
           </span>
           <span className="flex items-center gap-1">
             <kbd className="px-2 py-0.5 bg-slate-700 rounded">←</kbd>
-            上一条
+            Previous
           </span>
           <span className="flex items-center gap-1">
             <kbd className="px-2 py-0.5 bg-slate-700 rounded">→</kbd>
-            下一条
+            Next
           </span>
         </div>
       </div>

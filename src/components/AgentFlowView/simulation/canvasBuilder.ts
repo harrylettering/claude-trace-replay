@@ -50,6 +50,8 @@ export interface CanvasEdge {
   source: string
   target: string
   linkType: string
+  actionSummary?: string
+  actionDetail?: string
 }
 
 export interface VirtualNode {
@@ -69,7 +71,7 @@ function parseContentType(item: Record<string, unknown>): { contentType: Content
   switch (type) {
     case 'text': return { contentType: ContentType.TEXT }
     case 'thinking': return { contentType: ContentType.THINKING }
-    case 'tool_use': return { contentType: ContentType.TOOL_USE, toolName: item.name as string }
+    case 'tool_use': return { contentType: ContentType.TOOL_USE, toolName: (item.name as string) || 'text' }
     case 'tool_result': return { contentType: ContentType.TOOL_RESULT }
     case 'image': return { contentType: ContentType.IMAGE }
     default: return { contentType: ContentType.UNKNOWN }
@@ -87,6 +89,74 @@ function parseRole(entry: LogEntry): Role {
   if (msgRole === 'assistant') return Role.ASSISTANT
   if (msgRole === 'system') return Role.SYSTEM
   return Role.UNKNOWN
+}
+
+function truncateText(value: unknown, maxLength = 84): string {
+  if (value === undefined || value === null) return ''
+  const raw = typeof value === 'string' ? value : JSON.stringify(value)
+  const singleLine = raw.replace(/\s+/g, ' ').trim()
+  if (!singleLine) return ''
+  return singleLine.length > maxLength ? `${singleLine.slice(0, maxLength - 1)}…` : singleLine
+}
+
+function summarizeToolInput(toolName: string | undefined, input: Record<string, unknown> | undefined): string {
+  const name = (toolName || 'tool').toLowerCase()
+  const payload = input || {}
+  const path = truncateText(payload.file_path ?? payload.path ?? payload.dir ?? payload.cwd ?? payload.destination ?? payload.to, 64)
+  const pattern = truncateText(payload.pattern ?? payload.query ?? payload.regex, 56)
+  const command = truncateText(payload.command ?? payload.script ?? payload.cmd, 72)
+  const subject = truncateText(payload.subject ?? payload.activeForm ?? payload.taskId ?? payload.id, 64)
+  const url = truncateText(payload.url, 72)
+  const question = truncateText(payload.question ?? payload.prompt ?? payload.message, 72)
+  const skillName = truncateText(payload.skill ?? payload.name ?? payload.query, 64)
+
+  if (name === 'read') return path ? `Read ${path}` : 'Read file contents'
+  if (name === 'write') return path ? `Write ${path}` : 'Write file contents'
+  if (name === 'edit' || name.includes('edit')) return path ? `Edit ${path}` : 'Edit file contents'
+  if (name === 'glob') return pattern ? `Glob ${pattern}` : 'Find matching files'
+  if (name === 'grep') return pattern ? `Grep ${pattern}${path ? ` in ${path}` : ''}` : 'Search file contents'
+  if (name === 'bash') return command ? `Bash ${command}` : 'Run terminal command'
+  if (name === 'taskcreate') return subject ? `Create task: ${subject}` : 'Create task'
+  if (name === 'taskget') return subject ? `Inspect task ${subject}` : 'Get task details'
+  if (name === 'tasklist') return 'List tasks'
+  if (name === 'taskupdate') {
+    const status = truncateText(payload.status, 24)
+    return subject || status ? `Update task ${subject || ''}${subject && status ? ' -> ' : ''}${status || ''}`.trim() : 'Update task'
+  }
+  if (name === 'agent') return question ? `Spawn agent: ${question}` : subject ? `Spawn agent: ${subject}` : 'Spawn sub-agent'
+  if (name === 'enterplanmode') return 'Enter plan mode'
+  if (name === 'exitplanmode') return 'Exit plan mode'
+  if (name === 'webfetch') return url ? `Fetch ${url}` : 'Fetch web page'
+  if (name === 'websearch') return pattern ? `Search ${pattern}` : 'Search the web'
+  if (name === 'askuserquestion') return question ? `Ask user: ${question}` : 'Ask user question'
+  if (name === 'skill') return skillName ? `Use skill: ${skillName}` : 'Use skill'
+  if (name === 'toolsearch') return pattern ? `Find tool: ${pattern}` : 'Search tools'
+
+  const firstMeaningful = [command, path, pattern, url, subject, question, skillName].find(Boolean)
+  if (firstMeaningful) return `${toolName || 'Tool'} ${firstMeaningful}`
+
+  const firstEntries = Object.entries(payload).slice(0, 2)
+  if (firstEntries.length > 0) {
+    return `${toolName || 'Tool'} ${truncateText(firstEntries.map(([key, value]) => `${key}: ${truncateText(value, 28)}`).join(', '), 84)}`
+  }
+
+  return toolName || 'Run tool'
+}
+
+function summarizeToolResult(toolName: string | undefined, item: Record<string, unknown> | null): string {
+  if (!item) return `Receive ${toolName || 'tool'} result`
+  const result = item.content
+  const resultText = truncateText(result, 88)
+  const prefix = item.is_error ? `Error from ${toolName || 'tool'}` : `Result from ${toolName || 'tool'}`
+  return resultText ? `${prefix}: ${resultText}` : prefix
+}
+
+function summarizeMessageContent(contentType: ContentType, item: Record<string, unknown> | null): string {
+  if (!item) return ''
+  if (contentType === ContentType.THINKING) return truncateText(item.thinking, 88) || 'Reason about next step'
+  if (contentType === ContentType.TEXT) return truncateText(item.text, 88) || 'Process message text'
+  if (contentType === ContentType.IMAGE) return 'Handle image content'
+  return ''
 }
 
 // ─── CanvasBuilder Class ───────────────────────────────────────────────────────
@@ -206,6 +276,7 @@ export class CanvasBuilder {
   ): VirtualNode {
     const subNodes: CanvasNode[] = []
     const callLinks: CanvasEdge[] = []
+    const messageSummary = summarizeMessageContent(contentType, item)
 
     // Build sub_nodes and call_links based on role and contentType
     switch (role) {
@@ -214,38 +285,87 @@ export class CanvasBuilder {
           // assistant self-loop
           const sub = this.makeNode('assistant', ENTITY_ID.ASSISTANT, 'assistant')
           subNodes.push(sub)
-          callLinks.push(this.makeEdge(ENTITY_ID.ASSISTANT, ENTITY_ID.ASSISTANT, 'thinking'))
+          callLinks.push(this.makeEdge(
+            ENTITY_ID.ASSISTANT,
+            ENTITY_ID.ASSISTANT,
+            'thinking',
+            messageSummary || 'Reason about the next step',
+            'Assistant is internally reasoning before the next action.'
+          ))
         } else if (contentType === ContentType.TOOL_USE && item) {
           const toolId = item.id as string
+          const toolAction = summarizeToolInput(toolName, (item.input ?? {}) as Record<string, unknown>)
           const subA = this.makeNode('assistant', ENTITY_ID.ASSISTANT, 'assistant')
           const subMa = this.makeNode('main_agent', ENTITY_ID.MAIN_AGENT, 'main agent')
           const subT = this.makeNode('tool', toolId, `tool:${toolName}`)
           subNodes.push(subA, subMa, subT)
-          callLinks.push(this.makeEdge(ENTITY_ID.ASSISTANT, ENTITY_ID.MAIN_AGENT, 'agent_call'))
-          callLinks.push(this.makeEdge(ENTITY_ID.MAIN_AGENT, toolId, 'tool_call'))
+          callLinks.push(this.makeEdge(
+            ENTITY_ID.ASSISTANT,
+            ENTITY_ID.MAIN_AGENT,
+            'agent_call',
+            toolAction,
+            `Assistant hands ${toolName || 'tool'} orchestration back to Main Agent.`
+          ))
+          callLinks.push(this.makeEdge(
+            ENTITY_ID.MAIN_AGENT,
+            toolId,
+            'tool_call',
+            toolAction,
+            `Main Agent dispatches ${toolName || 'tool'} to perform the requested action.`
+          ))
         } else if (contentType === ContentType.TEXT) {
           const subA = this.makeNode('assistant', ENTITY_ID.ASSISTANT, 'assistant')
           const subMa = this.makeNode('main_agent', ENTITY_ID.MAIN_AGENT, 'main agent')
           const subU = this.makeNode('user', ENTITY_ID.USER, 'user')
           subNodes.push(subA, subMa, subU)
           // assistant 回复 user：先 assistant → main_agent (agent_response)
-          callLinks.push(this.makeEdge(ENTITY_ID.ASSISTANT, ENTITY_ID.MAIN_AGENT, 'agent_response'))
+          callLinks.push(this.makeEdge(
+            ENTITY_ID.ASSISTANT,
+            ENTITY_ID.MAIN_AGENT,
+            'agent_response',
+            messageSummary || 'Prepare final response',
+            'Assistant packages the reply and hands it to Main Agent.'
+          ))
           // 再 main_agent → user (response)
-          callLinks.push(this.makeEdge(ENTITY_ID.MAIN_AGENT, ENTITY_ID.USER, 'response'))
+          callLinks.push(this.makeEdge(
+            ENTITY_ID.MAIN_AGENT,
+            ENTITY_ID.USER,
+            'response',
+            messageSummary || 'Return result to user',
+            'Main Agent returns the result to the user.'
+          ))
         } else if (contentType === ContentType.IMAGE) {
           // assistant 图片回复，与 TEXT 相同处理
           const subA = this.makeNode('assistant', ENTITY_ID.ASSISTANT, 'assistant')
           const subMa = this.makeNode('main_agent', ENTITY_ID.MAIN_AGENT, 'main agent')
           const subU = this.makeNode('user', ENTITY_ID.USER, 'user')
           subNodes.push(subA, subMa, subU)
-          callLinks.push(this.makeEdge(ENTITY_ID.ASSISTANT, ENTITY_ID.MAIN_AGENT, 'agent_response'))
-          callLinks.push(this.makeEdge(ENTITY_ID.MAIN_AGENT, ENTITY_ID.USER, 'response'))
+          callLinks.push(this.makeEdge(
+            ENTITY_ID.ASSISTANT,
+            ENTITY_ID.MAIN_AGENT,
+            'agent_response',
+            'Prepare image response',
+            'Assistant packages image output and hands it to Main Agent.'
+          ))
+          callLinks.push(this.makeEdge(
+            ENTITY_ID.MAIN_AGENT,
+            ENTITY_ID.USER,
+            'response',
+            'Deliver image response',
+            'Main Agent returns the image result to the user.'
+          ))
         } else {
           // 其他未匹配情况：创建 main_agent 自引用，link_type 为角色值
           const subM = this.makeNode('main_agent', ENTITY_ID.MAIN_AGENT, 'main agent')
           subNodes.push(subM)
           // role 是字符串枚举值
-          callLinks.push(this.makeEdge(ENTITY_ID.MAIN_AGENT, ENTITY_ID.MAIN_AGENT, `${role}`))
+          callLinks.push(this.makeEdge(
+            ENTITY_ID.MAIN_AGENT,
+            ENTITY_ID.MAIN_AGENT,
+            `${role}`,
+            'Process assistant event',
+            'Main Agent processes an assistant-side event.'
+          ))
         }
         break
 
@@ -254,23 +374,48 @@ export class CanvasBuilder {
           const toolUseId = item.tool_use_id as string
           // 从 toolNames Map 获取工具名称（处理异步情况）
           const resolvedToolName = this.toolNames.get(toolUseId) || toolName || 'unknown'
+          const toolResultSummary = summarizeToolResult(resolvedToolName, item)
           const subT = this.makeNode('tool', toolUseId, `tool:${resolvedToolName}`)
           const subMa = this.makeNode('main_agent', ENTITY_ID.MAIN_AGENT, 'main agent')
           const subA = this.makeNode('assistant', ENTITY_ID.ASSISTANT, 'assistant')
           subNodes.push(subT, subMa, subA)
           // 工具结果返回：tool → main_agent (tool_result)
-          callLinks.push(this.makeEdge(toolUseId, ENTITY_ID.MAIN_AGENT, 'tool_result'))
+          callLinks.push(this.makeEdge(
+            toolUseId,
+            ENTITY_ID.MAIN_AGENT,
+            'tool_result',
+            toolResultSummary,
+            `${resolvedToolName} returns output to Main Agent.`
+          ))
           // main_agent 结果返回 assistant：main_agent → assistant (agent_result)
-          callLinks.push(this.makeEdge(ENTITY_ID.MAIN_AGENT, ENTITY_ID.ASSISTANT, 'agent_result'))
+          callLinks.push(this.makeEdge(
+            ENTITY_ID.MAIN_AGENT,
+            ENTITY_ID.ASSISTANT,
+            'agent_result',
+            toolResultSummary,
+            'Main Agent forwards the tool result back into reasoning.'
+          ))
         } else if (contentType === ContentType.TEXT || contentType === ContentType.IMAGE) {
           const subU = this.makeNode('user', ENTITY_ID.USER, 'user')
           const subMa = this.makeNode('main_agent', ENTITY_ID.MAIN_AGENT, 'main agent')
           const subA = this.makeNode('assistant', ENTITY_ID.ASSISTANT, 'assistant')
           subNodes.push(subU, subMa, subA)
           // 用户输入：user → main_agent (user_input)
-          callLinks.push(this.makeEdge(ENTITY_ID.USER, ENTITY_ID.MAIN_AGENT, 'user_input'))
+          callLinks.push(this.makeEdge(
+            ENTITY_ID.USER,
+            ENTITY_ID.MAIN_AGENT,
+            'user_input',
+            messageSummary || 'Send user request',
+            'User request enters the main agent pipeline.'
+          ))
           // main_agent 接收：main_agent → assistant (agent_receive)
-          callLinks.push(this.makeEdge(ENTITY_ID.MAIN_AGENT, ENTITY_ID.ASSISTANT, 'agent_receive'))
+          callLinks.push(this.makeEdge(
+            ENTITY_ID.MAIN_AGENT,
+            ENTITY_ID.ASSISTANT,
+            'agent_receive',
+            messageSummary || 'Forward request to reasoning',
+            'Main Agent forwards input into the reasoning stage.'
+          ))
         }
         break
 
@@ -286,7 +431,13 @@ export class CanvasBuilder {
         // attachment 和 system 类型：创建 main_agent 自引用
         const subM = this.makeNode('main_agent', ENTITY_ID.MAIN_AGENT, 'main agent')
         subNodes.push(subM)
-        callLinks.push(this.makeEdge(ENTITY_ID.MAIN_AGENT, ENTITY_ID.MAIN_AGENT, `${role}`))
+        callLinks.push(this.makeEdge(
+          ENTITY_ID.MAIN_AGENT,
+          ENTITY_ID.MAIN_AGENT,
+          `${role}`,
+          'Process system event',
+          'Main Agent processes an environment or system event.'
+        ))
         break
     }
 
@@ -305,8 +456,14 @@ export class CanvasBuilder {
     return { entityType, entityId, displayName, x: 0, y: 0 }
   }
 
-  private makeEdge(source: string, target: string, linkType: string): CanvasEdge {
-    return { id: `${source}-${target}`, source, target, linkType }
+  private makeEdge(
+    source: string,
+    target: string,
+    linkType: string,
+    actionSummary?: string,
+    actionDetail?: string
+  ): CanvasEdge {
+    return { id: `${source}-${target}`, source, target, linkType, actionSummary, actionDetail }
   }
 
   /**

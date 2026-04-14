@@ -67,18 +67,18 @@ function StatCard({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <div className="text-2xl font-bold text-blue-400">{formatFn(valueA)}</div>
-          <div className="text-xs text-slate-500 mt-1">会话 A</div>
+          <div className="text-xs text-slate-500 mt-1">Session A</div>
         </div>
         <div>
           <div className="text-2xl font-bold text-purple-400">{formatFn(valueB)}</div>
-          <div className="text-xs text-slate-500 mt-1">会话 B</div>
+          <div className="text-xs text-slate-500 mt-1">Session B</div>
         </div>
       </div>
       {typeof valueA === 'number' && typeof valueB === 'number' && (
         <div className="mt-3 pt-3 border-t border-slate-700 flex items-center gap-2">
           {getDiffIcon()}
           <span className={`text-sm font-medium ${getDiffClass()}`}>
-            {diff > 0 ? '+' : ''}{diff !== 0 ? formatFn(diff) : '无变化'}
+            {diff > 0 ? '+' : ''}{diff !== 0 ? formatFn(diff) : 'No change'}
             {diffPercent !== 0 && (
               <span className="text-xs ml-1">
                 ({diffPercent > 0 ? '+' : ''}{diffPercent.toFixed(1)}%)
@@ -93,7 +93,7 @@ function StatCard({
 
 export function SessionCompare({ defaultSession }: SessionCompareProps) {
   const [sessionA, setSessionA] = useState<LoadedSession | null>(
-    defaultSession ? { data: defaultSession, name: '当前会话' } : null
+    defaultSession ? { data: defaultSession, name: 'Current Session' } : null
   );
   const [sessionB, setSessionB] = useState<LoadedSession | null>(null);
   const [loadingA, setLoadingA] = useState(false);
@@ -113,12 +113,12 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
 
     ws.onopen = () => {
       setIsWsConnected(true);
-      console.log('[WS] SessionCompare 已连接');
+      console.log('[WS] SessionCompare connected');
     };
 
     ws.onclose = () => {
       setIsWsConnected(false);
-      console.log('[WS] SessionCompare 连接已断开');
+      console.log('[WS] SessionCompare disconnected');
     };
 
     ws.onmessage = (event) => {
@@ -138,7 +138,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
           setAnalyzeError(payload);
         }
       } catch (e) {
-        console.error('[WS] 消息解析失败', e);
+        console.error('[WS] Failed to parse message', e);
       }
     };
 
@@ -170,7 +170,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
         setAnalyzeError(null);
       } catch (err) {
         console.error('Failed to load session:', err);
-        alert('加载会话失败，请检查文件格式');
+        alert('Failed to load session. Please check the file format.');
       } finally {
         setLoading(false);
       }
@@ -209,9 +209,9 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
       <div>
         <h2 className="text-2xl font-bold mb-2 flex items-center gap-3">
           <BarChart3 className="w-6 h-6" />
-          会话对比
+          Session Compare
         </h2>
-        <p className="text-slate-400">加载两个会话进行对比分析</p>
+        <p className="text-slate-400">Load two sessions and compare them side by side</p>
       </div>
 
       {/* 会话加载区域 */}
@@ -221,7 +221,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-blue-500" />
-              会话 A
+              Session A
             </h3>
             {sessionA && (
               <button
@@ -241,7 +241,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="bg-slate-900/50 rounded-lg p-2">
-                  <div className="text-slate-500 text-xs">消息数</div>
+                  <div className="text-slate-500 text-xs">Messages</div>
                   <div className="font-semibold">{sessionA.data.stats.totalMessages}</div>
                 </div>
                 <div className="bg-slate-900/50 rounded-lg p-2">
@@ -257,11 +257,11 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
               className="w-full py-8 border-2 border-dashed border-slate-600 rounded-lg hover:border-blue-500 hover:bg-blue-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingA ? (
-                <div className="text-slate-400">加载中...</div>
+                <div className="text-slate-400">Loading...</div>
               ) : (
                 <div className="text-slate-400">
                   <Upload className="w-8 h-8 mx-auto mb-2" />
-                  点击加载会话 A
+                  Click to load Session A
                 </div>
               )}
             </button>
@@ -273,7 +273,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-purple-500" />
-              会话 B
+              Session B
             </h3>
             {sessionB && (
               <button
@@ -293,7 +293,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="bg-slate-900/50 rounded-lg p-2">
-                  <div className="text-slate-500 text-xs">消息数</div>
+                  <div className="text-slate-500 text-xs">Messages</div>
                   <div className="font-semibold">{sessionB.data.stats.totalMessages}</div>
                 </div>
                 <div className="bg-slate-900/50 rounded-lg p-2">
@@ -309,11 +309,11 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
               className="w-full py-8 border-2 border-dashed border-slate-600 rounded-lg hover:border-purple-500 hover:bg-purple-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingB ? (
-                <div className="text-slate-400">加载中...</div>
+                <div className="text-slate-400">Loading...</div>
               ) : (
                 <div className="text-slate-400">
                   <Upload className="w-8 h-8 mx-auto mb-2" />
-                  点击加载会话 B
+                  Click to load Session B
                 </div>
               )}
             </button>
@@ -330,8 +330,8 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
                 <Brain className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold">AI 对比分析</h3>
-                <p className="text-sm text-slate-400">让 AI 判断哪个会话效果更好</p>
+                <h3 className="text-lg font-semibold">AI Comparison</h3>
+                <p className="text-sm text-slate-400">Let AI judge which session performed better</p>
               </div>
             </div>
             {analyzeResult && !isAnalyzing && (
@@ -340,7 +340,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
                 className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1.5"
               >
                 <RefreshCw className="w-3 h-3" />
-                重新分析
+                Run Again
               </button>
             )}
           </div>
@@ -352,7 +352,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
               className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-slate-600 disabled:to-slate-600 text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:cursor-not-allowed"
             >
               <Sparkles className="w-4 h-4" />
-              {isWsConnected ? '开始 AI 对比分析' : '等待连接...'}
+              {isWsConnected ? 'Start AI Comparison' : 'Waiting for connection...'}
             </button>
           )}
 
@@ -360,8 +360,8 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
             <div className="flex items-center gap-3 p-4 bg-indigo-500/10 rounded-xl border border-indigo-500/30">
               <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
               <div>
-                <p className="text-sm font-medium text-indigo-400 animate-pulse">AI 正在分析对比中...</p>
-                <p className="text-xs text-slate-500">Claude 正在对比两个会话的质量和效率</p>
+                <p className="text-sm font-medium text-indigo-400 animate-pulse">AI is comparing the sessions...</p>
+                <p className="text-xs text-slate-500">Claude is evaluating quality and efficiency across both sessions</p>
               </div>
             </div>
           )}
@@ -370,7 +370,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
             <div className="flex items-center gap-3 p-4 bg-red-500/10 rounded-xl border border-red-500/30">
               <AlertCircle className="w-5 h-5 text-red-400" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-red-400">分析失败</p>
+                <p className="text-sm font-medium text-red-400">Analysis failed</p>
                 <p className="text-xs text-slate-400">{analyzeError}</p>
               </div>
             </div>
@@ -393,34 +393,34 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
           <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <BarChart3 className="w-5 h-5" />
-              总体统计对比
+              Overall Comparison
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <StatCard
-                label="总消息数"
+                label="Total Messages"
                 valueA={sessionA.data.stats.totalMessages}
                 valueB={sessionB.data.stats.totalMessages}
                 isHigherBetter={false}
               />
               <StatCard
-                label="用户消息"
+                label="User Messages"
                 valueA={sessionA.data.stats.userMessages}
                 valueB={sessionB.data.stats.userMessages}
                 isHigherBetter={false}
               />
               <StatCard
-                label="助手消息"
+                label="Assistant Messages"
                 valueA={sessionA.data.stats.assistantMessages}
                 valueB={sessionB.data.stats.assistantMessages}
                 isHigherBetter={true}
               />
               <StatCard
-                label="工具调用"
+                label="Tool Calls"
                 valueA={sessionA.data.stats.toolCalls}
                 valueB={sessionB.data.stats.toolCalls}
               />
               <StatCard
-                label="会话时长"
+                label="Session Duration"
                 valueA={sessionA.data.stats.sessionDuration}
                 valueB={sessionB.data.stats.sessionDuration}
                 formatFn={(v) => formatDuration(v as number)}
@@ -433,25 +433,25 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
           <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Zap className="w-5 h-5" />
-              Token 使用对比
+              Token Usage Comparison
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <StatCard
-                label="输入 Token"
+                label="Input Tokens"
                 valueA={sessionA.data.stats.inputTokens}
                 valueB={sessionB.data.stats.inputTokens}
                 formatFn={(v) => formatTokens(v as number)}
                 isHigherBetter={false}
               />
               <StatCard
-                label="输出 Token"
+                label="Output Tokens"
                 valueA={sessionA.data.stats.outputTokens}
                 valueB={sessionB.data.stats.outputTokens}
                 formatFn={(v) => formatTokens(v as number)}
                 isHigherBetter={true}
               />
               <StatCard
-                label="总计 Token"
+                label="Total Tokens"
                 valueA={sessionA.data.stats.totalTokens}
                 valueB={sessionB.data.stats.totalTokens}
                 formatFn={(v) => formatTokens(v as number)}
@@ -464,7 +464,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
           <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Settings className="w-5 h-5" />
-              工具使用对比
+              Tool Usage Comparison
             </h3>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
@@ -480,7 +480,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
                       <div className="flex items-center justify-between">
                         <span className="font-medium">{tool.name}</span>
                         <span className="text-slate-400">
-                          {sessionA.data.toolCalls.filter(t => t.name === tool.name).length} 次
+                          {sessionA.data.toolCalls.filter(t => t.name === tool.name).length} times
                         </span>
                       </div>
                     </div>
@@ -500,7 +500,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
                       <div className="flex items-center justify-between">
                         <span className="font-medium">{tool.name}</span>
                         <span className="text-slate-400">
-                          {sessionB.data.toolCalls.filter(t => t.name === tool.name).length} 次
+                          {sessionB.data.toolCalls.filter(t => t.name === tool.name).length} times
                         </span>
                       </div>
                     </div>
@@ -514,11 +514,11 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
           <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Settings className="w-5 h-5" />
-              使用的模型
+              Models Used
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-slate-900/50 rounded-lg p-4">
-                <div className="text-xs text-slate-500 mb-2">会话 A</div>
+                <div className="text-xs text-slate-500 mb-2">Session A</div>
                 <div className="flex flex-wrap gap-2">
                   {sessionA.data.stats.modelsUsed.length > 0 ? (
                     sessionA.data.stats.modelsUsed.map((model, idx) => (
@@ -527,12 +527,12 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
                       </span>
                     ))
                   ) : (
-                    <span className="text-slate-500 text-sm">无模型信息</span>
+                    <span className="text-slate-500 text-sm">No model data</span>
                   )}
                 </div>
               </div>
               <div className="bg-slate-900/50 rounded-lg p-4">
-                <div className="text-xs text-slate-500 mb-2">会话 B</div>
+                <div className="text-xs text-slate-500 mb-2">Session B</div>
                 <div className="flex flex-wrap gap-2">
                   {sessionB.data.stats.modelsUsed.length > 0 ? (
                     sessionB.data.stats.modelsUsed.map((model, idx) => (
@@ -541,7 +541,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
                       </span>
                     ))
                   ) : (
-                    <span className="text-slate-500 text-sm">无模型信息</span>
+                    <span className="text-slate-500 text-sm">No model data</span>
                   )}
                 </div>
               </div>
@@ -551,7 +551,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
       ) : (
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-12 text-center">
           <BarChart3 className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-          <p className="text-slate-400">请加载两个会话开始对比</p>
+          <p className="text-slate-400">Load two sessions to start comparing</p>
         </div>
       )}
     </div>

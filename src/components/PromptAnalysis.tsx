@@ -30,7 +30,7 @@ export function PromptAnalysis({ analysis }: PromptAnalysisProps) {
 
   return (
     <div className="space-y-6">
-      {/* 总体评分卡片 */}
+      {/* Score Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
           <div className="flex items-center gap-4">
@@ -69,55 +69,55 @@ export function PromptAnalysis({ analysis }: PromptAnalysisProps) {
               </div>
             </div>
             <div>
-              <h3 className="text-lg font-semibold">提示词质量</h3>
+              <h3 className="text-lg font-semibold">Prompt Quality</h3>
               <p className="text-slate-400 text-sm">
-                {score >= 80 ? '优秀' : score >= 60 ? '良好' : score >= 40 ? '需改进' : '较差'}
+                {score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : score >= 40 ? 'Needs Improvement' : 'Poor'}
               </p>
             </div>
           </div>
         </div>
 
-        {/* 统计数据 */}
+        {/* Prompt Stats */}
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
           <div className="flex items-center gap-3 mb-3">
             <MessageSquare className="w-5 h-5 text-blue-400" />
-            <h3 className="font-semibold">提示词统计</h3>
+            <h3 className="font-semibold">Prompt Stats</h3>
           </div>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-slate-400">总提示词数</span>
+              <span className="text-slate-400">Total Prompts</span>
               <span className="font-medium">{stats.totalPrompts}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">平均长度</span>
-              <span className="font-medium">{stats.avgPromptLength} 字符</span>
+              <span className="text-slate-400">Average Length</span>
+              <span className="font-medium">{stats.avgPromptLength} chars</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">总 Token 估算</span>
+              <span className="text-slate-400">Estimated Total Tokens</span>
               <span className="font-medium">{stats.totalTokens.toLocaleString()}</span>
             </div>
           </div>
         </div>
 
-        {/* 成功率 */}
+        {/* Interaction Efficiency */}
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
           <div className="flex items-center gap-3 mb-3">
             <TrendingUp className="w-5 h-5 text-green-400" />
-            <h3 className="font-semibold">交互效率</h3>
+            <h3 className="font-semibold">Interaction Efficiency</h3>
           </div>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-slate-400">成功率</span>
+              <span className="text-slate-400">Success Rate</span>
               <span className={`font-medium ${stats.successRate >= 80 ? 'text-green-400' : stats.successRate >= 50 ? 'text-amber-400' : 'text-red-400'}`}>
                 {stats.successRate}%
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">平均重试</span>
-              <span className="font-medium">{stats.avgRetries.toFixed(2)} 次</span>
+              <span className="text-slate-400">Average Retries</span>
+              <span className="font-medium">{stats.avgRetries.toFixed(2)} times</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">工具调用成功率</span>
+              <span className="text-slate-400">Tool Call Success Rate</span>
               <span className={`font-medium ${stats.toolCallSuccessRate >= 90 ? 'text-green-400' : stats.toolCallSuccessRate >= 70 ? 'text-amber-400' : 'text-red-400'}`}>
                 {stats.toolCallSuccessRate}%
               </span>
@@ -126,12 +126,12 @@ export function PromptAnalysis({ analysis }: PromptAnalysisProps) {
         </div>
       </div>
 
-      {/* 问题列表 */}
+      {/* Issues */}
       {issues.length > 0 && (
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
           <div className="flex items-center gap-3 mb-4">
             <AlertCircle className="w-5 h-5 text-amber-400" />
-            <h3 className="text-lg font-semibold">发现的问题</h3>
+            <h3 className="text-lg font-semibold">Issues Found</h3>
             <span className="px-2 py-0.5 bg-slate-700 rounded-full text-sm text-slate-300">
               {issues.length}
             </span>
@@ -148,7 +148,7 @@ export function PromptAnalysis({ analysis }: PromptAnalysisProps) {
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${SEVERITY_COLORS[severity]}`}>
                       {SEVERITY_LABELS[severity]}
                     </span>
-                    <span className="text-slate-400 text-sm">{severityIssues.length} 个问题</span>
+                    <span className="text-slate-400 text-sm">{severityIssues.length} issues</span>
                   </div>
                   <div className="space-y-2 ml-2">
                     {severityIssues.map((issue) => (
@@ -164,7 +164,7 @@ export function PromptAnalysis({ analysis }: PromptAnalysisProps) {
                             <p className="text-slate-300 text-sm mb-2">{issue.description}</p>
                             <div className="bg-blue-500/10 border border-blue-500/20 rounded p-3">
                               <p className="text-blue-300 text-sm">
-                                <span className="font-medium">建议：</span>
+                                <span className="font-medium">Suggestion:</span>
                                 {issue.suggestion}
                               </p>
                             </div>
@@ -183,12 +183,12 @@ export function PromptAnalysis({ analysis }: PromptAnalysisProps) {
         </div>
       )}
 
-      {/* 最佳实践 */}
+      {/* Best Practices */}
       {bestPractices.length > 0 && (
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
           <div className="flex items-center gap-3 mb-4">
             <CheckCircle2 className="w-5 h-5 text-green-400" />
-            <h3 className="text-lg font-semibold">最佳实践建议</h3>
+            <h3 className="text-lg font-semibold">Best Practice Suggestions</h3>
           </div>
           <ul className="space-y-2">
             {bestPractices.map((practice, index) => (

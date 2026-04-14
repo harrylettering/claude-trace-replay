@@ -13,9 +13,9 @@ const IMPACT_COLORS: Record<string, string> = {
 };
 
 const IMPACT_LABELS: Record<string, string> = {
-  small: '小幅改进',
-  medium: '中等改进',
-  large: '大幅改进',
+  small: 'Small Improvement',
+  medium: 'Medium Improvement',
+  large: 'Large Improvement',
 };
 
 export function PromptSuggestions({ suggestions }: PromptSuggestionsProps) {
@@ -48,8 +48,8 @@ export function PromptSuggestions({ suggestions }: PromptSuggestionsProps) {
     return (
       <div className="bg-slate-800 rounded-xl border border-slate-700 p-8 text-center">
         <Sparkles className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-        <p className="text-slate-400">没有具体的优化建议</p>
-        <p className="text-slate-500 text-sm mt-1">当前提示词质量已经很好了！</p>
+        <p className="text-slate-400">No specific suggestions found</p>
+        <p className="text-slate-500 text-sm mt-1">The current prompt quality already looks strong.</p>
       </div>
     );
   }
@@ -58,7 +58,7 @@ export function PromptSuggestions({ suggestions }: PromptSuggestionsProps) {
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <Sparkles className="w-5 h-5 text-purple-400" />
-        <h3 className="text-lg font-semibold">优化建议</h3>
+        <h3 className="text-lg font-semibold">Suggestions</h3>
         <span className="px-2 py-0.5 bg-slate-700 rounded-full text-sm text-slate-300">
           {suggestions.length}
         </span>
@@ -73,7 +73,7 @@ export function PromptSuggestions({ suggestions }: PromptSuggestionsProps) {
               key={suggestion.id}
               className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden"
             >
-              {/* 标题栏 */}
+              {/* Header */}
               <div
                 className="p-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-700/50"
                 onClick={() => toggleExpand(suggestion.id)}
@@ -96,15 +96,15 @@ export function PromptSuggestions({ suggestions }: PromptSuggestionsProps) {
                 </button>
               </div>
 
-              {/* 详细内容 */}
+              {/* Details */}
               {isExpanded && (
                 <div className="p-4 border-t border-slate-700 space-y-4">
-                  {/* 对比视图 */}
+                  {/* Before / After View */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* 优化前 */}
+                    {/* Before */}
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-slate-400">优化前</span>
+                        <span className="text-sm font-medium text-slate-400">Before</span>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -117,7 +117,7 @@ export function PromptSuggestions({ suggestions }: PromptSuggestionsProps) {
                           ) : (
                             <Copy className="w-3 h-3" />
                           )}
-                          {copiedId === `${suggestion.id}-original` ? '已复制' : '复制'}
+                          {copiedId === `${suggestion.id}-original` ? 'Copied' : 'Copy'}
                         </button>
                       </div>
                       <div className="bg-slate-900/50 rounded-lg p-4 border border-red-500/20">
@@ -127,15 +127,15 @@ export function PromptSuggestions({ suggestions }: PromptSuggestionsProps) {
                       </div>
                     </div>
 
-                    {/* 箭头 */}
+                    {/* Arrow */}
                     <div className="hidden md:flex items-center justify-center">
                       <ArrowRight className="w-6 h-6 text-slate-500" />
                     </div>
 
-                    {/* 优化后 */}
+                    {/* After */}
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-green-400">优化后</span>
+                        <span className="text-sm font-medium text-green-400">After</span>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -148,7 +148,7 @@ export function PromptSuggestions({ suggestions }: PromptSuggestionsProps) {
                           ) : (
                             <Copy className="w-3 h-3" />
                           )}
-                          {copiedId === `${suggestion.id}-improved` ? '已复制' : '复制'}
+                          {copiedId === `${suggestion.id}-improved` ? 'Copied' : 'Copy'}
                         </button>
                       </div>
                       <div className="bg-slate-900/50 rounded-lg p-4 border border-green-500/20">
@@ -159,9 +159,9 @@ export function PromptSuggestions({ suggestions }: PromptSuggestionsProps) {
                     </div>
                   </div>
 
-                  {/* 说明 */}
+                  {/* Explanation */}
                   <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
-                    <h4 className="text-sm font-medium text-purple-300 mb-2">优化说明</h4>
+                    <h4 className="text-sm font-medium text-purple-300 mb-2">Why this helps</h4>
                     <p className="text-slate-300 text-sm">{suggestion.explanation}</p>
                   </div>
                 </div>

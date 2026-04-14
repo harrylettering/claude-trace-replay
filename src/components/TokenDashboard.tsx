@@ -50,8 +50,8 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Token 使用统计</h2>
-        <p className="text-slate-400">详细的 Token 消耗分析</p>
+        <h2 className="text-2xl font-bold mb-2">Token Usage</h2>
+        <p className="text-slate-400">Detailed token consumption analysis</p>
       </div>
 
       {/* 汇总卡片 */}
@@ -61,7 +61,7 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
             <div className="p-2 rounded-lg bg-blue-500/10">
               <ArrowDown className="w-5 h-5 text-blue-500" />
             </div>
-            <span className="text-slate-400">输入 Token</span>
+            <span className="text-slate-400">Input Tokens</span>
           </div>
           <div className="text-3xl font-bold text-blue-400">{formatTokens(stats.inputTokens)}</div>
         </div>
@@ -70,7 +70,7 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
             <div className="p-2 rounded-lg bg-purple-500/10">
               <ArrowUp className="w-5 h-5 text-purple-500" />
             </div>
-            <span className="text-slate-400">输出 Token</span>
+            <span className="text-slate-400">Output Tokens</span>
           </div>
           <div className="text-3xl font-bold text-purple-400">{formatTokens(stats.outputTokens)}</div>
         </div>
@@ -79,7 +79,7 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
             <div className="p-2 rounded-lg bg-amber-500/10">
               <Zap className="w-5 h-5 text-amber-500" />
             </div>
-            <span className="text-slate-400">总计 Token</span>
+            <span className="text-slate-400">Total Tokens</span>
           </div>
           <div className="text-3xl font-bold text-amber-400">{formatTokens(stats.totalTokens)}</div>
         </div>
@@ -88,7 +88,7 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
       {/* 每次请求的 Token 使用 */}
       {tokenUsage.length > 0 && (
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-          <h3 className="text-lg font-semibold mb-4">每次请求的 Token 使用</h3>
+          <h3 className="text-lg font-semibold mb-4">Per-Request Token Usage</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={perRequestData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -96,9 +96,9 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
               <YAxis stroke="#94a3b8" tickFormatter={(value) => formatTokens(value)} />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
-              <Line type="monotone" dataKey="inputTokens" stroke="#3b82f6" strokeWidth={2} name="输入" />
-              <Line type="monotone" dataKey="outputTokens" stroke="#8b5cf6" strokeWidth={2} name="输出" />
-              <Line type="monotone" dataKey="totalTokens" stroke="#f59e0b" strokeWidth={2} name="总计" />
+              <Line type="monotone" dataKey="inputTokens" stroke="#3b82f6" strokeWidth={2} name="Input" />
+              <Line type="monotone" dataKey="outputTokens" stroke="#8b5cf6" strokeWidth={2} name="Output" />
+              <Line type="monotone" dataKey="totalTokens" stroke="#f59e0b" strokeWidth={2} name="Total" />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -107,7 +107,7 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
       {/* 累计 Token 使用 */}
       {cumulativeData.length > 0 && (
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-          <h3 className="text-lg font-semibold mb-4">累计 Token 使用</h3>
+          <h3 className="text-lg font-semibold mb-4">Cumulative Token Usage</h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={cumulativeData}>
               <defs>
@@ -125,8 +125,8 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
               <YAxis stroke="#94a3b8" tickFormatter={(value) => formatTokens(value)} />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
-              <Area type="monotone" dataKey="cumulativeInput" stroke="#3b82f6" fillOpacity={1} fill="url(#colorInput)" name="累计输入" />
-              <Area type="monotone" dataKey="cumulativeOutput" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorOutput)" name="累计输出" />
+              <Area type="monotone" dataKey="cumulativeInput" stroke="#3b82f6" fillOpacity={1} fill="url(#colorInput)" name="Cumulative Input" />
+              <Area type="monotone" dataKey="cumulativeOutput" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorOutput)" name="Cumulative Output" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -135,7 +135,7 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
       {tokenUsage.length === 0 && (
         <div className="bg-slate-800 rounded-xl p-8 border border-slate-700 text-center">
           <Zap className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-          <p className="text-slate-400">此会话中没有找到 Token 使用数据</p>
+          <p className="text-slate-400">No token usage data was found for this session</p>
         </div>
       )}
     </div>

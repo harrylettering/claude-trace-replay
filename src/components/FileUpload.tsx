@@ -72,7 +72,7 @@ export function FileUpload({ onFileLoad, isDark, disabled = false }: FileUploadP
           <Upload className={clsx("w-8 h-8 mx-auto mb-2", isDark ? "text-slate-400" : "text-slate-500")} />
         )}
         <div className={clsx("text-sm font-medium", isDark ? "text-slate-300" : "text-slate-700")}>
-          {disabled ? "正在处理..." : "点击或拖拽上传"}
+          {disabled ? "Processing..." : "Click or drag to upload"}
         </div>
         <div className={clsx("text-xs mt-1", isDark ? "text-slate-500" : "text-slate-400")}>
           .jsonl, .json, .log
