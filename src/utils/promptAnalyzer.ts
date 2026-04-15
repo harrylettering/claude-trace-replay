@@ -9,7 +9,7 @@ import type {
 } from '../types/prompt';
 import { isRealUserInput, extractUserText } from './logParser';
 
-// 从日志条目中提取用户提示词（只提取真正的用户输入，跳过 tool_result）
+// Extract user prompts from log entries (only real user input, skipping tool_result)
 function extractUserPrompts(entries: LogEntry[]): Array<{ entry: LogEntry; index: number; text: string }> {
   const prompts: Array<{ entry: LogEntry; index: number; text: string }> = [];
 
@@ -25,17 +25,17 @@ function extractUserPrompts(entries: LogEntry[]): Array<{ entry: LogEntry; index
   return prompts;
 }
 
-// 检查提示词是否过于简短
+// Check whether the prompt is too short
 function checkTooShort(text: string): PromptIssue | null {
   if (text.length < 20) {
     return {
       id: `too-short-${Date.now()}`,
       type: 'too_short',
       severity: 'high',
-      title: '提示词过于简短',
-      description: '提示词可能缺少必要的细节和上下文',
+      title: 'Prompt is too short',
+      description: 'The prompt may be missing important details and context',
       location: { entryIndex: -1, charStart: 0, charEnd: text.length },
-      suggestion: '请增加更多细节：描述目标、提供上下文、说明约束条件、定义输出格式',
+      suggestion: 'Add more detail: describe the goal, provide context, explain constraints, and define the desired output format',
     };
   }
   if (text.length < 50) {
@@ -43,16 +43,16 @@ function checkTooShort(text: string): PromptIssue | null {
       id: `too-short-${Date.now()}`,
       type: 'too_short',
       severity: 'medium',
-      title: '提示词偏短',
-      description: '提示词可能不够具体',
+      title: 'Prompt is somewhat short',
+      description: 'The prompt may not be specific enough',
       location: { entryIndex: -1, charStart: 0, charEnd: text.length },
-      suggestion: '考虑添加角色设定、步骤说明或示例来丰富提示词',
+      suggestion: 'Consider adding a role, step-by-step instructions, or examples to make the prompt richer',
     };
   }
   return null;
 }
 
-// 检查是否缺少结构
+// Check whether structure is missing
 function checkNoStructure(text: string): PromptIssue | null {
   const hasStructure =
     text.includes('1.') ||
@@ -62,23 +62,23 @@ function checkNoStructure(text: string): PromptIssue | null {
     text.includes('###') ||
     text.includes('**') ||
     text.toLowerCase().includes('step') ||
-    text.toLowerCase().includes('请');
+    text.toLowerCase().includes('please');
 
   if (text.length > 100 && !hasStructure) {
     return {
       id: `no-structure-${Date.now()}`,
       type: 'no_structure',
       severity: 'medium',
-      title: '缺少结构化',
-      description: '长提示词建议使用列表、标题等结构来组织内容',
+      title: 'Lacks structure',
+      description: 'Long prompts are easier to follow when organized with lists, headings, or sections',
       location: { entryIndex: -1 },
-      suggestion: '使用数字列表、项目符号、标题等方式组织提示词，使其更易读',
+      suggestion: 'Use numbered lists, bullet points, or headings to organize the prompt and improve readability',
     };
   }
   return null;
 }
 
-// 检查是否缺少角色设定
+// Check whether a role is missing
 function checkMissingRole(text: string): PromptIssue | null {
   const roleKeywords = [
     '作为',
@@ -100,27 +100,25 @@ function checkMissingRole(text: string): PromptIssue | null {
       id: `missing-role-${Date.now()}`,
       type: 'missing_role',
       severity: 'low',
-      title: '缺少角色设定',
-      description: '为 AI 设定角色可以获得更专业的回答',
+      title: 'Missing role setup',
+      description: 'Giving the AI a role often leads to more professional and focused responses',
       location: { entryIndex: -1 },
-      suggestion: '在提示词开头添加角色设定，例如"作为资深开发专家..."或"请充当产品经理..."',
+      suggestion: 'Add a role at the start of the prompt, such as "Act as a senior software engineer..." or "Act as a product manager..."',
     };
   }
   return null;
 }
 
-// 检查是否缺少输出格式
+// Check whether an output format is missing
 function checkNoOutputFormat(text: string): PromptIssue | null {
   const formatKeywords = [
-    '格式',
-    '输出',
     'json',
     'markdown',
-    '列表',
-    '表格',
     'format',
     'output',
     'return',
+    'list',
+    'table',
   ];
 
   const hasFormat = formatKeywords.some((keyword) =>
@@ -132,21 +130,18 @@ function checkNoOutputFormat(text: string): PromptIssue | null {
       id: `no-output-format-${Date.now()}`,
       type: 'no_output_format',
       severity: 'low',
-      title: '缺少输出格式说明',
-      description: '明确定义输出格式可以让回答更符合预期',
+      title: 'Missing output format',
+      description: 'Defining the expected output format helps the response match expectations',
       location: { entryIndex: -1 },
-      suggestion: '说明期望的输出格式，例如"请用 JSON 格式返回"或"请按以下列表格式输出"',
+      suggestion: 'Specify the desired output format, for example "Return the answer as JSON" or "Use the following list format"',
     };
   }
   return null;
 }
 
-// 检查是否缺少示例
+// Check whether examples are missing
 function checkNoExamples(text: string): PromptIssue | null {
   const exampleKeywords = [
-    '例如',
-    '比如',
-    '示例',
     'example',
     'for example',
     'e.g.',
@@ -164,24 +159,18 @@ function checkNoExamples(text: string): PromptIssue | null {
       id: `no-examples-${Date.now()}`,
       type: 'no_examples',
       severity: 'low',
-      title: '缺少示例',
-      description: '提供示例可以让 AI 更准确理解你的需求',
+      title: 'Missing examples',
+      description: 'Examples help the AI understand your intent more precisely',
       location: { entryIndex: -1 },
-      suggestion: '添加 1-2 个示例来说明期望的输出，使用引号或代码块包含示例内容',
+      suggestion: 'Add 1-2 examples to demonstrate the expected output, using quotes or code blocks when helpful',
     };
   }
   return null;
 }
 
-// 检查负面表述
+// Check for overly negative phrasing
 function checkNegative(text: string): PromptIssue | null {
   const negativePatterns = [
-    /不要\s*/g,
-    /不能\s*/g,
-    /不可以\s*/g,
-    /别\s*/g,
-    /避免\s*/g,
-    /禁止\s*/g,
     /don't\s*/gi,
     /do not\s*/gi,
     /never\s*/gi,
@@ -199,16 +188,16 @@ function checkNegative(text: string): PromptIssue | null {
       id: `negative-${Date.now()}`,
       type: 'negative',
       severity: 'medium',
-      title: '负面表述较多',
-      description: '正面描述通常比负面禁止更有效',
+      title: 'Too much negative phrasing',
+      description: 'Positive instructions are usually more effective than a long list of prohibitions',
       location: { entryIndex: -1 },
-      suggestion: '将"不要做 X"改为"请做 Y"，用正面指令代替负面禁止',
+      suggestion: 'Rewrite "do not do X" as "please do Y" so the instruction stays clear and action-oriented',
     };
   }
   return null;
 }
 
-// 检查重复内容
+// Check for repeated content
 function checkRepeated(text: string): PromptIssue | null {
   const sentences = text.split(/[。！？.!?\n]+/).filter((s) => s.trim().length > 10);
 
@@ -220,10 +209,10 @@ function checkRepeated(text: string): PromptIssue | null {
           id: `repeated-${Date.now()}`,
           type: 'repeated',
           severity: 'low',
-          title: '存在重复内容',
-          description: '相似的句子可能会浪费 token',
+          title: 'Repeated content detected',
+          description: 'Very similar sentences may waste tokens',
           location: { entryIndex: -1 },
-          suggestion: '合并或删除重复的表述，保持提示词简洁',
+          suggestion: 'Merge or remove repeated statements to keep the prompt concise',
         };
       }
     }
@@ -231,7 +220,7 @@ function checkRepeated(text: string): PromptIssue | null {
   return null;
 }
 
-// 计算两个字符串的相似度（简单版本）
+// Compute string similarity (simple version)
 function calculateSimilarity(a: string, b: string): number {
   const shorter = a.length < b.length ? a : b;
   const longer = a.length < b.length ? b : a;
@@ -242,7 +231,7 @@ function calculateSimilarity(a: string, b: string): number {
   return 1.0 - editDistance / longer.length;
 }
 
-// Levenshtein 距离
+// Levenshtein distance
 function levenshteinDistance(a: string, b: string): number {
   const matrix = Array.from({ length: a.length + 1 }, () =>
     Array(b.length + 1).fill(0)
@@ -265,78 +254,78 @@ function levenshteinDistance(a: string, b: string): number {
   return matrix[a.length][b.length];
 }
 
-// 生成优化建议
+// Generate suggestions
 function generateSuggestions(text: string): PromptSuggestion[] {
   const suggestions: PromptSuggestion[] = [];
 
-  // 建议添加角色设定
+  // Suggest adding a role
   if (text.length > 100 && !text.includes('作为') && !text.includes('充当')) {
     suggestions.push({
       id: `suggestion-role-${Date.now()}`,
       original: text.slice(0, 100) + '...',
-      improved: '作为[角色名称]，请帮我' + text.slice(0, 100),
-      explanation: '添加角色设定可以让 AI 以更专业的视角回答问题',
+      improved: 'Act as a [role], and help me ' + text.slice(0, 100),
+      explanation: 'Adding a role helps the AI respond from a more expert and focused perspective',
       impact: 'medium',
-      category: '角色设定',
+      category: 'Role Setup',
     });
   }
 
-  // 建议添加结构
+  // Suggest adding structure
   if (text.length > 150 && !text.includes('1.') && !text.includes('•')) {
     suggestions.push({
       id: `suggestion-structure-${Date.now()}`,
       original: text.slice(0, 150) + '...',
-      improved: '请按以下步骤处理：\n1. [步骤1]\n2. [步骤2]\n3. [步骤3]\n\n' + text.slice(0, 100),
-      explanation: '结构化提示词让 AI 更容易理解和执行',
+      improved: 'Please handle this in the following steps:\n1. [Step 1]\n2. [Step 2]\n3. [Step 3]\n\n' + text.slice(0, 100),
+      explanation: 'Structured prompts are easier for the AI to understand and execute',
       impact: 'medium',
-      category: '结构优化',
+      category: 'Structure',
     });
   }
 
-  // 建议添加输出格式
+  // Suggest adding an output format
   if (text.length > 150 && !text.toLowerCase().includes('json') && !text.toLowerCase().includes('格式')) {
     suggestions.push({
       id: `suggestion-format-${Date.now()}`,
       original: text.slice(0, 100) + '...',
-      improved: text.slice(0, 100) + '\n\n请用 JSON 格式返回结果，包含以下字段：[字段列表]',
-      explanation: '明确定义输出格式可以确保结果符合预期',
+      improved: text.slice(0, 100) + '\n\nReturn the result as JSON with the following fields: [field list]',
+      explanation: 'Clearly defining the output format helps ensure the response matches expectations',
       impact: 'large',
-      category: '输出格式',
+      category: 'Output Format',
     });
   }
 
   return suggestions;
 }
 
-// 从条目提取文本
+// Extract text from an entry
 function extractTextFromEntry(entry: LogEntry): string {
   return extractUserText(entry);
 }
 
-// 计算成功率（基于工具调用成功率、重试次数等）
+// Calculate success rate (based on tool-call success, retries, etc.)
 function calculateSuccessRate(entries: LogEntry[]): number {
   let toolCalls = 0;
   let successfulToolCalls = 0;
   let retries = 0;
 
   entries.forEach((entry, index) => {
-    // 检测工具调用
+    // Detect tool calls
     if (entry.type === 'assistant' && entry.message?.content) {
       const content = entry.message.content;
       if (Array.isArray(content)) {
         const hasToolUse = content.some((c) => c.type === 'tool_use');
         if (hasToolUse) {
           toolCalls++;
-          // 简化判断：假设大多数工具调用成功
+          // Simplified heuristic: assume most tool calls succeed
           successfulToolCalls++;
         }
       }
     }
 
-    // 检测重试（简单 heuristic）
+    // Detect retries (simple heuristic)
     if (isRealUserInput(entry) && index > 0) {
       const text = extractTextFromEntry(entry);
-      if (text.includes('不对') || text.includes('错了') || text.includes('重新')) {
+      if (text.includes('不对') || text.includes('错了') || text.includes('重新') || text.toLowerCase().includes('wrong') || text.toLowerCase().includes('incorrect') || text.toLowerCase().includes('redo') || text.toLowerCase().includes('again')) {
         retries++;
       }
     }
@@ -349,7 +338,7 @@ function calculateSuccessRate(entries: LogEntry[]): number {
   return Math.round((successfulToolCalls / toolCalls) * 100);
 }
 
-// 计算平均重试次数
+// Calculate average retries
 function calculateAvgRetries(entries: LogEntry[]): number {
   let retries = 0;
   let userMessages = 0;
@@ -359,7 +348,7 @@ function calculateAvgRetries(entries: LogEntry[]): number {
       userMessages++;
       if (index > 0) {
         const text = extractTextFromEntry(entry);
-        if (text.includes('不对') || text.includes('错了') || text.includes('重新')) {
+        if (text.includes('不对') || text.includes('错了') || text.includes('重新') || text.toLowerCase().includes('wrong') || text.toLowerCase().includes('incorrect') || text.toLowerCase().includes('redo') || text.toLowerCase().includes('again')) {
           retries++;
         }
       }
@@ -369,13 +358,13 @@ function calculateAvgRetries(entries: LogEntry[]): number {
   return userMessages > 0 ? retries / userMessages : 0;
 }
 
-// 计算工具调用成功率
+// Calculate tool-call success rate
 function calculateToolCallSuccessRate(entries: LogEntry[]): number {
   let toolCalls = 0;
   let errors = 0;
 
   entries.forEach((entry) => {
-    // 检测工具调用
+    // Detect tool calls
     if (entry.type === 'assistant' && entry.message?.content) {
       const content = entry.message.content;
       if (Array.isArray(content)) {
@@ -383,7 +372,7 @@ function calculateToolCallSuccessRate(entries: LogEntry[]): number {
         if (hasToolUse) toolCalls++;
       }
     }
-    // 检测错误
+    // Detect errors
     if (entry.type === 'system' && entry.message?.content) {
       const text = String(entry.message.content).toLowerCase();
       if (text.includes('error') || text.includes('错误') || text.includes('failed')) {
@@ -396,7 +385,7 @@ function calculateToolCallSuccessRate(entries: LogEntry[]): number {
   return Math.max(0, Math.round(((toolCalls - errors) / toolCalls) * 100));
 }
 
-// 主分析函数
+// Main analysis function
 export function analyzePrompts(data: ParsedLogData): PromptAnalysis {
   const entries = data.entries;
   const userPrompts = extractUserPrompts(entries);
@@ -442,7 +431,7 @@ export function analyzePrompts(data: ParsedLogData): PromptAnalysis {
     allSuggestions.push(...suggestions);
   });
 
-  // 计算统计
+  // Compute stats
   const successRate = calculateSuccessRate(entries);
   const avgRetries = calculateAvgRetries(entries);
   const toolCallSuccessRate = calculateToolCallSuccessRate(entries);
@@ -458,10 +447,10 @@ export function analyzePrompts(data: ParsedLogData): PromptAnalysis {
     toolCallSuccessRate,
   };
 
-  // 最佳实践
+  // Best practices
   const bestPractices = generateBestPractices(allIssues, stats);
 
-  // 计算总体分数
+  // Compute overall score
   const score = calculateScore(stats, allIssues);
 
   return {
@@ -473,57 +462,57 @@ export function analyzePrompts(data: ParsedLogData): PromptAnalysis {
   };
 }
 
-// 估算 token 数量（粗略估算）
+// Estimate token usage (rough estimate)
 function estimateTokens(entries: LogEntry[]): number {
   let totalChars = 0;
   entries.forEach((entry) => {
     totalChars += JSON.stringify(entry).length;
   });
-  return Math.round(totalChars / 4); // 粗略估计：4 字符 ≈ 1 token
+  return Math.round(totalChars / 4); // Rough estimate: 4 characters ~= 1 token
 }
 
-// 生成最佳实践建议
+// Generate best-practice suggestions
 function generateBestPractices(_issues: PromptIssue[], stats: PromptStats): string[] {
   const practices: string[] = [];
 
   if (stats.issuesByType.too_short > 0) {
-    practices.push('提供足够详细的提示词，包含目标、上下文和约束条件');
+    practices.push('Provide enough detail in the prompt, including the goal, context, and constraints');
   }
   if (stats.issuesByType.no_structure > 0) {
-    practices.push('使用列表、标题等结构组织长提示词');
+    practices.push('Use lists, headings, or sections to organize long prompts');
   }
   if (stats.issuesByType.missing_role > 0) {
-    practices.push('为 AI 设定专业角色以获得更精准的回答');
+    practices.push('Assign the AI a professional role to get more targeted responses');
   }
   if (stats.issuesByType.no_output_format > 0) {
-    practices.push('明确定义期望的输出格式');
+    practices.push('Clearly define the expected output format');
   }
   if (stats.issuesByType.no_examples > 0) {
-    practices.push('提供 1-2 个示例来说明期望的输出');
+    practices.push('Provide 1-2 examples that demonstrate the desired output');
   }
   if (stats.issuesByType.negative > 0) {
-    practices.push('使用正面指令代替负面禁止');
+    practices.push('Prefer positive instructions over prohibitions');
   }
   if (stats.issuesByType.repeated > 0) {
-    practices.push('保持提示词简洁，避免重复表述');
+    practices.push('Keep prompts concise and avoid repeated phrasing');
   }
 
-  // 如果没有特定问题，添加通用最佳实践
+  // Add general best practices when no specific issues are present
   if (practices.length === 0) {
-    practices.push('使用清晰、具体的语言描述需求');
-    practices.push('将复杂任务分解为多个步骤');
-    practices.push('提供相关的上下文信息');
-    practices.push('明确验收标准和输出格式');
+    practices.push('Describe the request using clear and specific language');
+    practices.push('Break complex tasks into multiple steps');
+    practices.push('Provide relevant context');
+    practices.push('Define acceptance criteria and output format clearly');
   }
 
-  return practices.slice(0, 6); // 最多返回 6 条
+  return practices.slice(0, 6); // Return up to 6 items
 }
 
-// 计算总体分数
+// Calculate the overall score
 function calculateScore(stats: PromptStats, issues: PromptIssue[]): number {
   let score = 100;
 
-  // 按严重程度扣分
+  // Deduct points by severity
   const severityPenalty: Record<Severity, number> = {
     low: 3,
     medium: 8,
@@ -535,10 +524,10 @@ function calculateScore(stats: PromptStats, issues: PromptIssue[]): number {
     score -= severityPenalty[issue.severity];
   });
 
-  // 成功率加分/减分
+  // Adjust by success rate
   score += (stats.successRate - 70) * 0.2;
 
-  // 工具调用成功率加分/减分
+  // Adjust by tool-call success rate
   score += (stats.toolCallSuccessRate - 80) * 0.1;
 
   return Math.max(0, Math.min(100, Math.round(score)));

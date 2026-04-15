@@ -1,42 +1,42 @@
 import type { LLMConfig, PromptAnalysis } from '../types/prompt';
 import type { LogEntry } from '../types/log';
 
-// 分析提示词的系统提示
-const ANALYSIS_SYSTEM_PROMPT = `你是一位专业的提示词工程专家。请分析给定的对话历史，识别提示词中的问题并提供具体的优化建议。
+// System prompt for prompt analysis
+const ANALYSIS_SYSTEM_PROMPT = `You are a professional prompt engineering expert. Analyze the provided conversation history, identify issues in the prompts, and provide specific optimization suggestions.
 
-请按以下 JSON 格式返回分析结果：
+Return the analysis in the following JSON format:
 {
   "issues": [
     {
-      "type": "问题类型",
+      "type": "issue_type",
       "severity": "low|medium|high|critical",
-      "title": "简短标题",
-      "description": "详细描述",
-      "suggestion": "具体改进建议"
+      "title": "short_title",
+      "description": "detailed_description",
+      "suggestion": "specific_suggestion"
     }
   ],
   "suggestions": [
     {
-      "original": "原始提示词片段",
-      "improved": "优化后的提示词",
-      "explanation": "为什么这样优化",
+      "original": "original_prompt_snippet",
+      "improved": "improved_prompt",
+      "explanation": "why_this_improves_it",
       "impact": "small|medium|large",
-      "category": "分类"
+      "category": "category"
     }
   ],
   "bestPractices": [
-    "最佳实践建议 1",
-    "最佳实践建议 2"
+    "best_practice_1",
+    "best_practice_2"
   ],
-  "overallAssessment": "总体评价"
+  "overallAssessment": "overall_assessment"
 }
 
-请只返回 JSON，不要包含其他文本。`;
+Return JSON only, with no additional text.`;
 
-// 生成分析提示词
+// Build the analysis prompt
 function buildAnalysisPrompt(entries: LogEntry[]): string {
   const conversation = entries
-    .slice(0, 20) // 限制数量避免过长
+    .slice(0, 20) // Limit size to avoid overlong prompts
     .map((entry) => {
       let content = '';
       if (entry.message?.content) {
@@ -51,46 +51,46 @@ function buildAnalysisPrompt(entries: LogEntry[]): string {
     })
     .join('\n\n');
 
-  return `请分析以下对话历史中的用户提示词，识别问题并提供优化建议：
+  return `Analyze the user prompts in the following conversation history, identify issues, and provide optimization suggestions:
 
 \`\`\`
 ${conversation}
 \`\`\`
 
-请特别关注：
-1. 用户提示词是否清晰、具体
-2. 是否缺少必要的上下文或结构
-3. 是否有可以优化的地方
-4. 提供具体的改进建议`;
+Pay special attention to:
+1. Whether the user prompts are clear and specific
+2. Whether necessary context or structure is missing
+3. Where the prompts can be improved
+4. Concrete and actionable recommendations`;
 }
 
-// 经验沉淀分析的系统提示
-const EXPERIENCE_SYSTEM_PROMPT = `你是一位顶级的 AI 协作专家和资深架构师。请深度复盘用户与 AI 程序员的这段对话历史，从中“沉淀经验”并提供“优化建议”。
+// System prompt for experience analysis
+const EXPERIENCE_SYSTEM_PROMPT = `You are a top-tier AI collaboration expert and senior architect. Deeply review this conversation between a user and an AI programmer, distill reusable lessons, and provide optimization suggestions.
 
-请从以下维度进行深度挖掘：
-1. **协作经验沉淀**：识别出在该会话中哪些做法是非常成功的（如清晰的架构定义、准确的错误报告），以及哪些做法导致了效率低下或循环（如模糊的指令、反复的重试）。
-2. **深度洞察**：分析 AI 程序员的行为模式。它在哪个环节表现最挣扎？在哪种类型的提示词下表现最出色？
-3. **优化建议**：针对未来的协作，提供 3-5 条具体、可落地且高质量的改进方案。
+Analyze from the following dimensions:
+1. **Collaboration lessons**: Identify which practices were especially successful in this session (such as clear architectural direction or precise error reporting), and which patterns led to inefficiency or loops (such as vague instructions or repeated retries).
+2. **Deep insights**: Analyze the AI programmer's behavioral patterns. Where did it struggle most? Under what types of prompts did it perform best?
+3. **Optimization suggestions**: Provide 3-5 concrete, practical, and high-quality recommendations for future collaboration.
 
-请按以下 JSON 格式返回分析结果：
+Return the analysis in the following JSON format:
 {
-  "summary": "一句话概括这段会话的协作表现",
-  "strengths": ["成功点 1", "成功点 2"],
-  "weaknesses": ["不足点 1", "不足点 2"],
+  "summary": "one_sentence_summary_of_collaboration_quality",
+  "strengths": ["strength_1", "strength_2"],
+  "weaknesses": ["weakness_1", "weakness_2"],
   "insights": [
     {
       "type": "success|failure|neutral",
       "category": "workflow|communication|tool_use|technical",
-      "content": "具体的洞察发现",
-      "recommendation": "基于此洞察的改进建议"
+      "content": "specific_insight",
+      "recommendation": "recommendation_based_on_the_insight"
     }
   ],
-  "nextSteps": ["下一步具体的优化建议 1", "下一步具体的优化建议 2"]
+  "nextSteps": ["next_step_1", "next_step_2"]
 }
 
-请只返回 JSON，不要包含其他解释性文本。`;
+Return JSON only, with no extra explanatory text.`;
 
-// OpenAI 兼容 API 客户端
+// OpenAI-compatible API client
 export class LLMClient {
   private config: LLMConfig;
 
@@ -124,7 +124,7 @@ export class LLMClient {
     return data.choices[0].message.content;
   }
 
-  // 深度分析提示词
+  // Deep prompt analysis
   async analyzePromptsDeep(entries: LogEntry[], _baseAnalysis: PromptAnalysis): Promise<{
     issues: Array<{ type: string; severity: string; title: string; description: string; suggestion: string }>;
     suggestions: Array<{ original: string; improved: string; explanation: string; impact: string; category: string }>;
@@ -138,9 +138,9 @@ export class LLMClient {
 
     const response = await this.request(messages);
 
-    // 尝试解析 JSON
+    // Attempt to parse JSON
     try {
-      // 清理响应，确保是有效的 JSON
+      // Clean the response to ensure valid JSON
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         throw new Error('No JSON found in response');
@@ -149,11 +149,11 @@ export class LLMClient {
     } catch (e) {
       console.error('Failed to parse LLM response:', e);
       console.error('Response:', response);
-      throw new Error('无法解析 AI 响应');
+      throw new Error('Failed to parse AI response');
     }
   }
 
-  // 深度复盘：沉淀经验与优化建议
+  // Deep review: distill lessons and suggest improvements
   async analyzeExperience(entries: LogEntry[]): Promise<{
     summary: string;
     strengths: string[];
@@ -176,11 +176,11 @@ export class LLMClient {
       return JSON.parse(jsonMatch[0]);
     } catch (e) {
       console.error('Failed to parse Experience analysis:', e);
-      throw new Error('无法解析经验沉淀报告');
+      throw new Error('Failed to parse experience analysis report');
     }
   }
 
-  // 优化单个提示词
+  // Optimize a single prompt
   async optimizePrompt(prompt: string): Promise<{
     original: string;
     improved: string;
@@ -189,20 +189,20 @@ export class LLMClient {
     const messages = [
       {
         role: 'system',
-        content: `你是一位提示词优化专家。请优化用户提供的提示词，使其更清晰、更有效。
+        content: `You are a prompt optimization expert. Improve the user's prompt so it becomes clearer and more effective.
 
-请按以下 JSON 格式返回：
+Return the result in the following JSON format:
 {
-  "original": "原始提示词",
-  "improved": "优化后的提示词",
-  "explanation": "优化说明"
+  "original": "original_prompt",
+  "improved": "improved_prompt",
+  "explanation": "explanation"
 }
 
-只返回 JSON，不要其他文本。`,
+Return JSON only, with no additional text.`,
       },
       {
         role: 'user',
-        content: `请优化以下提示词：\n\n${prompt}`,
+        content: `Optimize the following prompt:\n\n${prompt}`,
       },
     ];
 
@@ -221,46 +221,46 @@ export class LLMClient {
       };
     } catch (e) {
       console.error('Failed to parse LLM response:', e);
-      throw new Error('无法解析 AI 响应');
+      throw new Error('Failed to parse AI response');
     }
   }
 
-  // 测试连接
+  // Test connectivity
   async testConnection(): Promise<boolean> {
     const messages = [
-      { role: 'user', content: '请回复 "OK"' },
+      { role: 'user', content: 'Reply with "OK"' },
     ];
     const response = await this.request(messages);
     return response.includes('OK');
   }
 }
 
-// 创建客户端实例
+// Create a client instance
 export function createLLMClient(config: LLMConfig): LLMClient {
   return new LLMClient(config);
 }
 
-// 验证配置
+// Validate config
 export function validateConfig(config: LLMConfig): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   if (!config.name.trim()) {
-    errors.push('请输入配置名称');
+    errors.push('Please enter a configuration name');
   }
   if (!config.baseURL.trim()) {
-    errors.push('请输入 API 地址');
+    errors.push('Please enter an API URL');
   } else {
     try {
       new URL(config.baseURL);
     } catch {
-      errors.push('API 地址格式不正确');
+      errors.push('The API URL format is invalid');
     }
   }
   if (!config.apiKey.trim()) {
-    errors.push('请输入 API Key');
+    errors.push('Please enter an API key');
   }
   if (!config.model.trim()) {
-    errors.push('请输入模型名称');
+    errors.push('Please enter a model name');
   }
 
   return {

@@ -20,7 +20,7 @@ export class SessionTemplateManager {
 
   private load(): void {
     try {
-      // 加载模板
+      // Load templates
       const storedTemplates = localStorage.getItem(STORAGE_KEY);
       if (storedTemplates) {
         const data = JSON.parse(storedTemplates);
@@ -29,7 +29,7 @@ export class SessionTemplateManager {
         });
       }
 
-      // 加载实例
+      // Load instances
       const storedInstances = localStorage.getItem(STORAGE_KEY_INSTANCES);
       if (storedInstances) {
         const data = JSON.parse(storedInstances);
@@ -38,7 +38,7 @@ export class SessionTemplateManager {
         });
       }
 
-      // 添加内置模板（如果不存在）
+      // Add built-in templates if missing
       BUILT_IN_SESSION_TEMPLATES.forEach((template) => {
         if (!this.templates.has(template.id)) {
           this.templates.set(template.id, template);
@@ -46,7 +46,7 @@ export class SessionTemplateManager {
       });
     } catch (e) {
       console.error('Failed to load session templates:', e);
-      // 加载内置模板作为备用
+      // Fallback to built-in templates
       BUILT_IN_SESSION_TEMPLATES.forEach((template) => {
         this.templates.set(template.id, template);
       });
@@ -55,13 +55,13 @@ export class SessionTemplateManager {
 
   private save(): void {
     try {
-      // 保存自定义模板
+      // Save custom templates
       const customTemplates = Array.from(this.templates.values()).filter(
         (t) => !t.isBuiltIn
       );
       localStorage.setItem(STORAGE_KEY, JSON.stringify(customTemplates));
 
-      // 保存实例
+      // Save instances
       const instances = Array.from(this.instances.values());
       localStorage.setItem(STORAGE_KEY_INSTANCES, JSON.stringify(instances));
     } catch (e) {
@@ -79,7 +79,7 @@ export class SessionTemplateManager {
     return () => this.listeners.delete(listener);
   }
 
-  // ========== 模板管理 ==========
+  // ========== Template management ==========
 
   getAllTemplates(): SessionTemplate[] {
     return Array.from(this.templates.values()).sort((a, b) =>
@@ -144,7 +144,7 @@ export class SessionTemplateManager {
     const duplicated: SessionTemplate = {
       ...template,
       id: `session-template-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-      name: `${template.name} (副本)`,
+      name: `${template.name} (Copy)`,
       createdAt: Date.now(),
       updatedAt: Date.now(),
       usageCount: 0,
@@ -164,7 +164,7 @@ export class SessionTemplateManager {
     }
   }
 
-  // 从内容提取变量
+  // Extract variables from content
   extractVariables(content: string): string[] {
     const regex = /\{\{(\w+)\}\}/g;
     const variables: string[] = [];
@@ -177,7 +177,7 @@ export class SessionTemplateManager {
     return variables;
   }
 
-  // 渲染步骤内容
+  // Render step content
   renderStepContent(step: SessionStep, variables: Record<string, string>): string {
     let result = step.content;
     step.variables.forEach((varName) => {
@@ -187,7 +187,7 @@ export class SessionTemplateManager {
     return result;
   }
 
-  // 收集模板的所有变量
+  // Collect all template variables
   collectTemplateVariables(template: SessionTemplate): string[] {
     const allVariables = new Set<string>();
     template.steps.forEach((step) => {
@@ -197,7 +197,7 @@ export class SessionTemplateManager {
     return Array.from(allVariables);
   }
 
-  // ========== 实例管理 ==========
+  // ========== Instance management ==========
 
   getAllInstances(): SessionInstance[] {
     return Array.from(this.instances.values()).sort((a, b) =>
@@ -315,7 +315,7 @@ export class SessionTemplateManager {
     return deleted;
   }
 
-  // ========== 导入导出 ==========
+  // ========== Import / export ==========
 
   exportLibrary(): SessionTemplateLibraryExport {
     return {
@@ -328,7 +328,7 @@ export class SessionTemplateManager {
   importLibrary(data: SessionTemplateLibraryExport): number {
     let imported = 0;
     data.templates.forEach((template) => {
-      // 避免覆盖现有模板
+      // Avoid overwriting existing templates
       if (!this.templates.has(template.id)) {
         const importedTemplate = {
           ...template,
@@ -375,5 +375,5 @@ export class SessionTemplateManager {
   }
 }
 
-// 单例实例
+// Singleton instance
 export const sessionTemplateManager = new SessionTemplateManager();

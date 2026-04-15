@@ -66,151 +66,151 @@ export interface SessionTemplateLibraryExport {
 
 // 分类显示信息
 export const CATEGORY_INFO: Record<SessionTemplateCategory, { label: string; icon: string; color: string }> = {
-  code_development: { label: '代码开发', icon: '💻', color: 'from-blue-500 to-cyan-500' },
-  data_analysis: { label: '数据分析', icon: '📊', color: 'from-green-500 to-emerald-500' },
-  content_creation: { label: '内容创作', icon: '✍️', color: 'from-purple-500 to-pink-500' },
-  research: { label: '研究调研', icon: '🔍', color: 'from-amber-500 to-orange-500' },
-  planning: { label: '规划设计', icon: '📋', color: 'from-indigo-500 to-blue-500' },
-  debugging: { label: '调试排错', icon: '🐛', color: 'from-red-500 to-rose-500' },
-  code_review: { label: '代码审查', icon: '👀', color: 'from-teal-500 to-cyan-500' },
-  documentation: { label: '文档编写', icon: '📝', color: 'from-pink-500 to-rose-500' },
-  testing: { label: '测试验证', icon: '✅', color: 'from-green-500 to-teal-500' },
-  other: { label: '其他', icon: '📦', color: 'from-slate-500 to-gray-500' },
+  code_development: { label: 'Code Development', icon: '💻', color: 'from-blue-500 to-cyan-500' },
+  data_analysis: { label: 'Data Analysis', icon: '📊', color: 'from-green-500 to-emerald-500' },
+  content_creation: { label: 'Content Creation', icon: '✍️', color: 'from-purple-500 to-pink-500' },
+  research: { label: 'Research', icon: '🔍', color: 'from-amber-500 to-orange-500' },
+  planning: { label: 'Planning', icon: '📋', color: 'from-indigo-500 to-blue-500' },
+  debugging: { label: 'Debugging', icon: '🐛', color: 'from-red-500 to-rose-500' },
+  code_review: { label: 'Code Review', icon: '👀', color: 'from-teal-500 to-cyan-500' },
+  documentation: { label: 'Documentation', icon: '📝', color: 'from-pink-500 to-rose-500' },
+  testing: { label: 'Testing', icon: '✅', color: 'from-green-500 to-teal-500' },
+  other: { label: 'Other', icon: '📦', color: 'from-slate-500 to-gray-500' },
 };
 
 // 分类列表
 export const CATEGORIES: Array<{ value: SessionTemplateCategory; label: string }> = [
-  { value: 'code_development', label: '代码开发' },
-  { value: 'data_analysis', label: '数据分析' },
-  { value: 'content_creation', label: '内容创作' },
-  { value: 'research', label: '研究调研' },
-  { value: 'planning', label: '规划设计' },
-  { value: 'debugging', label: '调试排错' },
-  { value: 'code_review', label: '代码审查' },
-  { value: 'documentation', label: '文档编写' },
-  { value: 'testing', label: '测试验证' },
-  { value: 'other', label: '其他' },
+  { value: 'code_development', label: 'Code Development' },
+  { value: 'data_analysis', label: 'Data Analysis' },
+  { value: 'content_creation', label: 'Content Creation' },
+  { value: 'research', label: 'Research' },
+  { value: 'planning', label: 'Planning' },
+  { value: 'debugging', label: 'Debugging' },
+  { value: 'code_review', label: 'Code Review' },
+  { value: 'documentation', label: 'Documentation' },
+  { value: 'testing', label: 'Testing' },
+  { value: 'other', label: 'Other' },
 ];
 
 // 步骤类型显示信息
 export const STEP_TYPE_INFO: Record<SessionStep['type'], { label: string; icon: string; color: string }> = {
-  user_prompt: { label: '用户提示', icon: '👤', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
-  system_prompt: { label: '系统提示', icon: '⚙️', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
-  tool_call: { label: '工具调用', icon: '🔧', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
-  assistant_response: { label: '助手回复', icon: '🤖', color: 'bg-green-500/20 text-green-400 border-green-500/30' },
+  user_prompt: { label: 'User Prompt', icon: '👤', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
+  system_prompt: { label: 'System Prompt', icon: '⚙️', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
+  tool_call: { label: 'Tool Call', icon: '🔧', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
+  assistant_response: { label: 'Assistant Reply', icon: '🤖', color: 'bg-green-500/20 text-green-400 border-green-500/30' },
 };
 
 // 内置会话模板
 export const BUILT_IN_SESSION_TEMPLATES: SessionTemplate[] = [
   {
     id: 'built-in-full-code-dev',
-    name: '完整代码开发流程',
-    description: '从需求分析到最终交付的完整开发流程',
+    name: 'Complete Code Development Workflow',
+    description: 'An end-to-end workflow from requirements analysis to final delivery',
     category: 'code_development',
-    tags: ['完整流程', '代码开发', '最佳实践'],
+    tags: ['end-to-end workflow', 'code development', 'best practices'],
     variables: ['PROJECT_NAME', 'REQUIREMENTS', 'TECH_STACK', 'DELIVERABLES'],
     estimatedDurationMinutes: 60,
     useCases: [
-      '新功能开发',
-      '项目重构',
-      '技术方案实现'
+      'New feature development',
+      'Project refactoring',
+      'Technical solution implementation'
     ],
     bestPractices: [
-      '先理解需求再开始编码',
-      '分步骤验证每个阶段的成果',
-      '及时记录关键决策'
+      'Understand requirements before writing code',
+      'Validate each phase step by step',
+      'Record key decisions as you go'
     ],
     steps: [
       {
         id: 'step-1',
         type: 'user_prompt',
-        title: '需求分析',
-        description: '明确项目需求和目标',
-        content: `我需要开发一个名为"{{PROJECT_NAME}}"的项目。
+        title: 'Requirements Analysis',
+        description: 'Clarify the project requirements and goals',
+        content: `I need to build a project called "{{PROJECT_NAME}}".
 
-需求描述：
+Requirements:
 {{REQUIREMENTS}}
 
-请帮我：
-1. 分析和澄清需求中的关键点
-2. 识别潜在的技术挑战
-3. 提出需要进一步明确的问题
-4. 建议项目的整体范围`,
+Please help me:
+1. Analyze and clarify the key requirements
+2. Identify potential technical challenges
+3. Raise questions that need clarification
+4. Recommend an overall project scope`,
         variables: ['PROJECT_NAME', 'REQUIREMENTS'],
         order: 1,
       },
       {
         id: 'step-2',
         type: 'user_prompt',
-        title: '技术方案设计',
-        description: '设计技术架构和实现方案',
-        content: `技术栈：{{TECH_STACK}}
+        title: 'Technical Design',
+        description: 'Design the architecture and implementation approach',
+        content: `Tech stack: {{TECH_STACK}}
 
-请基于确认的需求，提供：
-1. 整体架构设计
-2. 关键模块划分
-3. 数据结构设计
-4. 核心算法/流程说明
-5. 技术选型理由`,
+Based on the confirmed requirements, please provide:
+1. An overall architecture design
+2. A breakdown of key modules
+3. Data structure design
+4. Core algorithms / flow explanations
+5. Rationale for the technical choices`,
         variables: ['TECH_STACK'],
         order: 2,
       },
       {
         id: 'step-3',
         type: 'user_prompt',
-        title: '代码实现',
-        description: '开始编写代码实现',
-        content: `请按照技术方案开始实现代码：
+        title: 'Implementation',
+        description: 'Start building the solution in code',
+        content: `Please implement the solution according to the technical design.
 
-交付物要求：{{DELIVERABLES}}
+Deliverables: {{DELIVERABLES}}
 
-请提供：
-1. 完整的可运行代码
-2. 必要的注释说明
-3. 代码结构说明
-4. 关键实现细节解释`,
+Please provide:
+1. Complete working code
+2. Necessary comments and explanations
+3. A short description of the code structure
+4. Explanations of key implementation details`,
         variables: ['DELIVERABLES'],
         order: 3,
       },
       {
         id: 'step-4',
         type: 'user_prompt',
-        title: '代码审查与优化',
-        description: '审查代码质量并进行优化',
-        content: `请对刚才生成的代码进行：
-1. 代码质量审查
-2. 安全性检查
-3. 性能优化建议
-4. 代码风格统一
-5. 最佳实践改进`,
+        title: 'Code Review and Optimization',
+        description: 'Review quality and improve the implementation',
+        content: `Please review the code that was just generated:
+1. Code quality review
+2. Security checks
+3. Performance optimization suggestions
+4. Code style consistency
+5. Best-practice improvements`,
         variables: [],
         order: 4,
       },
       {
         id: 'step-5',
         type: 'user_prompt',
-        title: '测试验证',
-        description: '编写测试用例并验证功能',
-        content: `请为代码编写：
-1. 单元测试
-2. 集成测试（如需要）
-3. 测试用例说明
-4. 边界情况验证
-5. 使用示例`,
+        title: 'Testing and Validation',
+        description: 'Write tests and validate the behavior',
+        content: `Please provide the following for the code:
+1. Unit tests
+2. Integration tests if needed
+3. Test case explanations
+4. Edge-case validation
+5. Usage examples`,
         variables: [],
         order: 5,
       },
       {
         id: 'step-6',
         type: 'user_prompt',
-        title: '文档总结',
-        description: '编写文档和项目总结',
-        content: `请为这个项目编写：
-1. README 文档
-2. 快速开始指南
-3. API 文档（如适用）
-4. 项目总结和经验记录
-5. 后续优化建议`,
+        title: 'Documentation Wrap-up',
+        description: 'Write docs and summarize the project',
+        content: `Please create the following for this project:
+1. A README
+2. A quick-start guide
+3. API documentation where applicable
+4. A project summary and lessons learned
+5. Suggestions for future improvements`,
         variables: [],
         order: 6,
       },
@@ -222,81 +222,81 @@ export const BUILT_IN_SESSION_TEMPLATES: SessionTemplate[] = [
   },
   {
     id: 'built-in-data-analysis',
-    name: '数据分析流程',
-    description: '结构化数据分析和洞察生成流程',
+    name: 'Data Analysis Workflow',
+    description: 'A structured workflow for data analysis and insight generation',
     category: 'data_analysis',
-    tags: ['数据分析', '洞察', '可视化'],
+    tags: ['data analysis', 'insights', 'visualization'],
     variables: ['DATA_DESCRIPTION', 'ANALYSIS_GOAL', 'DATA_SOURCE'],
     estimatedDurationMinutes: 30,
     useCases: [
-      '数据集探索',
-      '业务数据分析',
-      '实验结果分析'
+      'Dataset exploration',
+      'Business data analysis',
+      'Experiment result analysis'
     ],
     bestPractices: [
-      '先了解数据全貌再深入细节',
-      '用可视化帮助理解数据',
-      '验证假设而非只找支持证据'
+      'Understand the full dataset before diving into details',
+      'Use visualization to aid understanding',
+      'Validate hypotheses instead of only hunting for supporting evidence'
     ],
     steps: [
       {
         id: 'da-step-1',
         type: 'user_prompt',
-        title: '数据概览',
-        description: '了解数据基本情况',
-        content: `我需要分析以下数据：
+        title: 'Data Overview',
+        description: 'Understand the basic characteristics of the data',
+        content: `I need to analyze the following data:
 
-数据描述：{{DATA_DESCRIPTION}}
-数据来源：{{DATA_SOURCE}}
-分析目标：{{ANALYSIS_GOAL}}
+Data description: {{DATA_DESCRIPTION}}
+Data source: {{DATA_SOURCE}}
+Analysis goal: {{ANALYSIS_GOAL}}
 
-请先提供：
-1. 数据类型和结构分析
-2. 数据质量评估
-3. 关键统计指标
-4. 初步观察发现`,
+Please start with:
+1. Data type and structure analysis
+2. Data quality assessment
+3. Key statistical indicators
+4. Initial observations`,
         variables: ['DATA_DESCRIPTION', 'DATA_SOURCE', 'ANALYSIS_GOAL'],
         order: 1,
       },
       {
         id: 'da-step-2',
         type: 'user_prompt',
-        title: '深度分析',
-        description: '进行深入的数据分析',
-        content: `请进行深度分析：
-1. 趋势分析和模式识别
-2. 异常值和异常检测
-3. 相关性分析
-4. 关键发现和洞察
-5. 与目标的关联分析`,
+        title: 'Deep Analysis',
+        description: 'Perform a deeper analysis of the data',
+        content: `Please perform a deep analysis:
+1. Trend analysis and pattern recognition
+2. Outlier and anomaly detection
+3. Correlation analysis
+4. Key findings and insights
+5. Goal-oriented interpretation`,
         variables: [],
         order: 2,
       },
       {
         id: 'da-step-3',
         type: 'user_prompt',
-        title: '可视化建议',
-        description: '建议数据可视化方案',
-        content: `请建议合适的数据可视化方案：
-1. 关键指标的可视化方式
-2. 趋势和模式的展示
-3. 对比分析的可视化
-4. 可视化工具/库建议
-5. 可交互分析建议`,
+        title: 'Visualization Recommendations',
+        description: 'Recommend suitable data visualizations',
+        content: `Please suggest appropriate visualization approaches:
+1. Visualizations for key metrics
+2. Ways to display trends and patterns
+3. Visualizations for comparative analysis
+4. Recommended visualization tools / libraries
+5. Suggestions for interactive analysis`,
         variables: [],
         order: 3,
       },
       {
         id: 'da-step-4',
         type: 'user_prompt',
-        title: '结论与建议',
-        description: '总结分析结果并提供建议',
-        content: `请提供分析总结：
-1. 关键结论（3-5条）
-2. 可执行的建议
-3. 风险和注意事项
-4. 后续分析方向
-5. 决策支持信息`,
+        title: 'Conclusions and Recommendations',
+        description: 'Summarize results and provide recommendations',
+        content: `Please provide a final summary:
+1. Key conclusions (3-5 items)
+2. Actionable recommendations
+3. Risks and considerations
+4. Suggested next analysis directions
+5. Decision-support information`,
         variables: [],
         order: 4,
       },
@@ -308,95 +308,95 @@ export const BUILT_IN_SESSION_TEMPLATES: SessionTemplate[] = [
   },
   {
     id: 'built-in-bug-debug',
-    name: '调试排错流程',
-    description: '系统性的问题诊断和修复流程',
+    name: 'Debugging Workflow',
+    description: 'A systematic workflow for diagnosing and fixing issues',
     category: 'debugging',
-    tags: ['调试', '问题诊断', '故障修复'],
+    tags: ['debugging', 'problem diagnosis', 'bug fixing'],
     variables: ['PROBLEM_DESC', 'ENV_INFO', 'ERROR_LOG'],
     estimatedDurationMinutes: 45,
     useCases: [
-      'Bug 修复',
-      '问题诊断',
-      '性能问题排查'
+      'Bug fixes',
+      'Problem diagnosis',
+      'Performance issue investigation'
     ],
     bestPractices: [
-      '先复现问题再定位原因',
-      '系统地排除可能性',
-      '记录排查过程便于后续参考'
+      'Reproduce the issue before isolating the cause',
+      'Eliminate possibilities systematically',
+      'Document the investigation process for future reference'
     ],
     steps: [
       {
         id: 'db-step-1',
         type: 'user_prompt',
-        title: '问题描述',
-        description: '明确和澄清问题',
-        content: `我遇到了一个问题：
+        title: 'Problem Description',
+        description: 'Clarify and describe the issue',
+        content: `I ran into a problem:
 
-问题描述：{{PROBLEM_DESC}}
-环境信息：{{ENV_INFO}}
-错误日志：{{ERROR_LOG}}
+Problem description: {{PROBLEM_DESC}}
+Environment info: {{ENV_INFO}}
+Error log: {{ERROR_LOG}}
 
-请帮我：
-1. 理解和澄清问题
-2. 识别关键症状
-3. 收集必要的诊断信息清单
-4. 初步判断问题类型`,
+Please help me:
+1. Understand and clarify the issue
+2. Identify the key symptoms
+3. Collect the required diagnostic information
+4. Make an initial classification of the problem`,
         variables: ['PROBLEM_DESC', 'ENV_INFO', 'ERROR_LOG'],
         order: 1,
       },
       {
         id: 'db-step-2',
         type: 'user_prompt',
-        title: '复现验证',
-        description: '确认问题复现步骤',
-        content: `请帮我制定复现和验证方案：
-1. 最小化复现步骤
-2. 需要验证的假设列表
-3. 诊断命令/测试建议
-4. 需要收集的关键信息
-5. 验证标准`,
+        title: 'Reproduction and Validation',
+        description: 'Confirm how to reproduce the issue',
+        content: `Please help me design a reproduction and validation plan:
+1. Minimal reproduction steps
+2. Hypotheses that need to be tested
+3. Diagnostic commands / test suggestions
+4. Key information that should be collected
+5. Validation criteria`,
         variables: [],
         order: 2,
       },
       {
         id: 'db-step-3',
         type: 'user_prompt',
-        title: '根因分析',
-        description: '深入分析找到根本原因',
-        content: `基于已收集的信息，请进行根因分析：
-1. 可能的原因列表（按可能性排序）
-2. 每个原因的验证方法
-3. 排除法分析过程
-4. 最可能的根本原因
-5. 影响范围评估`,
+        title: 'Root Cause Analysis',
+        description: 'Investigate the underlying cause',
+        content: `Based on the collected information, please perform a root cause analysis:
+1. A ranked list of possible causes
+2. A validation method for each cause
+3. The elimination process
+4. The most likely root cause
+5. An impact-scope assessment`,
         variables: [],
         order: 3,
       },
       {
         id: 'db-step-4',
         type: 'user_prompt',
-        title: '修复方案',
-        description: '设计和实施修复方案',
-        content: `请提供修复方案：
-1. 修复方案（多个可选）
-2. 方案对比和推荐
-3. 修复代码/步骤
-4. 回归测试建议
-5. 防止复发的措施`,
+        title: 'Fix Plan',
+        description: 'Design and implement a fix',
+        content: `Please provide a fix plan:
+1. Multiple possible fixes
+2. A comparison and recommendation
+3. Fix code / implementation steps
+4. Regression test suggestions
+5. Preventive measures`,
         variables: [],
         order: 4,
       },
       {
         id: 'db-step-5',
         type: 'user_prompt',
-        title: '总结记录',
-        description: '总结问题和经验',
-        content: `请总结这次调试：
-1. 问题根因总结
-2. 修复方案说明
-3. 经验教训记录
-4. 预防措施建议
-5. 相关文档更新建议`,
+        title: 'Summary and Notes',
+        description: 'Summarize the issue and lessons learned',
+        content: `Please summarize this debugging session:
+1. Root cause summary
+2. Fix explanation
+3. Lessons learned
+4. Preventive recommendations
+5. Suggested documentation updates`,
         variables: [],
         order: 5,
       },

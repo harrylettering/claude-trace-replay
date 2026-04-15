@@ -1,15 +1,15 @@
 import type { LogEntry } from './log';
 
-// 搜索模式类型
+// Search mode type
 export type SearchMode = 'simple' | 'regex' | 'exact';
 
-// 时间范围
+// Time range
 export interface TimeRange {
   startTime?: string;
   endTime?: string;
 }
 
-// Token 范围
+// Token range
 export interface TokenRange {
   minInput?: number;
   maxInput?: number;
@@ -19,35 +19,35 @@ export interface TokenRange {
   maxTotal?: number;
 }
 
-// 消息类型过滤
+// Message type filter
 export type MessageTypeFilter = 'all' | 'user' | 'assistant' | 'system' | 'tool' | 'file-history-snapshot';
 
-// 高级搜索过滤器
+// Advanced search filters
 export interface SearchFilters {
-  // 基础搜索
+  // Basic search
   query: string;
   searchMode: SearchMode;
   caseSensitive: boolean;
 
-  // 类型过滤
+  // Type filters
   messageTypes: MessageTypeFilter[];
 
-  // 工具名称过滤
+  // Tool name filter
   toolNames: string[];
 
-  // 时间范围
+  // Time range
   timeRange: TimeRange;
 
-  // Token 范围
+  // Token range
   tokenRange: TokenRange;
 
-  // 其他标志
+  // Other flags
   onlyWithErrors: boolean;
   onlyWithTools: boolean;
   onlySidechain: boolean;
 }
 
-// 搜索结果
+// Search result
 export interface SearchResult {
   entries: LogEntry[];
   totalCount: number;
@@ -55,7 +55,7 @@ export interface SearchResult {
   matchCount: number;
 }
 
-// 保存的搜索预设
+// Saved search preset
 export interface SavedSearch {
   id: string;
   name: string;
@@ -63,7 +63,7 @@ export interface SavedSearch {
   createdAt: number;
 }
 
-// 默认过滤器值
+// Default filter values
 export const DEFAULT_FILTERS: SearchFilters = {
   query: '',
   searchMode: 'simple',

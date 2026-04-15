@@ -26,7 +26,7 @@ export function GanttChart({ events, playback, width: _width = 800 }: GanttChart
   if (events.length === 0) {
     return (
       <div className="h-[150px] bg-slate-950/50 border-t border-slate-800 flex items-center justify-center">
-        <span className="text-slate-500 text-sm">等待事件...</span>
+        <span className="text-slate-500 text-sm">Waiting for events...</span>
       </div>
     )
   }

@@ -131,7 +131,7 @@ export function ActivityLog({ logs }: ActivityLogProps) {
         {logs.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-slate-600">
             <Terminal className="w-8 h-8 mb-2 opacity-50" />
-            <span className="text-sm">等待日志...</span>
+            <span className="text-sm">Waiting for logs...</span>
           </div>
         )}
       </div>

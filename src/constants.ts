@@ -1,15 +1,15 @@
-// Token 相关常量
+// Token-related constants
 export const MAX_TOKEN_VALUE = 10_000_000;
 export const MESSAGE_PREVIEW_LENGTH = 100;
 export const CONVERSATION_PREVIEW_LENGTH = 80;
 
-// 定价常量（Claude 3.5 Sonnet）
+// Pricing constants (Claude 3.5 Sonnet)
 export const PRICING = {
   INPUT_PER_MTOK: 3,
   OUTPUT_PER_MTOK: 15,
 } as const;
 
-// UI 相关常量
+// UI-related constants
 export const UI_COLORS = {
   user: {
     bg: 'bg-blue-500/10',
@@ -37,7 +37,7 @@ export const UI_COLORS = {
   },
 } as const;
 
-// 格式化常量
+// Formatting constants
 export const TOKEN_FORMATTING = {
   MILLION: 1_000_000,
   THOUSAND: 1_000,

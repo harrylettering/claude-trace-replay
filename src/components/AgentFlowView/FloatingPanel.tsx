@@ -128,10 +128,10 @@ export function FloatingPanel({ node, onClose, position }: FloatingPanelProps) {
                 </div>
               )}
 
-              {/* Token 消耗 */}
+              {/* Token Usage */}
               {data.tokenCount !== undefined && (
                 <div className="flex items-center justify-between pt-2 border-t border-slate-800">
-                  <span className="text-[10px] text-slate-500">Token 消耗</span>
+                  <span className="text-[10px] text-slate-500">Token Usage</span>
                   <span className="text-sm font-bold text-cyan-400">
                     {data.tokenCount.toLocaleString()}
                   </span>

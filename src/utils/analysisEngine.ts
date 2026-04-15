@@ -13,21 +13,21 @@ import type {
 import { DEFAULT_ANALYSIS } from '../types/analysis';
 import { PRICING } from '../constants';
 
-// 阈值常量
-const PERFORMANCE_WARNING_THRESHOLD_MS = 30_000; // 30秒
-const PERFORMANCE_CRITICAL_THRESHOLD_MS = 60_000; // 60秒
+// Threshold constants
+const PERFORMANCE_WARNING_THRESHOLD_MS = 30_000; // 30 seconds
+const PERFORMANCE_CRITICAL_THRESHOLD_MS = 60_000; // 60 seconds
 const HIGH_TOKEN_THRESHOLD = 50_000;
-const TOKEN_EFFICIENCY_GOOD = 0.5; // 输出/输入 > 0.5 为好
-const TOKEN_EFFICIENCY_POOR = 0.1; // 输出/输入 < 0.1 为差
-const ERROR_RATE_WARNING = 0.1; // 10% 错误率
-const ERROR_RATE_CRITICAL = 0.25; // 25% 错误率
+const TOKEN_EFFICIENCY_GOOD = 0.5; // Output/input > 0.5 is good
+const TOKEN_EFFICIENCY_POOR = 0.1; // Output/input < 0.1 is poor
+const ERROR_RATE_WARNING = 0.1; // 10% error rate
+const ERROR_RATE_CRITICAL = 0.25; // 25% error rate
 
-// 生成唯一 ID
+// Generate a unique ID
 function generateId(): string {
   return `insight_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-// 创建洞察
+// Create an insight
 function createInsight(
   category: AnalysisCategory,
   severity: Severity,
@@ -45,7 +45,7 @@ function createInsight(
   };
 }
 
-// 计算中位数
+// Compute median
 function median(numbers: number[]): number {
   if (numbers.length === 0) return 0;
   const sorted = [...numbers].sort((a, b) => a - b);
@@ -53,7 +53,7 @@ function median(numbers: number[]): number {
   return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-// 分析性能
+// Analyze performance
 function analyzePerformance(data: ParsedLogData): PerformanceAnalysis {
   const durations = data.turnDurations.map((d: any) => d.durationMs).filter((d: any) => d > 0);
 
@@ -96,7 +96,7 @@ function analyzePerformance(data: ParsedLogData): PerformanceAnalysis {
   };
 }
 
-// 分析 Token 使用
+// Analyze token usage
 function analyzeTokens(data: ParsedLogData): TokenAnalysis {
   const { tokenUsage, stats } = data;
 
@@ -152,7 +152,7 @@ function analyzeTokens(data: ParsedLogData): TokenAnalysis {
   };
 }
 
-// 分析工具使用
+// Analyze tool usage
 function analyzeTools(toolCalls: ToolCall[]): ToolStats[] {
   const toolMap = new Map<string, { count: number; successCount: number; errorCount: number; durations: number[] }>();
 
@@ -190,7 +190,7 @@ function analyzeTools(toolCalls: ToolCall[]): ToolStats[] {
   }).sort((a, b) => b.count - a.count);
 }
 
-// 分析模式
+// Analyze patterns
 function analyzePatterns(entries: LogEntry[], stats: SessionStats): PatternAnalysis {
   const userMessageCount = entries.filter(e => e.type === 'user' && !e.isMeta).length;
   const assistantMessageCount = entries.filter(e => e.type === 'assistant').length;
@@ -203,7 +203,7 @@ function analyzePatterns(entries: LogEntry[], stats: SessionStats): PatternAnaly
 
   const sidechainCount = entries.filter(e => e.isSidechain).length;
 
-  // 计算对话深度
+  // Compute conversation depth
   const depthMap = new Map<string, number>();
   let maxDepth = 0;
 
@@ -233,7 +233,7 @@ function analyzePatterns(entries: LogEntry[], stats: SessionStats): PatternAnaly
   };
 }
 
-// 分析错误
+// Analyze errors
 function analyzeErrors(toolCalls: ToolCall[], toolStats: ToolStats[]): ErrorAnalysis {
   const totalErrors = toolCalls.filter(t => t.isError).length;
   const errorRate = toolCalls.length > 0 ? totalErrors / toolCalls.length : 0;
@@ -266,7 +266,7 @@ function analyzeErrors(toolCalls: ToolCall[], toolStats: ToolStats[]): ErrorAnal
   };
 }
 
-// 生成洞察
+// Generate insights
 function generateInsights(
   _data: ParsedLogData,
   performance: PerformanceAnalysis,
@@ -277,15 +277,15 @@ function generateInsights(
 ): Insight[] {
   const insights: Insight[] = [];
 
-  // 性能相关洞察
+  // Performance insights
   if (performance.maxTurnDuration > PERFORMANCE_CRITICAL_THRESHOLD_MS) {
     insights.push(createInsight(
       'performance',
       'critical',
-      '发现极慢的响应',
-      `有响应时间超过 ${Math.round(PERFORMANCE_CRITICAL_THRESHOLD_MS / 1000)} 秒的请求`,
+      'Very slow responses detected',
+      `Some requests took longer than ${Math.round(PERFORMANCE_CRITICAL_THRESHOLD_MS / 1000)} seconds`,
       {
-        suggestions: ['考虑优化工具调用', '检查网络连接', '减少单次请求的工作量'],
+        suggestions: ['Consider optimizing tool usage', 'Check network connectivity', 'Reduce the workload per request'],
         relatedEntryIds: performance.slowTurns.slice(0, 3).map(t => t.timestamp),
       }
     ));
@@ -293,10 +293,10 @@ function generateInsights(
     insights.push(createInsight(
       'performance',
       'warning',
-      '存在较慢的响应',
-      `部分请求响应时间超过 ${Math.round(PERFORMANCE_WARNING_THRESHOLD_MS / 1000)} 秒`,
+      'Slow responses observed',
+      `Some requests took longer than ${Math.round(PERFORMANCE_WARNING_THRESHOLD_MS / 1000)} seconds`,
       {
-        suggestions: ['考虑拆分复杂任务', '优化工具使用'],
+        suggestions: ['Consider splitting complex tasks', 'Optimize tool usage'],
       }
     ));
   }
@@ -305,20 +305,20 @@ function generateInsights(
     insights.push(createInsight(
       'performance',
       'warning',
-      '多次慢响应',
-      `发现 ${performance.slowTurns.length} 次响应时间超过平均值 2 倍的请求`
+      'Repeated slow responses',
+      `${performance.slowTurns.length} requests were more than twice the average response time`
     ));
   }
 
-  // Token 相关洞察
+  // Token insights
   if (tokenAnalysis.highTokenEntries.length > 0) {
     insights.push(createInsight(
       'token_usage',
       'warning',
-      '高 Token 使用',
-      `有 ${tokenAnalysis.highTokenEntries.length} 次请求 Token 使用超过 ${HIGH_TOKEN_THRESHOLD}`,
+      'High token usage',
+      `${tokenAnalysis.highTokenEntries.length} requests used more than ${HIGH_TOKEN_THRESHOLD} tokens`,
       {
-        suggestions: ['考虑拆分长对话', '使用更简洁的提示词', '定期清除上下文'],
+        suggestions: ['Consider splitting long conversations', 'Use more concise prompts', 'Trim context periodically'],
       }
     ));
   }
@@ -327,18 +327,18 @@ function generateInsights(
     insights.push(createInsight(
       'token_usage',
       'warning',
-      'Token 效率较低',
-      `输出 Token 与输入 Token 比率较低 (${(tokenAnalysis.tokenEfficiency * 100).toFixed(1)}%)`,
+      'Low token efficiency',
+      `The output-to-input token ratio is low (${(tokenAnalysis.tokenEfficiency * 100).toFixed(1)}%)`,
       {
-        suggestions: ['优化提示词以获得更简洁的回复', '考虑使用更合适的模型'],
+        suggestions: ['Refine prompts for more concise answers', 'Consider a more suitable model'],
       }
     ));
   } else if (tokenAnalysis.tokenEfficiency > TOKEN_EFFICIENCY_GOOD) {
     insights.push(createInsight(
       'token_usage',
       'info',
-      'Token 效率良好',
-      `输出 Token 与输入 Token 比率良好 (${(tokenAnalysis.tokenEfficiency * 100).toFixed(1)}%)`
+      'Good token efficiency',
+      `The output-to-input token ratio is healthy (${(tokenAnalysis.tokenEfficiency * 100).toFixed(1)}%)`
     ));
   }
 
@@ -346,57 +346,57 @@ function generateInsights(
     insights.push(createInsight(
       'token_usage',
       'warning',
-      '会话成本较高',
-      `本次会话估算成本超过 $${tokenAnalysis.estimatedCost.totalCost.toFixed(2)}`,
+      'Session cost is high',
+      `The estimated session cost exceeded $${tokenAnalysis.estimatedCost.totalCost.toFixed(2)}`,
       {
-        suggestions: ['考虑使用更经济的模型', '优化上下文管理'],
+        suggestions: ['Consider a more cost-effective model', 'Optimize context management'],
       }
     ));
   }
 
-  // 工具调用相关洞察
+  // Tool-call insights
   const mostUsedTool = toolStats[0];
   if (mostUsedTool) {
     insights.push(createInsight(
       'tool_calls',
       'info',
-      `最常用工具: ${mostUsedTool.name}`,
-      `共使用 ${mostUsedTool.count} 次，成功率 ${(mostUsedTool.successRate * 100).toFixed(1)}%`,
+      `Most used tool: ${mostUsedTool.name}`,
+      `Used ${mostUsedTool.count} times with a ${(mostUsedTool.successRate * 100).toFixed(1)}% success rate`,
     ));
   }
 
-  // 错误相关洞察
+  // Error insights
   if (errors.errorRate > ERROR_RATE_CRITICAL) {
     insights.push(createInsight(
       'errors',
       'critical',
-      '错误率很高',
-      `工具调用错误率达到 ${(errors.errorRate * 100).toFixed(1)}%`,
+      'Error rate is very high',
+      `The tool-call error rate reached ${(errors.errorRate * 100).toFixed(1)}%`,
       {
-        suggestions: ['检查工具配置', '验证权限设置', '查看错误日志详情'],
+        suggestions: ['Check tool configuration', 'Verify permissions', 'Review detailed error logs'],
       }
     ));
   } else if (errors.errorRate > ERROR_RATE_WARNING) {
     insights.push(createInsight(
       'errors',
       'warning',
-      '存在较多错误',
-      `工具调用错误率为 ${(errors.errorRate * 100).toFixed(1)}%`,
+      'Elevated error rate',
+      `The tool-call error rate is ${(errors.errorRate * 100).toFixed(1)}%`,
       {
         suggestions: errors.frequentErrorTools.length > 0
-          ? [`关注这些工具的错误: ${errors.frequentErrorTools.join(', ')}`]
+          ? [`Focus on errors from these tools: ${errors.frequentErrorTools.join(', ')}`]
           : [],
       }
     ));
   }
 
-  // 模式相关洞察
+  // Pattern insights
   if (patterns.hasSidechains) {
     insights.push(createInsight(
       'patterns',
       'info',
-      '使用了 Sidechain',
-      `会话中包含 ${patterns.sidechainCount} 条 Sidechain 消息`,
+      'Sidechain usage detected',
+      `The session contains ${patterns.sidechainCount} Sidechain messages`,
     ));
   }
 
@@ -404,8 +404,8 @@ function generateInsights(
     insights.push(createInsight(
       'patterns',
       'info',
-      '对话层级较深',
-      `最大对话深度达到 ${patterns.conversationDepth} 层`,
+      'Deep conversation structure',
+      `The maximum conversation depth reached ${patterns.conversationDepth} levels`,
     ));
   }
 
@@ -413,15 +413,15 @@ function generateInsights(
     insights.push(createInsight(
       'patterns',
       'info',
-      '工具使用频繁',
-      `工具相关消息占比 ${(patterns.toolMessageRatio * 100).toFixed(1)}%`,
+      'Frequent tool usage',
+      `Tool-related messages account for ${(patterns.toolMessageRatio * 100).toFixed(1)}% of the session`,
     ));
   }
 
   return insights;
 }
 
-// 生成总结
+// Generate summary
 function generateSummary(
   stats: SessionStats,
   insights: Insight[],
@@ -432,36 +432,36 @@ function generateSummary(
   const strengths: string[] = [];
   const improvements: string[] = [];
 
-  keyPoints.push(`共 ${stats.totalMessages} 条消息`);
-  keyPoints.push(`调用了 ${stats.toolCalls} 次工具`);
-  keyPoints.push(`使用了 ${stats.totalTokens.toLocaleString()} Token`);
+  keyPoints.push(`${stats.totalMessages} messages in total`);
+  keyPoints.push(`${stats.toolCalls} tool calls`);
+  keyPoints.push(`${stats.totalTokens.toLocaleString()} tokens used`);
 
-  // 计算优势
+  // Compute strengths
   const criticalErrors = insights.filter(i => i.severity === 'critical');
   const warnings = insights.filter(i => i.severity === 'warning');
 
   if (errors.errorRate < 0.05) {
-    strengths.push('工具调用成功率很高');
+    strengths.push('Tool-call success rate is very high');
   }
   if (stats.modelsUsed.length > 0) {
-    strengths.push(`使用了模型: ${stats.modelsUsed.join(', ')}`);
+    strengths.push(`Models used: ${stats.modelsUsed.join(', ')}`);
   }
   if (stats.toolCalls > 0 && toolStats.some(t => t.successRate > 0.9)) {
-    strengths.push('部分工具使用非常稳定');
+    strengths.push('Some tools were used very consistently');
   }
 
-  // 改进点
+  // Compute improvement areas
   if (criticalErrors.length > 0) {
-    improvements.push(`需要解决 ${criticalErrors.length} 个严重问题`);
+    improvements.push(`${criticalErrors.length} critical issues need attention`);
   }
   if (warnings.length > 0) {
-    improvements.push(`有 ${warnings.length} 个需要注意的警告`);
+    improvements.push(`${warnings.length} warnings should be reviewed`);
   }
   if (errors.frequentErrorTools.length > 0) {
-    improvements.push(`关注高频出错工具: ${errors.frequentErrorTools.join(', ')}`);
+    improvements.push(`Focus on frequently failing tools: ${errors.frequentErrorTools.join(', ')}`);
   }
 
-  // 计算等级
+  // Compute overall grade
   let grade: AnalysisResult['summary']['overallGrade'];
   if (criticalErrors.length === 0 && warnings.length <= 2) {
     grade = 'A';
@@ -478,12 +478,12 @@ function generateSummary(
   return {
     keyPoints,
     strengths,
-    improvements: improvements.length > 0 ? improvements : ['会话表现良好，继续保持！'],
+    improvements: improvements.length > 0 ? improvements : ['Session quality looks solid. Keep it up.'],
     overallGrade: grade,
   };
 }
 
-// 主分析函数
+// Main analysis function
 export function analyzeSession(data: ParsedLogData): AnalysisResult {
   const { stats } = data;
 
