@@ -38,6 +38,13 @@ export default function App() {
   const [manualPath, setManualPath] = useState('')
   const wsRef = useRef<WebSocket | null>(null)
   const activePathRef = useRef<string | null>(null)
+  const offlineLogContentRef = useRef<string | null>(null)
+
+  const resetClaudeCliAnalysis = useCallback(() => {
+    setIsCliAnalyzing(false)
+    setClaudeCliResult('')
+    setClaudeCliError(null)
+  }, [])
 
   // 建立 WebSocket 连接
   useEffect(() => {
@@ -69,6 +76,7 @@ export default function App() {
         } else if (type === 'session-reset') {
           setLogData(null)
           setCurrentView('overview')
+          resetClaudeCliAnalysis()
         } else if (type === 'claude-analysis-start') {
           setIsCliAnalyzing(true)
           setClaudeCliResult('')
@@ -87,12 +95,13 @@ export default function App() {
     }
 
     return () => ws.close()
-  }, [])
+  }, [resetClaudeCliAnalysis])
 
   const startWatching = (path: string) => {
     if (wsRef.current && isWsConnected) {
       setLogData(null)
-      setClaudeCliResult('')
+      resetClaudeCliAnalysis()
+      offlineLogContentRef.current = null
       activePathRef.current = path
       wsRef.current.send(JSON.stringify({ type: 'start-watch', data: { path } }))
       setCurrentView('overview')
@@ -100,12 +109,27 @@ export default function App() {
   }
 
   const runClaudeCliAnalysis = useCallback((prompt?: string) => {
-    console.log('[DEBUG] Preparing analysis request. WS state:', wsRef.current?.readyState, 'path:', activePathRef.current, 'custom prompt:', prompt);
-    if (wsRef.current && isWsConnected && activePathRef.current) {
-      console.log('[DEBUG] Sending run-claude-analysis message:', activePathRef.current);
-      wsRef.current.send(JSON.stringify({ type: 'run-claude-analysis', data: { path: activePathRef.current, prompt } }))
+    const path = activePathRef.current
+    const content = offlineLogContentRef.current
+    console.log('[DEBUG] Preparing analysis request. WS state:', wsRef.current?.readyState, 'path:', path, 'has offline content:', Boolean(content), 'custom prompt:', prompt);
+    if (wsRef.current && isWsConnected && (path || content)) {
+      setIsCliAnalyzing(true)
+      setClaudeCliResult('')
+      setClaudeCliError(null)
+      console.log('[DEBUG] Sending run-claude-analysis message:', path || '[offline-upload]');
+      wsRef.current.send(JSON.stringify({
+        type: 'run-claude-analysis',
+        data: {
+          path: path || undefined,
+          content: path ? undefined : content,
+          prompt,
+        },
+      }))
     } else {
-      console.warn('[DEBUG] Requirements not met: wsConnected:', isWsConnected, 'path:', activePathRef.current);
+      setClaudeCliResult('')
+      setIsCliAnalyzing(false)
+      setClaudeCliError('No Claude Code log is available for analysis. Please watch a live session or upload a JSONL file first.')
+      console.warn('[DEBUG] Requirements not met: wsConnected:', isWsConnected, 'path:', path, 'has offline content:', Boolean(content));
     }
   }, [isWsConnected])
 
@@ -128,6 +152,9 @@ export default function App() {
   const handleFileLoad = useCallback((content: string) => {
     setIsLoading(true)
     setError(null)
+    resetClaudeCliAnalysis()
+    activePathRef.current = null
+    offlineLogContentRef.current = content
 
     setTimeout(() => {
       try {
@@ -140,7 +167,7 @@ export default function App() {
         setIsLoading(false)
       }
     }, 50)
-  }, [])
+  }, [resetClaudeCliAnalysis])
 
   const renderDiscoveryView = () => {
     return (
@@ -278,6 +305,7 @@ export default function App() {
           isCliAnalyzing={isCliAnalyzing}
           cliError={claudeCliError || undefined}
           onRunCliAnalysis={runClaudeCliAnalysis}
+          onResetCliAnalysis={resetClaudeCliAnalysis}
         />
       )
       case 'tokens': return <TokenDashboard data={logData} />

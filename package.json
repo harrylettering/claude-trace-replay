@@ -1,8 +1,31 @@
 {
-  "name": "claude-log-visualization",
+  "name": "claude-log-analyzer",
   "private": true,
   "version": "0.1.0",
+  "description": "Visual analytics dashboard for Claude Code JSONL logs, including timelines, token usage, agent-flow replay, prompt analysis, and session comparison.",
   "type": "module",
+  "license": "MIT",
+  "author": "Harli Hao",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harrylettering/claude-log-analyzer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/harrylettering/claude-log-analyzer/issues"
+  },
+  "homepage": "https://github.com/harrylettering/claude-log-analyzer#readme",
+  "keywords": [
+    "claude-code",
+    "claude",
+    "ai-coding",
+    "jsonl",
+    "log-analysis",
+    "developer-tools",
+    "agent-visualization",
+    "react",
+    "typescript",
+    "vite"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

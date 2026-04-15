@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Info, FileJson, Brain, Loader2, Zap, ArrowRight, Terminal, RefreshCw } from 'lucide-react';
 import type { ParsedLogData } from '../types/log';
@@ -11,10 +11,11 @@ interface PromptOptimizerProps {
   cliResult?: string;
   isCliAnalyzing?: boolean;
   onRunCliAnalysis?: (prompt?: string) => void;
+  onResetCliAnalysis?: () => void;
   cliError?: string;
 }
 
-export const PromptOptimizer: React.FC<PromptOptimizerProps> = ({ data, cliResult, isCliAnalyzing, onRunCliAnalysis, cliError: _cliError }) => {
+export const PromptOptimizer: React.FC<PromptOptimizerProps> = ({ data, cliResult, isCliAnalyzing, onRunCliAnalysis, onResetCliAnalysis, cliError }) => {
   const [_copiedId, _setCopiedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'cli' | 'rules'>('cli');
   const [customPrompt, setCustomPrompt] = useState<string>('');
@@ -25,7 +26,20 @@ Please return the following directly:
 2. Wins to keep: which practices should continue?
 3. Pitfalls to avoid: which behaviors caused inefficiency or errors?
 4. Optimization suggestions: three concrete improvements for future sessions.
-Please format the output clearly in Markdown.`;
+Please format the output clearly in Markdown.
+
+Output language rule:
+- Respond in English by default.
+- Use another language only when the user's custom instructions explicitly request it.`;
+
+  const runAnalysis = () => {
+    const prompt = customPrompt.trim();
+    onRunCliAnalysis?.(prompt.length > 0 ? prompt : undefined);
+  };
+
+  useEffect(() => {
+    onResetCliAnalysis?.();
+  }, [onResetCliAnalysis]);
 
   // 基础规则提取 (启发式)
   const lessons: Lesson[] = useMemo(() => extractLessons(data.entries), [data.entries]);
@@ -94,6 +108,37 @@ Please format the output clearly in Markdown.`;
         {/* CLI 复盘展示区 */}
         {activeTab === 'cli' && (
           <div className="space-y-4 animate-in fade-in duration-500">
+            <div className="space-y-4">
+              <div className="cyber-card p-4">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">
+                  Custom Analysis Instructions (Optional)
+                </label>
+                <textarea
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  placeholder='Optional: add custom instructions, e.g. "Focus on tool failures" or "Summarize code changes". Leave empty to use the default retrospective prompt.'
+                  className="w-full h-[140px] bg-black/40 border border-slate-700 rounded-xl p-3 text-sm text-slate-200 font-mono resize-none focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                />
+                <details className="mt-2 group">
+                  <summary className="cursor-pointer text-[9px] text-slate-500 hover:text-slate-300 font-bold uppercase tracking-tight">
+                    Default prompt preview
+                  </summary>
+                  <pre className="mt-2 whitespace-pre-wrap rounded-lg border border-slate-800 bg-black/30 p-3 text-[10px] leading-relaxed text-slate-500">
+                    {defaultPrompt}
+                  </pre>
+                </details>
+              </div>
+              <button
+                onClick={runAnalysis}
+                disabled={isCliAnalyzing}
+                className="cyber-btn w-full py-3 text-[10px] font-black rounded-xl transition-all uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isCliAnalyzing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Terminal className="w-3.5 h-3.5" />}
+                {isCliAnalyzing ? 'Running Analysis' : 'Run Analysis'}
+              </button>
+            </div>
+
             {isCliAnalyzing && (
                <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center gap-4">
                   <div className="relative">
@@ -106,31 +151,19 @@ Please format the output clearly in Markdown.`;
                   </div>
                </div>
             )}
+
+            {cliError && !isCliAnalyzing && (
+              <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4">
+                <p className="text-[10px] font-black text-red-300 uppercase tracking-widest">Analysis Error</p>
+                <p className="mt-2 text-sm text-red-100/80">{cliError}</p>
+              </div>
+            )}
             
-            {!isCliAnalyzing && !cliResult && (
-              <div className="space-y-4">
-                <div className="cyber-card p-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">
-                    Custom Analysis Prompt (Optional)
-                  </label>
-                  <textarea
-                    value={customPrompt}
-                    onChange={(e) => setCustomPrompt(e.target.value)}
-                    placeholder={defaultPrompt}
-                    className="w-full h-[180px] bg-black/40 border border-slate-700 rounded-xl p-3 text-sm text-slate-200 font-mono resize-none focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
-                    style={{ fontFamily: 'var(--font-mono)' }}
-                  />
-                  <p className="mt-2 text-[9px] text-slate-500">
-                    Leave empty to use the default retrospective prompt. You can also provide custom analysis instructions like "Summarize the core request of this session" or "List all code changes made."
-                  </p>
-                </div>
-                <button
-                  onClick={() => onRunCliAnalysis?.(customPrompt.trim() || undefined)}
-                  className="cyber-btn w-full py-3 text-[10px] font-black rounded-xl transition-all uppercase tracking-widest flex items-center justify-center gap-2"
-                >
-                  <Terminal className="w-3.5 h-3.5" />
-                  Run Analysis
-                </button>
+            {!isCliAnalyzing && !cliResult && !cliError && (
+              <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 p-5 text-center">
+                <p className="text-xs text-slate-500">
+                  Run the analysis to generate a retrospective. The generated answer will appear here and will not be written back into the instruction box.
+                </p>
               </div>
             )}
 
@@ -138,7 +171,7 @@ Please format the output clearly in Markdown.`;
               <div className="space-y-3">
                 <div className="flex justify-end mb-2">
                   <button
-                    onClick={() => onRunCliAnalysis?.(customPrompt.trim() || undefined)}
+                    onClick={runAnalysis}
                     className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-[9px] font-black rounded-lg transition-all uppercase tracking-widest flex items-center gap-1.5"
                   >
                     <RefreshCw className="w-2.5 h-2.5" />

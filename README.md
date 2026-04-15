@@ -1,28 +1,47 @@
-# Claude Log Visualization
+# Claude Log Analyzer
+
+<p align="center">
+  <strong>Visual analytics for Claude Code session logs.</strong>
+</p>
+
+<p align="center">
+  Turn Claude Code JSONL logs into timelines, token insights, agent-flow playback, prompt retrospectives, and session comparisons.
+</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white" alt="React 18" />
   <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript 5" />
   <img src="https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white" alt="Vite 5" />
-  <img src="https://img.shields.io/badge/Tailwind-3-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind 3" />
-  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License" />
+  <img src="https://img.shields.io/badge/Tailwind-3-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" />
 </p>
 
-<p align="center">
-  A visualization and analysis workspace for Claude Code session logs.
-  Explore conversation structure, token usage, tool activity, replay flows, AI retrospectives, and session-to-session comparisons in one interface.
-</p>
+## Demo
 
-## Overview
+<video src="docs/screenshots/claude-log-analyzer.mp4" controls muted playsinline width="100%"></video>
 
-Claude Log Visualization turns raw Claude Code `.jsonl` logs into an interactive analysis dashboard.
-It is designed for debugging AI-assisted workflows, understanding multi-step tool execution, reviewing prompt quality, and extracting reusable collaboration patterns from real coding sessions.
+## Why This Exists
 
-The app focuses on three layers:
+Claude Code sessions can become long, tool-heavy, and hard to review from raw `.jsonl` files alone.
+Claude Log Analyzer gives those sessions a visual interface so you can understand what happened, where tokens went, which tools were used, how the agent moved through the task, and what can be improved next time.
 
-- Session observability: overview metrics, timelines, token charts, log streams, and file history
-- Flow understanding: conversation trees, agent flow playback, and step-by-step tool relationships
-- Higher-level analysis: AI retrospectives, prompt optimization, session comparison, and reusable patterns
+Use it to:
+
+- Debug slow or noisy Claude Code sessions
+- Review tool calls, tool results, and parent-child message structure
+- Track token usage spikes across a session
+- Replay agent workflows step by step
+- Compare two sessions side by side
+- Extract prompt and collaboration improvement ideas
+
+## Highlights
+
+- **Agent Flow Replay**: animated call-and-return visualization centered on `Main Agent`
+- **Current Step Insight**: see who called whom and what happened at each step
+- **Timeline Inspection**: searchable, expandable session timeline with rich event cards
+- **Token Analytics**: per-request and aggregate token usage charts
+- **AI Retrospective**: generate strengths, weaknesses, and next-step recommendations
+- **Session Compare**: compare two Claude Code runs across messages, tokens, tools, and models
 
 ## Screenshots
 
@@ -46,38 +65,6 @@ The app focuses on three layers:
 | --- | --- |
 | ![Agent Flow Bash Return](docs/screenshots/agent-flow-bash.png) | ![Agent Flow Assistant Return](docs/screenshots/agent-flow-assistant.png) |
 
-## Features
-
-### Analysis Views
-
-- Session Overview with message counts, token totals, model usage, duration, and tool-call stats
-- Session Timeline with expandable cards, search, filtering, and diff-oriented event inspection
-- Token Usage charts for per-request and aggregate token behavior
-- Conversation Flow for parent-child message structure and hierarchy inspection
-- Real-Time Log view for raw event browsing and filtering
-- Session Compare for side-by-side metrics across two runs
-
-### Agent Workflow Visualization
-
-- Animated Agent Flow playback centered on `Main Agent`
-- Step-aware `Current Step` panel showing who called whom and what happened
-- Tool-category-aware rendering for file, shell, task, network, agent, and planning operations
-- Replay controls with speed adjustment, restart, and viewport reset
-
-### AI and Prompt Analysis
-
-- AI retrospective analysis with strengths, weaknesses, and next-step recommendations
-- Prompt quality analysis with issue detection and optimization suggestions
-- Reusable prompt templates and session pattern extraction
-- Multi-session aggregation for broader trend analysis
-
-### Workflow Utilities
-
-- Advanced search with text matching, message-type filtering, tool filtering, and token/time constraints
-- Session replay for chronological walkthroughs
-- Export support for analysis outputs and session artifacts
-- Template libraries for prompts and session structures
-
 ## Quick Start
 
 ### Requirements
@@ -88,18 +75,18 @@ The app focuses on three layers:
 ### Install
 
 ```bash
-git clone https://github.com/your-username/claude-log-visualization.git
-cd claude-log-visualization
+git clone https://github.com/harrylettering/claude-log-analyzer.git
+cd claude-log-analyzer
 npm install
 ```
 
-### Run
+### Run Locally
 
 ```bash
 npm run dev
 ```
 
-Then open `http://localhost:3000`.
+Open `http://localhost:3000`.
 
 ### Build
 
@@ -116,22 +103,22 @@ npm run preview
 ## How It Works
 
 1. Load a Claude Code `.jsonl` session log.
-2. The parser normalizes entries into messages, tool calls, token usage, relationships, and derived analysis data.
-3. The UI exposes multiple synchronized views so you can inspect the same session from different angles.
-4. Higher-level modules generate summaries, prompt guidance, and reusable patterns from the parsed session data.
+2. The parser normalizes entries into messages, tool calls, token usage, parent-child relationships, and derived analysis data.
+3. The UI exposes synchronized views so you can inspect the same session from different angles.
+4. Analysis modules generate summaries, prompt guidance, and reusable collaboration patterns from the parsed session.
 
 ## Main Views
 
-| View | Purpose |
+| View | What It Helps You Understand |
 | --- | --- |
-| Session Overview | High-level stats for a single session |
+| Session Overview | High-level stats for messages, tokens, duration, models, and tool calls |
+| Session Timeline | Chronological actions, searchable messages, diffs, and tool results |
+| Agent Flow | Animated agent/tool call relationships and current-step context |
+| Conversation Flow | Parent-child message hierarchy and conversation depth |
+| Token Usage | Token trends, spikes, and per-request usage |
 | AI Analysis | Retrospective insights and recommendations |
 | Prompt Optimizer | Prompt quality review and improvement ideas |
 | Session Compare | Side-by-side comparison across two sessions |
-| Token Usage | Token trends and spikes |
-| Session Timeline | Chronological action inspection |
-| Conversation Flow | Parent-child conversation structure |
-| Agent Flow | Animated call-and-return visualization |
 | Real-Time Log | Raw event stream inspection |
 
 ## Supported Log Data
@@ -142,7 +129,7 @@ Typical entries include:
 - `user`
 - `assistant`
 - `system`
-- tool-use / tool-result content blocks
+- tool-use and tool-result content blocks
 - permission and metadata events
 - file history snapshots
 
@@ -172,7 +159,7 @@ Common fields used by the parser include:
 ## Project Structure
 
 ```text
-claude-log-visualization/
+claude-log-analyzer/
 ├── docs/
 │   └── screenshots/          # README demo images
 ├── src/
@@ -187,17 +174,27 @@ claude-log-visualization/
 └── README.md
 ```
 
-## Development Notes
+## Roadmap
 
-- `npm run dev` starts the Vite development server
-- `npm run build` runs TypeScript compilation and the production build
-- `npm run preview` serves the production build locally
-- `npm run lint` runs ESLint
+- Add a short Agent Flow demo GIF to the README hero section
+- Provide anonymized sample logs for first-time users
+- Improve large-session performance and virtualization
+- Add more layout modes for complex agent/tool flows
+- Add export presets for reports and retrospectives
+
+## Development
+
+```bash
+npm run dev       # Start the Vite development server
+npm run build     # Type-check and build for production
+npm run preview   # Preview the production build locally
+npm run lint      # Run ESLint
+```
 
 ## Contributing
 
 Contributions are welcome.
-If you plan to extend the parser, add new visualizations, or improve the README, a focused issue or PR with screenshots is especially helpful.
+If you want to add a parser improvement, visualization, sample log, or UI polish, please open an issue or pull request with enough context to reproduce the behavior.
 
 ## License
 

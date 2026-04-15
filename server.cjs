@@ -10,30 +10,39 @@ const CLAUDE_BASE_DIR = path.join(os.homedir(), '.claude', 'projects');
 
 const { spawn, exec } = require('child_process');
 
-// --- 经验沉淀提示词 (终端版) ---
-const CLI_ANALYSIS_PROMPT = `你是一位顶级的 AI 协作专家。请阅读以下对话日志（已结构化压缩），并进行深度复盘。
-请直接给出以下内容：
-1. 协作总结：一句话概括表现。
-2. 成功经验：哪些做法值得保持？
-3. 避坑指南：哪些做法导致了低效或错误？
-4. 优化建议：针对未来的 3 条具体改进方案。
-请使用清晰的 Markdown 格式输出。`;
+// --- Retrospective prompt for Claude CLI ---
+const LANGUAGE_RULE = `Output language rule:
+- Respond in English by default.
+- Use another language only when the user's custom instructions explicitly request it.`;
 
-// --- 会话对比分析提示词 ---
-const COMPARE_ANALYSIS_PROMPT = `你是一位顶级的 AI 协作专家。请对比分析以下两个对话会话，评估哪个效果更好并给出详细分析。
+const CLI_ANALYSIS_PROMPT = `You are a top-tier AI collaboration expert. Read the following conversation log, which has already been structurally compressed, and produce a deep retrospective.
 
-请直接给出以下内容：
-1. **整体评估**：哪个会话效果更好？（A/B/平局）
-2. **质量对比**：从回答准确性、效率、工具使用等维度对比
-3. **差异分析**：两个会话的主要差异点
-4. **建议**：针对本次对比的优化建议
+Return the following sections directly:
+1. Collaboration summary: a one-sentence overview of performance.
+2. Wins to keep: which practices should continue?
+3. Pitfalls to avoid: which behaviors caused inefficiency or errors?
+4. Optimization suggestions: three concrete improvements for future sessions.
 
-请使用清晰的 Markdown 格式输出。对比时要有具体的数据支撑和明确的判断。`;
+Use clear Markdown formatting.
+
+${LANGUAGE_RULE}`;
+
+// --- Session comparison analysis prompt ---
+const COMPARE_ANALYSIS_PROMPT = `You are a top-tier AI collaboration expert. Compare the following two conversation sessions, evaluate which one performed better, and provide a detailed analysis.
+
+Return the following sections directly:
+1. **Overall assessment**: which session performed better? (A / B / tie)
+2. **Quality comparison**: compare answer quality, efficiency, tool usage, and execution reliability.
+3. **Difference analysis**: identify the most important differences between the sessions.
+4. **Recommendations**: provide concrete optimization suggestions based on this comparison.
+
+Use clear Markdown formatting and support judgments with concrete data where possible.
+
+${LANGUAGE_RULE}`;
 
 // --- 智能无损压缩函数 ---
-function compressLogForAnalysis(filePath) {
+function compressLogContentForAnalysis(content, sourceLabel = 'uploaded content') {
     try {
-        const content = fs.readFileSync(filePath, 'utf-8');
         const lines = content.split('\n').filter(line => line.trim());
         const originalSize = Buffer.byteLength(content, 'utf-8');
 
@@ -42,9 +51,9 @@ function compressLogForAnalysis(filePath) {
         for (const line of lines) {
             try {
                 const entry = JSON.parse(line);
-                const timestamp = entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString() : '未知时间';
+                const timestamp = entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString() : 'unknown time';
 
-                // 用户消息
+                // User messages
                 if (entry.type === 'user') {
                     let userText = '';
                     if (typeof entry.message?.content === 'string') {
@@ -56,23 +65,23 @@ function compressLogForAnalysis(filePath) {
                             .join('\n');
                     }
                     if (userText.trim()) {
-                        compressedLines.push(`[${timestamp}] 用户: ${userText.trim()}`);
+                        compressedLines.push(`[${timestamp}] User: ${userText.trim()}`);
                     }
                     continue;
                 }
 
-                // AI消息
+                // Assistant messages
                 if (entry.type === 'assistant') {
                     const contentBlocks = Array.isArray(entry.message?.content) ? entry.message.content : [];
 
-                    // 提取thinking
+                    // Extract thinking
                     const thinkingBlock = contentBlocks.find(block => block.type === 'thinking');
                     if (thinkingBlock?.thinking) {
                         const shortThinking = thinkingBlock.thinking.slice(0, 200) + (thinkingBlock.thinking.length > 200 ? '...' : '');
-                        compressedLines.push(`[${timestamp}] AI思考: ${shortThinking}`);
+                        compressedLines.push(`[${timestamp}] Assistant thinking: ${shortThinking}`);
                     }
 
-                    // 提取工具调用
+                    // Extract tool calls
                     const toolUseBlocks = contentBlocks.filter(block => block.type === 'tool_use');
                     for (const toolUse of toolUseBlocks) {
                         const name = toolUse.name.toLowerCase();
@@ -80,52 +89,52 @@ function compressLogForAnalysis(filePath) {
 
                         if (name === 'bash' || name === 'execute_command') {
                             const cmd = (input.command || input.script || '').trim();
-                            compressedLines.push(`[${timestamp}] AI执行命令: ${cmd.slice(0, 300)}${cmd.length > 300 ? '...' : ''}`);
+                            compressedLines.push(`[${timestamp}] Assistant ran command: ${cmd.slice(0, 300)}${cmd.length > 300 ? '...' : ''}`);
                         } else if (name === 'edit' || name === 'write' || name === 'str_replace_editor') {
-                            const filePath = input.path || input.file_path || '未知文件';
-                            const action = input.command === 'view' ? '查看文件' : '修改文件';
-                            compressedLines.push(`[${timestamp}] AI${action}: ${filePath}`);
+                            const filePath = input.path || input.file_path || 'unknown file';
+                            const action = input.command === 'view' ? 'viewed file' : 'modified file';
+                            compressedLines.push(`[${timestamp}] Assistant ${action}: ${filePath}`);
                         } else if (name === 'delete' || name === 'remove') {
-                            const filePath = input.path || input.file_path || '未知文件';
-                            compressedLines.push(`[${timestamp}] AI删除文件: ${filePath}`);
+                            const filePath = input.path || input.file_path || 'unknown file';
+                            compressedLines.push(`[${timestamp}] Assistant deleted file: ${filePath}`);
                         } else if (name === 'move' || name === 'rename' || name === 'mv') {
-                            const from = input.source || input.from || '旧路径';
-                            const to = input.destination || input.to || '新路径';
-                            compressedLines.push(`[${timestamp}] AI重命名/移动: ${from} → ${to}`);
+                            const from = input.source || input.from || 'old path';
+                            const to = input.destination || input.to || 'new path';
+                            compressedLines.push(`[${timestamp}] Assistant renamed/moved: ${from} -> ${to}`);
                         } else if (name === 'grep' || name === 'search' || name === 'find') {
                             const query = input.query || input.pattern || '';
-                            compressedLines.push(`[${timestamp}] AI搜索: ${query}`);
+                            compressedLines.push(`[${timestamp}] Assistant searched: ${query}`);
                         } else if (name === 'view' || name === 'read_file' || name === 'glob' || name === 'list_files' || name === 'ls') {
                             const path = input.path || input.pattern || input.file_path || '';
-                            compressedLines.push(`[${timestamp}] AI读取/列出文件: ${path}`);
+                            compressedLines.push(`[${timestamp}] Assistant read/listed files: ${path}`);
                         } else if (name === 'computer' || name === 'computer_use') {
-                            const action = input.action || '未知操作';
-                            compressedLines.push(`[${timestamp}] AI操作电脑: ${action}`);
+                            const action = input.action || 'unknown action';
+                            compressedLines.push(`[${timestamp}] Assistant used computer: ${action}`);
                         } else {
-                            compressedLines.push(`[${timestamp}] AI调用工具: ${name}`);
+                            compressedLines.push(`[${timestamp}] Assistant called tool: ${name}`);
                         }
                     }
 
-                    // 提取文本回复
+                    // Extract text replies
                     const textBlocks = contentBlocks.filter(block => block.type === 'text');
                     if (textBlocks.length > 0) {
                         const text = textBlocks.map(block => block.text).join('\n').trim();
                         if (text) {
-                            compressedLines.push(`[${timestamp}] AI回复: ${text.slice(0, 500)}${text.length > 500 ? '...' : ''}`);
+                            compressedLines.push(`[${timestamp}] Assistant reply: ${text.slice(0, 500)}${text.length > 500 ? '...' : ''}`);
                         }
                     }
 
-                    // 工具结果（错误才记录）
+                    // Tool results (errors only)
                     if (Array.isArray(entry.message?.content)) {
                         const toolResultBlocks = entry.message.content.filter(block => block.type === 'tool_result' && block.is_error);
                         for (const result of toolResultBlocks) {
                             const errorContent = typeof result.content === 'string' ? result.content : JSON.stringify(result.content);
-                            compressedLines.push(`[${timestamp}] 工具执行错误: ${errorContent.slice(0, 300)}${errorContent.length > 300 ? '...' : ''}`);
+                            compressedLines.push(`[${timestamp}] Tool execution error: ${errorContent.slice(0, 300)}${errorContent.length > 300 ? '...' : ''}`);
                         }
                     }
                 }
             } catch (e) {
-                // 忽略解析失败的行
+                // Ignore malformed lines
                 continue;
             }
         }
@@ -138,7 +147,17 @@ function compressLogForAnalysis(filePath) {
 
         return compressedContent;
     } catch (e) {
-        console.error('[压缩失败]', e);
+        console.error(`[压缩失败] ${sourceLabel}`, e);
+        return null;
+    }
+}
+
+function compressLogForAnalysis(filePath) {
+    try {
+        const content = fs.readFileSync(filePath, 'utf-8');
+        return compressLogContentForAnalysis(content, filePath);
+    } catch (e) {
+        console.error('[读取日志失败]', e);
         return null;
     }
 }
@@ -281,23 +300,25 @@ wss.on('connection', (ws) => {
             } else if (type === 'run-claude-analysis') {
                 console.log('[DEBUG] 收到 run-claude-analysis 请求:', JSON.stringify(data));
                 const targetPath = data?.path || watcher.activeFile;
+                const rawContent = typeof data?.content === 'string' ? data.content : '';
                 const customPrompt = data?.prompt;
 
-                if (!targetPath) {
-                    console.error('[DEBUG] 分析失败: 未提供有效路径');
-                    ws.send(JSON.stringify({ type: 'claude-analysis-error', payload: '未选择活跃文件且未提供路径' }));
+                if (!targetPath && !rawContent) {
+                    console.error('[DEBUG] 分析失败: 未提供有效路径或日志内容');
+                    ws.send(JSON.stringify({ type: 'claude-analysis-error', payload: 'No active file path or uploaded log content was provided.' }));
                     return;
                 }
 
-                console.log(`[DEBUG] 确认分析路径: ${targetPath}`);
+                console.log(`[DEBUG] 确认分析来源: ${targetPath || 'offline uploaded content'}`);
                 console.log(`[DEBUG] 使用自定义prompt: ${customPrompt ? '是' : '否（使用默认）'}`);
                 ws.send(JSON.stringify({ type: 'claude-analysis-start' }));
 
                 try {
                     // 先压缩日志
-                    const compressedContent = compressLogForAnalysis(targetPath);
+                    const sourceContent = targetPath ? fs.readFileSync(targetPath, 'utf-8') : rawContent;
+                    const compressedContent = compressLogContentForAnalysis(sourceContent, targetPath || 'offline uploaded content');
                     if (!compressedContent) {
-                        ws.send(JSON.stringify({ type: 'claude-analysis-error', payload: '日志压缩失败，请检查文件是否可读' }));
+                        ws.send(JSON.stringify({ type: 'claude-analysis-error', payload: 'Failed to compress the log. Please check the file content.' }));
                         return;
                     }
 
@@ -306,8 +327,10 @@ wss.on('connection', (ws) => {
                     fs.writeFileSync(tempFilePath, compressedContent, 'utf-8');
                     console.log(`[临时文件] 已写入: ${tempFilePath}`);
 
-                    // 使用自定义prompt或默认prompt
-                    const finalPrompt = customPrompt || CLI_ANALYSIS_PROMPT;
+                    // Use custom prompt or default prompt, while keeping language adaptation stable.
+                    const finalPrompt = customPrompt
+                        ? `${customPrompt}\n\n${LANGUAGE_RULE}`
+                        : CLI_ANALYSIS_PROMPT;
 
                     // 用shell执行命令，和run_claude.sh逻辑一致
                     const command = `cat "${tempFilePath}" | claude -p "${finalPrompt.replace(/"/g, '\\"')}"`;
