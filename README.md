@@ -83,7 +83,8 @@ npm install
 ### Run Locally
 
 ```bash
-npm run dev
+./start-backend.sh
+./start-frontend.sh
 ```
 
 Open `http://localhost:3000`.
