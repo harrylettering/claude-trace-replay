@@ -1,5 +1,7 @@
 # Claude Trace Replay
 
+[English](./README.md) | [简体中文](./README.zh-CN.md)
+
 <p align="center">
   <strong>Replay Claude Code traces and understand what actually happened.</strong>
 </p>
