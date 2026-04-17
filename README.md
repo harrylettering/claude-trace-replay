@@ -26,7 +26,8 @@
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" />
 </p>
 
-![Claude Log Analyzer Overview](docs/screenshots/session-overview.png)
+## Demo
+https://github.com/user-attachments/assets/be7374a6-5f6a-4c87-95f5-defe3974f6ea
 
 ## Why People Star This
 
@@ -59,10 +60,7 @@ If you use Claude Code seriously, this helps you move from "I have a log file" t
 - Teams trying to understand why one prompt or workflow worked better than another
 - Anyone who wants to learn from real AI coding traces instead of guessing
 
-## Demo
 
-- Demo video: [GitHub Demo Asset](https://github.com/user-attachments/assets/be7374a6-5f6a-4c87-95f5-defe3974f6ea)
-- Local full demo clip: [claude-log-analyzer.mp4](docs/screenshots/claude-log-analyzer.mp4)
 
 ## Screenshots
 
