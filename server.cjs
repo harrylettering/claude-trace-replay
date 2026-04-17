@@ -27,7 +27,7 @@ Use clear Markdown formatting.
 
 ${LANGUAGE_RULE}`;
 
-// --- Session comparison analysis prompt ---
+// --- Session comparison prompt ---
 const COMPARE_ANALYSIS_PROMPT = `You are a top-tier AI collaboration expert. Compare the following two conversation sessions, evaluate which one performed better, and provide a detailed analysis.
 
 Return the following sections directly:
@@ -40,7 +40,7 @@ Use clear Markdown formatting and support judgments with concrete data where pos
 
 ${LANGUAGE_RULE}`;
 
-// --- 智能无损压缩函数 ---
+// --- Lossless-style log compression helper ---
 function compressLogContentForAnalysis(content, sourceLabel = 'uploaded content') {
     try {
         const lines = content.split('\n').filter(line => line.trim());
@@ -143,11 +143,11 @@ function compressLogContentForAnalysis(content, sourceLabel = 'uploaded content'
         const compressedSize = Buffer.byteLength(compressedContent, 'utf-8');
         const compressionRatio = ((1 - compressedSize / originalSize) * 100).toFixed(1);
 
-        console.log(`[压缩完成] 原始大小: ${(originalSize/1024).toFixed(1)}KB → 压缩后: ${(compressedSize/1024).toFixed(1)}KB → 压缩率: ${compressionRatio}%`);
+        console.log(`[Compression complete] Original: ${(originalSize/1024).toFixed(1)}KB -> Compressed: ${(compressedSize/1024).toFixed(1)}KB -> Ratio: ${compressionRatio}%`);
 
         return compressedContent;
     } catch (e) {
-        console.error(`[压缩失败] ${sourceLabel}`, e);
+        console.error(`[Compression failed] ${sourceLabel}`, e);
         return null;
     }
 }
@@ -157,12 +157,12 @@ function compressLogForAnalysis(filePath) {
         const content = fs.readFileSync(filePath, 'utf-8');
         return compressLogContentForAnalysis(content, filePath);
     } catch (e) {
-        console.error('[读取日志失败]', e);
+        console.error('[Failed to read log file]', e);
         return null;
     }
 }
 
-// --- 扫描工具：增加排除逻辑与全路径显示 ---
+// --- Discovery scanner with exclusions and full-path output ---
 function getRecentSessions() {
     if (!fs.existsSync(CLAUDE_BASE_DIR)) {
         return [];
@@ -170,14 +170,14 @@ function getRecentSessions() {
     
     const sessions = [];
     const now = Date.now();
-    // 扩大检索范围到 1 小时，确保稳定性，同时避免展示过旧数据
+    // Scan the last 24 hours to keep discovery stable while avoiding stale sessions.
     const SCAN_WINDOW = 24 * 60 * 60 * 1000;
 
     try {
         const projects = fs.readdirSync(CLAUDE_BASE_DIR);
 
         projects.forEach(project => {
-            // 排除 subagents 文件夹
+            // Exclude the subagents folder.
             if (project === 'subagents') return;
 
             const projectPath = path.join(CLAUDE_BASE_DIR, project);
@@ -190,30 +190,30 @@ function getRecentSessions() {
                 const filePath = path.join(projectPath, file);
                 try {
                     const stats = fs.statSync(filePath);
-// 收集活跃会话
-if (now - stats.mtimeMs <= SCAN_WINDOW) {
-    sessions.push({
-        id: file, // 完整的文件名
-        folderName: project.replace(/^-Users-/, '').replace(/^-Users/, ''), // 去掉 -Users 前缀
-        fullPath: filePath,
-        lastUpdated: stats.mtime,
-        size: (stats.size / 1024).toFixed(1) + ' KB'
-    });
-}
+                    // Collect recently active sessions.
+                    if (now - stats.mtimeMs <= SCAN_WINDOW) {
+                        sessions.push({
+                            id: file, // Full filename
+                            folderName: project.replace(/^-Users-/, '').replace(/^-Users/, ''), // Strip the -Users prefix
+                            fullPath: filePath,
+                            lastUpdated: stats.mtime,
+                            size: (stats.size / 1024).toFixed(1) + ' KB'
+                        });
+                    }
                 } catch (e) {
-                    // 忽略单个文件读取错误
+                    // Ignore per-file read errors.
                 }
             });
         });
     } catch (err) {
-        console.error('[Discovery] 扫描出错:', err);
+        console.error('[Discovery] Scan failed:', err);
     }
 
-    // 按时间倒序
+    // Sort from newest to oldest.
     return sessions.sort((a, b) => b.lastUpdated - a.lastUpdated);
 }
 
-// --- 监听器类 ---
+// --- File watcher class ---
 class LogFileWatcher {
     constructor(ws) {
         this.ws = ws;
@@ -227,15 +227,15 @@ class LogFileWatcher {
         this.activeFile = filePath;
         this.currentPos = 0; 
 
-        console.log(`[Watcher] 开启实时监听: ${filePath}`);
+        console.log(`[Watcher] Starting live watch: ${filePath}`);
         
-        // 挂载监听
+        // Attach the watcher.
         this.watcher = chokidar.watch(filePath, { 
             persistent: true,
             ignoreInitial: false 
         });
         
-        // 初始读取
+        // Initial read.
         this.readNewLines();
         
         this.watcher.on('change', () => this.readNewLines());
@@ -295,26 +295,26 @@ wss.on('connection', (ws) => {
                 const list = getRecentSessions();
                 ws.send(JSON.stringify({ type: 'discovery-list', payload: list }));
             } else if (type === 'start-watch') {
-                console.log(`[DEBUG] 收到 start-watch: ${data.path}`);
+                console.log(`[DEBUG] Received start-watch: ${data.path}`);
                 watcher.watchPath(data.path);
             } else if (type === 'run-claude-analysis') {
-                console.log('[DEBUG] 收到 run-claude-analysis 请求:', JSON.stringify(data));
+                console.log('[DEBUG] Received run-claude-analysis request:', JSON.stringify(data));
                 const targetPath = data?.path || watcher.activeFile;
                 const rawContent = typeof data?.content === 'string' ? data.content : '';
                 const customPrompt = data?.prompt;
 
                 if (!targetPath && !rawContent) {
-                    console.error('[DEBUG] 分析失败: 未提供有效路径或日志内容');
+                    console.error('[DEBUG] Analysis failed: no valid path or log content was provided.');
                     ws.send(JSON.stringify({ type: 'claude-analysis-error', payload: 'No active file path or uploaded log content was provided.' }));
                     return;
                 }
 
-                console.log(`[DEBUG] 确认分析来源: ${targetPath || 'offline uploaded content'}`);
-                console.log(`[DEBUG] 使用自定义prompt: ${customPrompt ? '是' : '否（使用默认）'}`);
+                console.log(`[DEBUG] Analysis source confirmed: ${targetPath || 'offline uploaded content'}`);
+                console.log(`[DEBUG] Using custom prompt: ${customPrompt ? 'yes' : 'no (using default)'}`);
                 ws.send(JSON.stringify({ type: 'claude-analysis-start' }));
 
                 try {
-                    // 先压缩日志
+                    // Compress the log before handing it to the CLI.
                     const sourceContent = targetPath ? fs.readFileSync(targetPath, 'utf-8') : rawContent;
                     const compressedContent = compressLogContentForAnalysis(sourceContent, targetPath || 'offline uploaded content');
                     if (!compressedContent) {
@@ -322,19 +322,19 @@ wss.on('connection', (ws) => {
                         return;
                     }
 
-                    // 写临时文件
+                    // Write a temporary file.
                     const tempFilePath = path.join(os.tmpdir(), `claude_compressed_${Date.now()}.txt`);
                     fs.writeFileSync(tempFilePath, compressedContent, 'utf-8');
-                    console.log(`[临时文件] 已写入: ${tempFilePath}`);
+                    console.log(`[Temp file] Written: ${tempFilePath}`);
 
-                    // Use custom prompt or default prompt, while keeping language adaptation stable.
+                    // Use either the custom prompt or the default prompt.
                     const finalPrompt = customPrompt
                         ? `${customPrompt}\n\n${LANGUAGE_RULE}`
                         : CLI_ANALYSIS_PROMPT;
 
-                    // 用shell执行命令，和run_claude.sh逻辑一致
+                    // Execute through the shell, matching the existing CLI workflow.
                     const command = `cat "${tempFilePath}" | claude -p "${finalPrompt.replace(/"/g, '\\"')}"`;
-                    console.log(`[执行命令] ${command.slice(0, 200)}...`);
+                    console.log(`[Executing command] ${command.slice(0, 200)}...`);
 
                     const claudeProcess = exec(command, { shell: '/bin/bash' });
 
@@ -350,7 +350,7 @@ wss.on('connection', (ws) => {
                     claudeProcess.stderr.on('data', (chunk) => {
                         const text = chunk.toString();
                         console.error(`[DEBUG] Claude Stderr: ${text}`);
-                        // 过滤掉一些常见的无用输出
+                        // Filter out common noisy output.
                         if (!text.includes('Progress')) {
                             ws.send(JSON.stringify({ type: 'claude-analysis-chunk', payload: `\n[CLI Info]: ${text}` }));
                         }
@@ -358,18 +358,18 @@ wss.on('connection', (ws) => {
 
                     claudeProcess.on('error', (err) => {
                         console.error('[DEBUG] Claude Process Error:', err);
-                        // 清理临时文件
+                        // Clean up the temporary file.
                         fs.unlinkSync(tempFilePath);
-                        ws.send(JSON.stringify({ type: 'claude-analysis-error', payload: `启动 Claude 失败: ${err.message}。请确保已安装 claude cli 并在环境变量中。` }));
+                        ws.send(JSON.stringify({ type: 'claude-analysis-error', payload: `Failed to start Claude: ${err.message}. Please make sure the Claude CLI is installed and available in PATH.` }));
                     });
 
                     claudeProcess.on('close', (code) => {
-                        console.log(`[DEBUG] Claude CLI 进程结束. Exit Code: ${code}`);
-                        // 清理临时文件
+                        console.log(`[DEBUG] Claude CLI process exited. Exit code: ${code}`);
+                        // Clean up the temporary file.
                         try { fs.unlinkSync(tempFilePath); } catch (e) {}
 
                         if (code !== 0 && !fullOutput) {
-                            ws.send(JSON.stringify({ type: 'claude-analysis-error', payload: `分析进程异常退出 (Code: ${code})。请检查本地 claude 是否可用。` }));
+                            ws.send(JSON.stringify({ type: 'claude-analysis-error', payload: `Analysis process exited unexpectedly (code: ${code}). Please check whether the local Claude CLI is available.` }));
                         } else {
                             ws.send(JSON.stringify({ type: 'claude-analysis-end', payload: fullOutput }));
                         }
@@ -377,32 +377,32 @@ wss.on('connection', (ws) => {
 
                 } catch (err) {
                     console.error('[DEBUG] Execution Exception:', err);
-                    ws.send(JSON.stringify({ type: 'claude-analysis-error', payload: `执行异常: ${err.message}` }));
+                    ws.send(JSON.stringify({ type: 'claude-analysis-error', payload: `Execution error: ${err.message}` }));
                 }
             } else if (type === 'compare-sessions-analysis') {
-                // 会话对比分析
+                // Session comparison analysis
                 const { sessionA, sessionB } = data || {};
-                console.log('[DEBUG] 收到 compare-sessions-analysis 请求');
+                console.log('[DEBUG] Received compare-sessions-analysis request');
 
                 if (!sessionA || !sessionB) {
-                    ws.send(JSON.stringify({ type: 'compare-analysis-error', payload: '缺少会话数据' }));
+                    ws.send(JSON.stringify({ type: 'compare-analysis-error', payload: 'Missing session data.' }));
                     return;
                 }
 
                 ws.send(JSON.stringify({ type: 'compare-analysis-start' }));
 
                 try {
-                    // 将两个会话内容拼接成对比格式
-                    const compareContent = `【会话 A】\n${sessionA}\n\n【会话 B】\n${sessionB}`;
+                    // Combine the two sessions into a single comparison payload.
+                    const compareContent = `[Session A]\n${sessionA}\n\n[Session B]\n${sessionB}`;
 
-                    // 写临时文件
+                    // Write a temporary file.
                     const tempFilePath = path.join(os.tmpdir(), `claude_compare_${Date.now()}.txt`);
                     fs.writeFileSync(tempFilePath, compareContent, 'utf-8');
-                    console.log(`[临时文件] 已写入: ${tempFilePath}`);
+                    console.log(`[Temp file] Written: ${tempFilePath}`);
 
-                    // 用shell执行命令
+                    // Execute through the shell.
                     const command = `cat "${tempFilePath}" | claude -p "${COMPARE_ANALYSIS_PROMPT.replace(/"/g, '\\"')}"`;
-                    console.log(`[执行命令] ${command.slice(0, 200)}...`);
+                    console.log(`[Executing command] ${command.slice(0, 200)}...`);
 
                     const claudeProcess = exec(command, { shell: '/bin/bash' });
 
@@ -424,15 +424,15 @@ wss.on('connection', (ws) => {
                     claudeProcess.on('error', (err) => {
                         console.error('[DEBUG] Claude Process Error:', err);
                         try { fs.unlinkSync(tempFilePath); } catch (e) {}
-                        ws.send(JSON.stringify({ type: 'compare-analysis-error', payload: `启动 Claude 失败: ${err.message}` }));
+                        ws.send(JSON.stringify({ type: 'compare-analysis-error', payload: `Failed to start Claude: ${err.message}` }));
                     });
 
                     claudeProcess.on('close', (code) => {
-                        console.log(`[DEBUG] Claude CLI 进程结束. Exit Code: ${code}`);
+                        console.log(`[DEBUG] Claude CLI process exited. Exit code: ${code}`);
                         try { fs.unlinkSync(tempFilePath); } catch (e) {}
 
                         if (code !== 0 && !fullOutput) {
-                            ws.send(JSON.stringify({ type: 'compare-analysis-error', payload: `分析进程异常退出 (Code: ${code})` }));
+                            ws.send(JSON.stringify({ type: 'compare-analysis-error', payload: `Analysis process exited unexpectedly (code: ${code})` }));
                         } else {
                             ws.send(JSON.stringify({ type: 'compare-analysis-end', payload: fullOutput }));
                         }
@@ -440,7 +440,7 @@ wss.on('connection', (ws) => {
 
                 } catch (err) {
                     console.error('[DEBUG] Execution Exception:', err);
-                    ws.send(JSON.stringify({ type: 'compare-analysis-error', payload: `执行异常: ${err.message}` }));
+                    ws.send(JSON.stringify({ type: 'compare-analysis-error', payload: `Execution error: ${err.message}` }));
                 }
             }
         } catch (e) { }

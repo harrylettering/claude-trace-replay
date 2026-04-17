@@ -18,18 +18,18 @@ export function RealTimeLog({ data, onDataUpdate }: RealTimeLogProps) {
   const [autoScroll, setAutoScroll] = useState(true);
   const logEndRef = useRef<HTMLDivElement>(null);
 
-  // 过滤日志条目
+  // Filter log entries.
   const searchResult = filterEntries(data.entries, filters);
   const filteredEntries = searchResult.entries;
 
-  // 自动滚动
+  // Auto-scroll behavior.
   useEffect(() => {
     if (autoScroll && !isPaused) {
       logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [filteredEntries.length, autoScroll, isPaused]);
 
-  // 文件拖放处理
+  // Handle drag-and-drop file loading.
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
@@ -119,7 +119,7 @@ export function RealTimeLog({ data, onDataUpdate }: RealTimeLogProps) {
         </div>
       </div>
 
-      {/* 高级搜索过滤器 */}
+      {/* Advanced search filters */}
       <AdvancedSearchFilter
         entries={data.entries}
         filters={filters}
@@ -128,7 +128,7 @@ export function RealTimeLog({ data, onDataUpdate }: RealTimeLogProps) {
         totalCount={searchResult.totalCount}
       />
 
-      {/* 自动滚动 */}
+      {/* Auto-scroll toggle */}
       <div className="flex items-center justify-between">
         <label className="flex items-center gap-2 cursor-pointer">
           <input
@@ -146,7 +146,7 @@ export function RealTimeLog({ data, onDataUpdate }: RealTimeLogProps) {
         </div>
       </div>
 
-      {/* 日志流 */}
+      {/* Log stream */}
       <div
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
@@ -201,7 +201,7 @@ export function RealTimeLog({ data, onDataUpdate }: RealTimeLogProps) {
         </div>
       </div>
 
-      {/* 拖放提示 */}
+      {/* Drag-and-drop hint */}
       <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 border-dashed text-center">
         <Download className="w-5 h-5 text-slate-400 mx-auto mb-2" />
         <p className="text-slate-400 text-sm">Drop a new log file here to load it</p>

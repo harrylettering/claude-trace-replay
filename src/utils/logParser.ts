@@ -14,7 +14,7 @@ import {
 } from '../constants';
 import { saveImage } from './imageStore';
 
-// 解析错误类型
+// Parse error type.
 export interface ParseError {
   line: number;
   raw: string;
@@ -26,13 +26,13 @@ export interface ParseResult {
   errors: ParseError[];
 }
 
-// ============ Agent Action 解析 ============
+// ============ Agent Action Parsing ============
 
 function createInitialAgentAction(toolUse: ToolUseBlock): AgentAction | undefined {
   const name = toolUse.name.toLowerCase();
   const input = toolUse.input as any;
 
-  // 1. 终端执行
+  // 1. Terminal execution.
   if (name === 'bash' || name === 'run' || name === 'execute_command') {
     const cmd = (input.command || input.script || '').trim();
     if (cmd.startsWith('rm ') || cmd.includes(' rm ')) {
@@ -46,7 +46,7 @@ function createInitialAgentAction(toolUse: ToolUseBlock): AgentAction | undefine
     };
   }
 
-  // 2. 写操作
+  // 2. Write operations.
   if (name === 'edit' || name === 'replace' || name === 'write' || name === 'write_to_file' || name === 'str_replace_editor' || name === 'create' || name === 'save') {
     const isView = input.command === 'view' || input.command === 'list_files';
     if (isView) {
@@ -65,7 +65,7 @@ function createInitialAgentAction(toolUse: ToolUseBlock): AgentAction | undefine
     };
   }
 
-  // 3. 删操作
+  // 3. Delete operations.
   if (name === 'delete' || name === 'remove' || name === 'rm' || name === 'delete_file') {
     return {
       type: 'CodeDelete',
@@ -74,7 +74,7 @@ function createInitialAgentAction(toolUse: ToolUseBlock): AgentAction | undefine
     };
   }
 
-  // 4. 移操作
+  // 4. Move operations.
   if (name === 'move' || name === 'rename' || name === 'mv') {
     return {
       type: 'CodeMove',
@@ -83,7 +83,7 @@ function createInitialAgentAction(toolUse: ToolUseBlock): AgentAction | undefine
     };
   }
 
-  // 5. 搜操作
+  // 5. Search operations.
   if (name === 'grep' || name === 'find' || name === 'search') {
     return {
       type: 'CodeSearch',
@@ -92,7 +92,7 @@ function createInitialAgentAction(toolUse: ToolUseBlock): AgentAction | undefine
     };
   }
 
-  // 6. 读操作
+  // 6. Read operations.
   if (name === 'view' || name === 'read_file' || name === 'glob' || name === 'list_files' || name === 'ls') {
     return {
       type: 'CodeRead',
@@ -101,7 +101,7 @@ function createInitialAgentAction(toolUse: ToolUseBlock): AgentAction | undefine
     };
   }
 
-  // 7. 多模态 GUI 操作
+  // 7. Multimodal GUI operations.
   if (name === 'computer' || name === 'computer_use' || input.action) {
     const actionType = input.action || 'unknown';
     if (actionType === 'screenshot') {
@@ -116,7 +116,7 @@ function createInitialAgentAction(toolUse: ToolUseBlock): AgentAction | undefine
     };
   }
 
-  // 8. 任务管理工具
+  // 8. Task-management tools.
   if (name === 'TaskCreate') {
     return {
       type: 'TaskCreate',
@@ -135,7 +135,7 @@ function createInitialAgentAction(toolUse: ToolUseBlock): AgentAction | undefine
     };
   }
 
-  // 所有其他未知工具，统一用通用类型
+  // Fall back to a generic action for all other tools.
   return {
     type: 'GenericToolCall',
     name: name,
@@ -169,25 +169,25 @@ function updateAgentActionWithResult(action: AgentAction, result: any, isError: 
   }
   const resultText = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
 
-  // 1. 终端命令结果
+  // 1. Terminal command result.
   if (action.type === 'TerminalCommand') {
     action.output = resultText;
     action.exitCode = isError ? 1 : 0;
     if (isError) action.stderr = resultText;
   }
 
-  // 2. 文件读取结果
+  // 2. File read result.
   if (action.type === 'CodeRead') {
     action.content = resultText;
   }
 
-  // 3. 搜索结果
+  // 3. Search result.
   if (action.type === 'CodeSearch') {
     action.results = resultText;
   }
 }
 
-// ============ 分类函数 ============
+// ============ Categorization Helpers ============
 
 export function categorizeEntry(entry: LogEntry): EntryCategory {
   if (entry.type === 'summary') return 'SUMMARY';
@@ -262,7 +262,7 @@ function processToolResult(contentItem: ContentBlock): { toolUseId: string; cont
   return null;
 }
 
-// ============ 主解析函数 ============
+// ============ Main Parse Function ============
 
 export function parseLog(content: string): ParseResult {
   const lines = content.split('\n').filter((line) => line.trim());
@@ -283,7 +283,7 @@ export function parseLog(content: string): ParseResult {
       const ts = getTimestamp(entry);
       if (!isNaN(ts)) validTimestamps.push(ts);
 
-      // Assistant 消息处理
+      // Assistant message handling.
       if (entry.type === 'assistant' && entry.message) {
         const contentArray = Array.isArray(entry.message.content) ? entry.message.content : [];
         let hasToolUse = false;
@@ -308,13 +308,13 @@ export function parseLog(content: string): ParseResult {
           }
         });
 
-        // 如果是纯文本回复，没有工具调用，就生成AssistantText action
+        // Pure text assistant replies become AssistantText actions.
         if (!hasToolUse && assistantText.trim()) {
           setParsedActionWithPriority(entry, { type: 'AssistantText', content: assistantText.trim() });
         }
       }
 
-      // Sub-agent 任务处理
+      // Sub-agent task handling.
       if (entry.toolUseResult?.content) {
         entry.toolUseResult.content.forEach((item) => {
           const action = createInitialAgentAction(item as any);
@@ -322,7 +322,7 @@ export function parseLog(content: string): ParseResult {
         });
       }
 
-      // User 消息处理
+      // User message handling.
       if (entry.type === 'user' && entry.message) {
         const contentArray = Array.isArray(entry.message.content) ? entry.message.content : [];
         let userText = '';
@@ -330,7 +330,7 @@ export function parseLog(content: string): ParseResult {
         let hasToolResult = false;
 
         contentArray.forEach((item) => {
-          // 用户上传图片
+          // User-uploaded image.
           if (item.type === 'image' && (item as any).source?.data) {
             hasImage = true;
             const imageId = `user_img_${entry.uuid}`;
@@ -339,7 +339,7 @@ export function parseLog(content: string): ParseResult {
           } else if (item.type === 'text') {
             userText += (item as any).text + '\n';
           }
-          // 工具结果匹配
+          // Match tool results back to their pending tool calls.
           const result = processToolResult(item);
           if (result?.toolUseId) {
             hasToolResult = true;
@@ -354,7 +354,7 @@ export function parseLog(content: string): ParseResult {
                 updateAgentActionWithResult(sourceEntry.parsedAction, result.content, result.isError, entry.uuid);
               }
             } else {
-              // 匹配不到对应调用的工具结果，直接生成TaskResult action
+              // If no matching tool call is found, emit a standalone TaskResult action.
               const resultText = typeof result.content === 'string' ? result.content : JSON.stringify(result.content, null, 2);
               setParsedActionWithPriority(entry, {
                 type: 'TaskResult',
@@ -366,10 +366,10 @@ export function parseLog(content: string): ParseResult {
           }
         });
 
-        // 处理直接挂载在entry上的toolUseResult（非content里的tool result
+        // Handle toolUseResult objects attached directly to the entry.
         if (!hasToolResult && entry.toolUseResult) {
           hasToolResult = true;
-          // 从toolUseResult生成TaskResult
+          // Convert the direct toolUseResult into a TaskResult action.
           const resultContent = entry.toolUseResult.content
             ? (typeof entry.toolUseResult.content === 'string'
               ? entry.toolUseResult.content
@@ -384,13 +384,13 @@ export function parseLog(content: string): ParseResult {
           });
         }
 
-        // 如果是纯文本消息，没有图片和工具结果，生成UserMessage action
+        // Pure user text without images or tool results becomes a UserMessage action.
         if (!hasImage && !hasToolResult && userText.trim()) {
           setParsedActionWithPriority(entry, { type: 'UserMessage', content: userText.trim() });
         }
       }
 
-      // Token & 统计
+      // Token accounting and stats.
       const usage = extractTokenUsage(entry);
       if (usage) {
         tokenUsage.push({ timestamp: entry.timestamp, ...usage });
@@ -438,14 +438,14 @@ export function formatTokens(tokens: number): string {
   return tokens.toString();
 }
 
-// --- 压缩会话用于 AI 分析 ---
+// --- Compress a session for AI analysis ---
 export function compressLogEntries(entries: LogEntry[]): string {
   const compressedLines: string[] = [];
 
   for (const entry of entries) {
-    const timestamp = entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString() : '未知时间';
+    const timestamp = entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString() : 'unknown time';
 
-    // 用户消息
+    // User messages.
     if (entry.type === 'user') {
       let userText = '';
       if (typeof entry.message?.content === 'string') {
@@ -458,23 +458,23 @@ export function compressLogEntries(entries: LogEntry[]): string {
       }
       if (userText.trim()) {
         const truncated = userText.trim().slice(0, 300);
-        compressedLines.push(`[${timestamp}] 用户: ${truncated}${userText.length > 300 ? '...' : ''}`);
+        compressedLines.push(`[${timestamp}] User: ${truncated}${userText.length > 300 ? '...' : ''}`);
       }
       continue;
     }
 
-    // AI 消息
+    // Assistant messages.
     if (entry.type === 'assistant') {
       const contentBlocks = Array.isArray(entry.message?.content) ? entry.message.content : [];
 
-      // 提取 thinking
+      // Extract thinking.
       const thinkingBlock = contentBlocks.find(block => block.type === 'thinking');
       if ((thinkingBlock as any)?.thinking) {
         const shortThinking = (thinkingBlock as any).thinking.slice(0, 200) + ((thinkingBlock as any).thinking.length > 200 ? '...' : '');
-        compressedLines.push(`[${timestamp}] AI思考: ${shortThinking}`);
+        compressedLines.push(`[${timestamp}] Assistant thinking: ${shortThinking}`);
       }
 
-      // 提取工具调用
+      // Extract tool calls.
       const toolUseBlocks = contentBlocks.filter(block => block.type === 'tool_use');
       for (const toolUse of toolUseBlocks) {
         const toolUseTyped = toolUse as ToolUseBlock;
@@ -484,49 +484,49 @@ export function compressLogEntries(entries: LogEntry[]): string {
         if (name === 'bash' || name === 'execute_command') {
           const cmd = ((input.command as string) || (input.script as string) || '').trim();
           const truncated = cmd.slice(0, 300);
-          compressedLines.push(`[${timestamp}] AI执行命令: ${truncated}${cmd.length > 300 ? '...' : ''}`);
+          compressedLines.push(`[${timestamp}] Assistant ran command: ${truncated}${cmd.length > 300 ? '...' : ''}`);
         } else if (name === 'edit' || name === 'write' || name === 'str_replace_editor') {
-          const filePath = input.path || input.file_path || '未知文件';
-          const action = input.command === 'view' ? '查看文件' : '修改文件';
-          compressedLines.push(`[${timestamp}] AI${action}: ${filePath}`);
+          const filePath = input.path || input.file_path || 'unknown file';
+          const action = input.command === 'view' ? 'viewed file' : 'modified file';
+          compressedLines.push(`[${timestamp}] Assistant ${action}: ${filePath}`);
         } else if (name === 'delete' || name === 'remove') {
-          const filePath = input.path || input.file_path || '未知文件';
-          compressedLines.push(`[${timestamp}] AI删除文件: ${filePath}`);
+          const filePath = input.path || input.file_path || 'unknown file';
+          compressedLines.push(`[${timestamp}] Assistant deleted file: ${filePath}`);
         } else if (name === 'move' || name === 'rename' || name === 'mv') {
-          const from = input.source || input.from || '旧路径';
-          const to = input.destination || input.to || '新路径';
-          compressedLines.push(`[${timestamp}] AI重命名/移动: ${from} → ${to}`);
+          const from = input.source || input.from || 'old path';
+          const to = input.destination || input.to || 'new path';
+          compressedLines.push(`[${timestamp}] Assistant renamed/moved: ${from} -> ${to}`);
         } else if (name === 'grep' || name === 'search' || name === 'find') {
           const query = input.query || input.pattern || '';
-          compressedLines.push(`[${timestamp}] AI搜索: ${query}`);
+          compressedLines.push(`[${timestamp}] Assistant searched: ${query}`);
         } else if (name === 'view' || name === 'read_file' || name === 'glob' || name === 'ls') {
           const filePath = input.path || input.pattern || input.file_path || '';
-          compressedLines.push(`[${timestamp}] AI读取/列出文件: ${filePath}`);
+          compressedLines.push(`[${timestamp}] Assistant read/listed files: ${filePath}`);
         } else if (name === 'computer' || name === 'computer_use') {
-          const action = input.action || '未知操作';
-          compressedLines.push(`[${timestamp}] AI操作电脑: ${action}`);
+          const action = input.action || 'unknown action';
+          compressedLines.push(`[${timestamp}] Assistant used computer: ${action}`);
         } else {
-          compressedLines.push(`[${timestamp}] AI调用工具: ${name}`);
+          compressedLines.push(`[${timestamp}] Assistant called tool: ${name}`);
         }
       }
 
-      // 提取文本回复
+      // Extract text replies.
       const textBlocks = contentBlocks.filter(block => block.type === 'text');
       if (textBlocks.length > 0) {
         const text = textBlocks.map(block => (block as any).text).join('\n').trim();
         if (text) {
           const truncated = text.slice(0, 500);
-          compressedLines.push(`[${timestamp}] AI回复: ${truncated}${text.length > 500 ? '...' : ''}`);
+          compressedLines.push(`[${timestamp}] Assistant reply: ${truncated}${text.length > 500 ? '...' : ''}`);
         }
       }
 
-      // 工具结果（错误才记录）
+      // Record tool results only when they are errors.
       const toolResultBlocks = contentBlocks.filter(block => block.type === 'tool_result' && (block as any).is_error);
       for (const result of toolResultBlocks) {
         const resultTyped = result as ToolResultBlock;
         const errorContent = typeof resultTyped.content === 'string' ? resultTyped.content : JSON.stringify(resultTyped.content);
         const truncated = errorContent.slice(0, 300);
-        compressedLines.push(`[${timestamp}] 工具执行错误: ${truncated}${errorContent.length > 300 ? '...' : ''}`);
+        compressedLines.push(`[${timestamp}] Tool execution error: ${truncated}${errorContent.length > 300 ? '...' : ''}`);
       }
     }
   }

@@ -1,9 +1,9 @@
 import type { SessionStats } from './log';
 
-// 问题严重程度
+// Issue severity
 export type Severity = 'info' | 'warning' | 'error' | 'critical';
 
-// 分析类别
+// Analysis category
 export type AnalysisCategory =
   | 'performance'
   | 'token_usage'
@@ -13,7 +13,7 @@ export type AnalysisCategory =
   | 'suggestions'
   | 'summary';
 
-// 单个发现/建议
+// Single finding / recommendation
 export interface Insight {
   id: string;
   category: AnalysisCategory;
@@ -27,7 +27,7 @@ export interface Insight {
   timestamp?: string;
 }
 
-// 工具使用统计
+// Tool usage stats
 export interface ToolStats {
   name: string;
   count: number;
@@ -39,7 +39,7 @@ export interface ToolStats {
   maxDuration?: number;
 }
 
-// 性能分析
+// Performance analysis
 export interface PerformanceAnalysis {
   avgTurnDuration: number;
   medianTurnDuration: number;
@@ -53,14 +53,14 @@ export interface PerformanceAnalysis {
   avgTurnsPerMinute: number;
 }
 
-// Token 分析
+// Token analysis
 export interface TokenAnalysis {
   avgInputTokensPerTurn: number;
   avgOutputTokensPerTurn: number;
   avgTotalTokensPerTurn: number;
   maxInputTokens: { value: number; timestamp: string };
   maxOutputTokens: { value: number; timestamp: string };
-  tokenEfficiency: number; // 输出 Token / 输入 Token 比率
+  tokenEfficiency: number; // Output token / input token ratio
   highTokenEntries: Array<{
     id?: string;
     inputTokens: number;
@@ -75,7 +75,7 @@ export interface TokenAnalysis {
   };
 }
 
-// 会话模式分析
+// Session pattern analysis
 export interface PatternAnalysis {
   userMessageCount: number;
   assistantMessageCount: number;
@@ -88,7 +88,7 @@ export interface PatternAnalysis {
   peakActivityTimes: string[];
 }
 
-// 错误分析
+// Error analysis
 export interface ErrorAnalysis {
   totalErrors: number;
   errorRate: number;
@@ -101,7 +101,7 @@ export interface ErrorAnalysis {
   frequentErrorTools: string[];
 }
 
-// 完整的分析结果
+// Full analysis result
 export interface AnalysisResult {
   stats: SessionStats;
   insights: Insight[];
@@ -118,7 +118,7 @@ export interface AnalysisResult {
   };
 }
 
-// 默认的空分析结果
+// Default empty analysis result
 export const DEFAULT_ANALYSIS: AnalysisResult = {
   stats: {
     totalMessages: 0,

@@ -147,3 +147,4 @@ vite.config.ts.timestamp-*
 
 #github
 .github/
+.DS_Store

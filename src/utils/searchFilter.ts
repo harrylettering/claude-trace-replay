@@ -1,7 +1,7 @@
 import type { LogEntry } from '../types/log';
 import type { SearchFilters, SearchResult, SearchMode, MessageTypeFilter } from '../types/search';
 
-// 检查字符串是否匹配搜索词
+// Check whether a string matches the query.
 function matchesQuery(
   text: string,
   query: string,
@@ -21,7 +21,7 @@ function matchesQuery(
         const regex = new RegExp(query, caseSensitive ? '' : 'i');
         return regex.test(text);
       } catch {
-        // 如果正则表达式无效，回退到简单匹配
+        // Fall back to a plain substring match when the regex is invalid.
         return searchText.includes(searchQuery);
       }
     case 'simple':
@@ -30,17 +30,17 @@ function matchesQuery(
   }
 }
 
-// 获取条目的搜索文本 - 检索原始日志的所有字段
+// Get the searchable text for an entry by serializing the raw payload.
 function getEntrySearchText(entry: LogEntry): string {
   return JSON.stringify(entry);
 }
 
-// 检查条目类型是否匹配
+// Check whether the entry type matches the filter.
 function matchesMessageType(entry: LogEntry, types: MessageTypeFilter[]): boolean {
   if (types.includes('all')) return true;
 
   if (types.includes('tool')) {
-    // 检查是否包含工具调用
+    // Treat entries with tool usage or tool results as tool messages.
     const content = entry.message?.content;
     const hasTool = Array.isArray(content) && content.some((c: any) =>
       c.type === 'tool_use' || c.type === 'tool_result'
@@ -51,7 +51,7 @@ function matchesMessageType(entry: LogEntry, types: MessageTypeFilter[]): boolea
   return types.includes(entry.type as MessageTypeFilter);
 }
 
-// 检查工具名称是否匹配
+// Check whether the tool name matches.
 function matchesToolName(entry: LogEntry, toolNames: string[]): boolean {
   if (toolNames.length === 0) return true;
 
@@ -68,7 +68,7 @@ function matchesToolName(entry: LogEntry, toolNames: string[]): boolean {
   });
 }
 
-// 检查时间范围
+// Check whether the entry falls inside the selected time range.
 function matchesTimeRange(entry: LogEntry, timeRange: { startTime?: string; endTime?: string }): boolean {
   const entryTime = new Date(entry.timestamp).getTime();
 
@@ -85,7 +85,7 @@ function matchesTimeRange(entry: LogEntry, timeRange: { startTime?: string; endT
   return true;
 }
 
-// 检查 Token 范围
+// Check whether token counts match the requested range.
 function matchesTokenRange(entry: LogEntry, tokenRange: {
   minInput?: number;
   maxInput?: number;
@@ -94,7 +94,7 @@ function matchesTokenRange(entry: LogEntry, tokenRange: {
   minTotal?: number;
   maxTotal?: number;
 }): boolean {
-  // 如果没有 Token 范围限制，或者条目不是 assistant 类型（没有 Token 数据），则通过
+  // If no token filter is active, or the entry has no token data, allow it through.
   const hasTokenFilter =
     tokenRange.minInput !== undefined ||
     tokenRange.maxInput !== undefined ||
@@ -105,7 +105,7 @@ function matchesTokenRange(entry: LogEntry, tokenRange: {
 
   if (!hasTokenFilter) return true;
 
-  // 从条目中提取 Token 数据
+  // Extract token data from the entry.
   const usage = entry.message?.usage || (entry as any).usage;
   if (!usage) return false;
 
@@ -126,7 +126,7 @@ function matchesTokenRange(entry: LogEntry, tokenRange: {
   return true;
 }
 
-// 检查是否有错误
+// Check whether the entry includes an error.
 function hasErrors(entry: LogEntry): boolean {
   const content = entry.message?.content;
   if (!Array.isArray(content)) return false;
@@ -140,7 +140,7 @@ function hasErrors(entry: LogEntry): boolean {
   });
 }
 
-// 检查是否有工具调用
+// Check whether the entry includes tool-related blocks.
 function hasTools(entry: LogEntry): boolean {
   const content = entry.message?.content;
   if (!Array.isArray(content)) return false;
@@ -150,7 +150,7 @@ function hasTools(entry: LogEntry): boolean {
   );
 }
 
-// 主过滤函数
+// Main filtering function.
 export function filterEntries(
   entries: LogEntry[],
   filters: SearchFilters
@@ -159,28 +159,28 @@ export function filterEntries(
   let matchCount = 0;
 
   for (const entry of entries) {
-    // 类型过滤
+    // Message-type filter.
     if (!matchesMessageType(entry, filters.messageTypes)) continue;
 
-    // 工具名称过滤
+    // Tool-name filter.
     if (!matchesToolName(entry, filters.toolNames)) continue;
 
-    // 时间范围过滤
+    // Time-range filter.
     if (!matchesTimeRange(entry, filters.timeRange)) continue;
 
-    // Token 范围过滤
+    // Token-range filter.
     if (!matchesTokenRange(entry, filters.tokenRange)) continue;
 
-    // 错误过滤
+    // Error-only filter.
     if (filters.onlyWithErrors && !hasErrors(entry)) continue;
 
-    // 工具过滤
+    // Tool-only filter.
     if (filters.onlyWithTools && !hasTools(entry)) continue;
 
-    // Sidechain 过滤
+    // Sidechain-only filter.
     if (filters.onlySidechain && !entry.isSidechain) continue;
 
-    // 搜索词匹配
+    // Query matching.
     const searchText = getEntrySearchText(entry);
     const matches = matchesQuery(
       searchText,
@@ -203,7 +203,7 @@ export function filterEntries(
   };
 }
 
-// 获取所有工具名称
+// Collect all distinct tool names.
 export function getToolNames(entries: LogEntry[]): string[] {
   const toolNames = new Set<string>();
 
@@ -226,7 +226,7 @@ export function getToolNames(entries: LogEntry[]): string[] {
   return Array.from(toolNames).sort();
 }
 
-// 验证正则表达式
+// Validate a regex pattern.
 export function isValidRegex(pattern: string): boolean {
   try {
     new RegExp(pattern);
@@ -236,7 +236,7 @@ export function isValidRegex(pattern: string): boolean {
   }
 }
 
-// 高亮匹配的文本
+// Highlight matching text.
 export function highlightText(
   text: string,
   query: string,
@@ -272,11 +272,11 @@ export function highlightText(
       parts.push({ text: match[0], highlight: true });
       lastIndex = match.index + match[0].length;
 
-      // 防止无限循环
+      // Prevent infinite loops from zero-length regex matches.
       if (match[0].length === 0) break;
     }
   } catch {
-    // 如果正则表达式失败，不进行高亮
+    // If regex construction fails, skip highlighting.
     return { parts: [{ text, highlight: false }] };
   }
 

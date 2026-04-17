@@ -128,7 +128,7 @@ export const ActionCardRenderer: React.FC<{ action: AgentAction }> = ({ action }
   };
 
   return (
-    <div className="group/card relative">
+    <div className="group/card relative flow-root">
       {renderCard()}
       
       {/* 底部工具栏：Token 统计 & 极客探查器入口 */}

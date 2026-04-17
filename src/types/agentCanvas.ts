@@ -35,6 +35,7 @@ export type LinkType =
   | 'agent_receive'  // 1 → 2
   | 'agent_response' // 2 → 1
   | 'response'       // 1 → 0
+  | 'processing'     // 2 → 2 self-loop (draw arc) processing (draw arc)
 
 // ─── Virtual Node (Python Node equivalent) ─────────────────────────────────────
 

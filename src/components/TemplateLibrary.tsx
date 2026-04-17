@@ -145,7 +145,7 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
         </div>
       </div>
 
-      {/* 搜索和过滤 */}
+      {/* Search and filters */}
       <div className="flex flex-wrap gap-4">
         <div className="flex-1 min-w-[200px]">
           <div className="relative">
@@ -186,7 +186,7 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
         </div>
       </div>
 
-      {/* 模板列表 */}
+      {/* Template list */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredTemplates.map((template) => (
           <div
@@ -295,7 +295,7 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
         )}
       </div>
 
-      {/* 编辑器弹窗 */}
+      {/* Editor modal */}
       {showEditor && (
         <TemplateEditor
           template={editingTemplate}
@@ -311,7 +311,7 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
         />
       )}
 
-      {/* 导入弹窗 */}
+      {/* Import modal */}
       {showImport && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
@@ -358,7 +358,7 @@ export function TemplateLibrary({ onSelectTemplate }: TemplateLibraryProps) {
   );
 }
 
-// 模板编辑器
+// Template editor
 function TemplateEditor({
   template,
   onClose,

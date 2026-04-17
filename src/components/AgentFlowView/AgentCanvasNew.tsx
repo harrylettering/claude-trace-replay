@@ -210,6 +210,13 @@ function getDisplayLabel(node: CanvasNodeData) {
   return node.displayName.replace(/^tool:/i, '')
 }
 
+function truncateStepText(value: string | undefined, max = 96) {
+  if (!value) return undefined
+  const compact = value.replace(/\s+/g, ' ').trim()
+  if (!compact) return undefined
+  return compact.length > max ? `${compact.slice(0, max - 1).trimEnd()}…` : compact
+}
+
 function getNodeShapeKind(node: CanvasNodeData): ShapeKind {
   if (node.entityType === 'user') return 'speech'
   if (node.entityType === 'main_agent') return 'chamfered'
@@ -1017,37 +1024,83 @@ function drawNode(
   ctx.restore()
 }
 
-function getEdgeStatus(edge: CanvasEdgeData | null, nodes: Map<string, CanvasNodeData>): EdgeStatus {
-  if (!edge) {
+function getEdgePhaseLabel(linkType: string) {
+  switch (linkType) {
+    case 'user_input': return 'User Input'
+    case 'agent_receive': return 'Agent Receive'
+    case 'thinking': return 'Reasoning'
+    case 'agent_call': return 'Agent Handoff'
+    case 'tool_call': return 'Tool Invocation'
+    case 'tool_result': return 'Tool Result'
+    case 'agent_result': return 'Result Relay'
+    case 'agent_response': return 'Response Prep'
+    case 'response': return 'User Response'
+    default: return 'Flow Step'
+  }
+}
+
+function getEdgeRoute(edge: CanvasEdgeData, nodes: Map<string, CanvasNodeData>) {
+  const source = nodes.get(edge.source)
+  const target = nodes.get(edge.target)
+  const sourceName = source ? getDisplayLabel(source) : edge.source
+  const targetName = target ? getDisplayLabel(target) : edge.target
+  return `${sourceName} -> ${targetName}`
+}
+
+function getEdgeStatusAtTime(
+  currentTime: number,
+  edges: Map<string, CanvasEdgeData>,
+  edgeTiming: Map<string, number>,
+  nodes: Map<string, CanvasNodeData>
+): EdgeStatus {
+  const orderedEdges = [...edges.values()]
+    .map((edge) => ({ edge, time: edgeTiming.get(edge.id) }))
+    .filter((item): item is { edge: CanvasEdgeData; time: number } => item.time !== undefined)
+    .sort((a, b) => a.time - b.time)
+
+  const active = orderedEdges.find(({ time }) => currentTime >= time && currentTime <= time + PARTICLE_DURATION)
+  if (active) {
+    const { edge } = active
+    const phase = getEdgePhaseLabel(edge.linkType)
     return {
-      edgeId: null,
-      title: 'Step Transition',
-      summary: 'Preparing the next scene',
-      detail: 'Previous nodes are fading out while the next call prepares to appear.',
+      edgeId: edge.id,
+      title: truncateStepText(edge.actionSummary, 88) ?? phase,
+      summary: `${phase} · ${getEdgeRoute(edge, nodes)}`,
+      detail: edge.actionDetail ?? `${phase} is currently in progress.`,
     }
   }
 
-  const source = nodes.get(edge.source)
-  const target = nodes.get(edge.target)
-  const sourceName = source?.displayName ?? edge.source
-  const targetName = target?.displayName ?? edge.target
-  const descriptions: Record<string, string> = {
-    user_input: 'User request enters the main agent pipeline.',
-    agent_receive: 'Main Agent forwards input into the reasoning stage.',
-    thinking: 'Assistant is internally reasoning before the next action.',
-    agent_call: 'Assistant hands control back to Main Agent for orchestration.',
-    tool_call: 'Main Agent dispatches a tool invocation.',
-    tool_result: 'Tool output returns to Main Agent.',
-    agent_result: 'Main Agent sends tool output back into reasoning.',
-    agent_response: 'Assistant prepares the final response.',
-    response: 'Main Agent returns the result to the user.',
+  const next = orderedEdges.find(({ time }) => time > currentTime)
+  const previous = [...orderedEdges].reverse().find(({ time }) => time <= currentTime)
+
+  if (next) {
+    const nextPhase = getEdgePhaseLabel(next.edge.linkType)
+    const previousLabel = previous
+      ? truncateStepText(previous.edge.actionSummary, 42) ?? getEdgePhaseLabel(previous.edge.linkType)
+      : 'initial scene'
+    return {
+      edgeId: next.edge.id,
+      title: truncateStepText(next.edge.actionSummary, 88) ?? `Up next: ${nextPhase}`,
+      summary: `Up next · ${nextPhase} · ${getEdgeRoute(next.edge, nodes)}`,
+      detail: `Transitioning from ${previousLabel} to the next scene while the upcoming call fades in.`,
+    }
+  }
+
+  if (previous) {
+    const previousPhase = getEdgePhaseLabel(previous.edge.linkType)
+    return {
+      edgeId: previous.edge.id,
+      title: truncateStepText(previous.edge.actionSummary, 88) ?? `${previousPhase} complete`,
+      summary: `Completed · ${previousPhase} · ${getEdgeRoute(previous.edge, nodes)}`,
+      detail: previous.edge.actionDetail ?? 'Playback has reached the end of the current flow.',
+    }
   }
 
   return {
-    edgeId: edge.id,
-    title: `${sourceName} -> ${targetName}`,
-    summary: edge.actionSummary,
-    detail: edge.actionDetail ?? descriptions[edge.linkType] ?? `${sourceName} communicates with ${targetName}.`,
+    edgeId: null,
+    title: 'Step Transition',
+    summary: 'Preparing the first scene',
+    detail: 'The agent flow is getting ready to reveal the first call in the sequence.',
   }
 }
 
@@ -1135,7 +1188,7 @@ function getSceneRenderState(currentTime: number, sceneId: number, scenes: Map<n
 }
 
 function shiftNodeForScene(node: CanvasNodeData, shiftX: number, shiftY: number): CanvasNodeData {
-  if (node.entityId === '1') return node
+  if (node.entityType !== 'tool') return node
   return {
     ...node,
     x: node.x + shiftX,
@@ -1189,8 +1242,9 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
   const lastMousePosRef = useRef({ x: 0, y: 0 })
 
   const activeEdge = getActiveEdgeAtTime(currentTime, canvasEdgesRef.current, edgeTimingRef.current)
-  const activeEdgeStatus = getEdgeStatus(activeEdge, canvasNodesRef.current)
-  const activeStepTheme = getStepTheme(activeEdge, canvasNodesRef.current)
+  const activeEdgeStatus = getEdgeStatusAtTime(currentTime, canvasEdgesRef.current, edgeTimingRef.current, canvasNodesRef.current)
+  const statusThemeEdge = activeEdgeStatus.edgeId ? canvasEdgesRef.current.get(activeEdgeStatus.edgeId) ?? activeEdge : activeEdge
+  const activeStepTheme = getStepTheme(statusThemeEdge ?? null, canvasNodesRef.current)
 
   const fitToView = useCallback((nodes: Map<string, CanvasNodeData>, width: number, height: number) => {
     if (nodes.size === 0 || width <= 0 || height <= 0) return
@@ -1464,14 +1518,12 @@ export function AgentCanvasNew({ data }: AgentCanvasNewProps) {
 
     canvasNodesRef.current.forEach((node) => {
       const sceneShift =
-        node.entityId === '1'
-          ? { x: 0, y: 0 }
-          : nodeSceneRef.current.has(node.entityId)
-            ? {
-                x: getSceneRenderState(currentTimeRef.current, nodeSceneRef.current.get(node.entityId)!, sceneInfoRef.current).shiftX,
-                y: getSceneRenderState(currentTimeRef.current, nodeSceneRef.current.get(node.entityId)!, sceneInfoRef.current).shiftY,
-              }
-            : { x: 0, y: 0 }
+        nodeSceneRef.current.has(node.entityId)
+          ? {
+              x: getSceneRenderState(currentTimeRef.current, nodeSceneRef.current.get(node.entityId)!, sceneInfoRef.current).shiftX,
+              y: getSceneRenderState(currentTimeRef.current, nodeSceneRef.current.get(node.entityId)!, sceneInfoRef.current).shiftY,
+            }
+          : { x: 0, y: 0 }
       const opacity = visibleNodeOpacity.get(node.entityId) ?? 0
       if (opacity <= 0.02) return
       ctx.save()

@@ -1,25 +1,25 @@
 
-// 提示词问题类型
+// Prompt issue types.
 export type IssueType =
-  | 'vague'                // 模糊不清
-  | 'too_short'            // 过于简短
-  | 'missing_context'      // 缺少上下文
-  | 'no_structure'         // 缺少结构
-  | 'no_examples'          // 缺少示例
-  | 'no_constraints'       // 缺少约束条件
-  | 'no_output_format'     // 缺少输出格式
-  | 'negative'             // 负面表述
-  | 'passive'              // 被动语态
-  | 'inefficient_token'    // Token 使用低效
-  | 'repeated'             // 重复内容
-  | 'missing_role'         // 缺少角色设定
-  | 'missing_steps'        // 缺少步骤分解
-  | 'other';               // 其他
+  | 'vague'                // Ambiguous
+  | 'too_short'            // Too short
+  | 'missing_context'      // Missing context
+  | 'no_structure'         // Missing structure
+  | 'no_examples'          // Missing examples
+  | 'no_constraints'       // Missing constraints
+  | 'no_output_format'     // Missing output format
+  | 'negative'             // Negatively framed
+  | 'passive'              // Passive voice
+  | 'inefficient_token'    // Token-inefficient
+  | 'repeated'             // Repetitive
+  | 'missing_role'         // Missing role definition
+  | 'missing_steps'        // Missing step breakdown
+  | 'other';               // Other
 
-// 问题严重程度
+// Issue severity.
 export type Severity = 'low' | 'medium' | 'high' | 'critical';
 
-// 提示词问题
+// Prompt issue.
 export interface PromptIssue {
   id: string;
   type: IssueType;
@@ -34,7 +34,7 @@ export interface PromptIssue {
   suggestion: string;
 }
 
-// 优化建议
+// Optimization suggestion.
 export interface PromptSuggestion {
   id: string;
   original: string;
@@ -44,7 +44,7 @@ export interface PromptSuggestion {
   category: string;
 }
 
-// 提示词统计
+// Prompt statistics.
 export interface PromptStats {
   totalPrompts: number;
   totalTokens: number;
@@ -56,7 +56,7 @@ export interface PromptStats {
   toolCallSuccessRate: number;
 }
 
-// 经验洞察
+// Experience insight.
 export interface ExperienceInsight {
   type: 'success' | 'failure' | 'neutral';
   category: 'workflow' | 'communication' | 'tool_use' | 'technical';
@@ -64,7 +64,7 @@ export interface ExperienceInsight {
   recommendation: string;
 }
 
-// 会话经验总结
+// Session experience summary.
 export interface SessionExperience {
   summary: string;
   strengths: string[];
@@ -73,17 +73,17 @@ export interface SessionExperience {
   nextSteps: string[];
 }
 
-// 提示词分析结果
+// Prompt analysis result.
 export interface PromptAnalysis {
   stats: PromptStats;
   issues: PromptIssue[];
   suggestions: PromptSuggestion[];
   bestPractices: string[];
   score: number;  // 0-100
-  experience?: SessionExperience; // 新增：经验沉淀
+  experience?: SessionExperience; // Added experiential learnings.
 }
 
-// 提示词模板
+// Prompt template.
 export interface PromptTemplate {
   id: string;
   name: string;
@@ -98,7 +98,7 @@ export interface PromptTemplate {
   isBuiltIn: boolean;
 }
 
-// LLM 配置
+// LLM configuration.
 export interface LLMConfig {
   id: string;
   name: string;
@@ -108,7 +108,7 @@ export interface LLMConfig {
   isDefault: boolean;
 }
 
-// 分析报告导出格式
+// Analysis report export format.
 export interface AnalysisReport {
   version: string;
   generatedAt: number;
@@ -121,14 +121,14 @@ export interface AnalysisReport {
   templates: PromptTemplate[];
 }
 
-// 模板库导出格式
+// Template library export format.
 export interface TemplateLibraryExport {
   version: string;
   exportedAt: number;
   templates: PromptTemplate[];
 }
 
-// 内置模板
+// Built-in templates.
 export const BUILT_IN_TEMPLATES: PromptTemplate[] = [
   {
     id: 'built-in-code-review',
@@ -231,7 +231,7 @@ Make sure the documentation is clear, accurate, and practical.`,
   },
 ];
 
-// 默认 LLM 配置
+// Default LLM configurations.
 export const DEFAULT_LLM_CONFIGS: LLMConfig[] = [
   {
     id: 'openai-default',
@@ -251,7 +251,7 @@ export const DEFAULT_LLM_CONFIGS: LLMConfig[] = [
   },
 ];
 
-// 问题类型显示名称
+// User-facing labels for issue types.
 export const ISSUE_TYPE_LABELS: Record<IssueType, string> = {
   vague: 'Vague',
   too_short: 'Too Short',
@@ -269,7 +269,7 @@ export const ISSUE_TYPE_LABELS: Record<IssueType, string> = {
   other: 'Other',
 };
 
-// 严重程度颜色
+// Severity color mapping.
 export const SEVERITY_COLORS: Record<Severity, string> = {
   low: 'text-blue-400 bg-blue-500/20',
   medium: 'text-amber-400 bg-amber-500/20',
@@ -277,7 +277,7 @@ export const SEVERITY_COLORS: Record<Severity, string> = {
   critical: 'text-red-400 bg-red-500/20',
 };
 
-// 严重程度显示名称
+// User-facing labels for severity.
 export const SEVERITY_LABELS: Record<Severity, string> = {
   low: 'Low',
   medium: 'Medium',

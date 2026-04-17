@@ -209,6 +209,9 @@ export class CallGraphBuilder {
           links.push(this.createLink('agent_receive', ENTITY_ID.MAIN_AGENT, ENTITY_ID.ASSISTANT))
         }
         break
+      default:
+          links.push(this.createLink('processing', ENTITY_ID.MAIN_AGENT, ENTITY_ID.MAIN_AGENT))
+        break
     }
 
     return links

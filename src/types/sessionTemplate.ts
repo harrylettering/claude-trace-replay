@@ -1,4 +1,4 @@
-// 会话步骤类型
+// Session step type
 export interface SessionStep {
   id: string;
   type: 'user_prompt' | 'system_prompt' | 'tool_call' | 'assistant_response';
@@ -10,7 +10,7 @@ export interface SessionStep {
   isOptional?: boolean;
 }
 
-// 会话模板分类
+// Session template category
 export type SessionTemplateCategory =
   | 'code_development'
   | 'data_analysis'
@@ -23,7 +23,7 @@ export type SessionTemplateCategory =
   | 'testing'
   | 'other';
 
-// 会话模板
+// Session template
 export interface SessionTemplate {
   id: string;
   name: string;
@@ -43,7 +43,7 @@ export interface SessionTemplate {
   version?: string;
 }
 
-// 会话实例（从模板创建的具体会话）
+// Session instance created from a template
 export interface SessionInstance {
   id: string;
   templateId: string;
@@ -57,14 +57,14 @@ export interface SessionInstance {
   notes?: string;
 }
 
-// 模板库导出格式
+// Template library export format
 export interface SessionTemplateLibraryExport {
   version: string;
   exportedAt: number;
   templates: SessionTemplate[];
 }
 
-// 分类显示信息
+// Category display metadata
 export const CATEGORY_INFO: Record<SessionTemplateCategory, { label: string; icon: string; color: string }> = {
   code_development: { label: 'Code Development', icon: '💻', color: 'from-blue-500 to-cyan-500' },
   data_analysis: { label: 'Data Analysis', icon: '📊', color: 'from-green-500 to-emerald-500' },
@@ -78,7 +78,7 @@ export const CATEGORY_INFO: Record<SessionTemplateCategory, { label: string; ico
   other: { label: 'Other', icon: '📦', color: 'from-slate-500 to-gray-500' },
 };
 
-// 分类列表
+// Category list
 export const CATEGORIES: Array<{ value: SessionTemplateCategory; label: string }> = [
   { value: 'code_development', label: 'Code Development' },
   { value: 'data_analysis', label: 'Data Analysis' },
@@ -92,7 +92,7 @@ export const CATEGORIES: Array<{ value: SessionTemplateCategory; label: string }
   { value: 'other', label: 'Other' },
 ];
 
-// 步骤类型显示信息
+// Step type display metadata
 export const STEP_TYPE_INFO: Record<SessionStep['type'], { label: string; icon: string; color: string }> = {
   user_prompt: { label: 'User Prompt', icon: '👤', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
   system_prompt: { label: 'System Prompt', icon: '⚙️', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
@@ -100,7 +100,7 @@ export const STEP_TYPE_INFO: Record<SessionStep['type'], { label: string; icon: 
   assistant_response: { label: 'Assistant Reply', icon: '🤖', color: 'bg-green-500/20 text-green-400 border-green-500/30' },
 };
 
-// 内置会话模板
+// Built-in session templates
 export const BUILT_IN_SESSION_TEMPLATES: SessionTemplate[] = [
   {
     id: 'built-in-full-code-dev',

@@ -1,6 +1,6 @@
 import type { ActionEnhancedEntry } from './agent';
 
-// ============ 内容块类型 ============
+// ============ Content Blocks ============
 
 
 export interface TextBlock {
@@ -44,7 +44,7 @@ export type ContentBlock =
   | ImageBlock
   | { type: string; [key: string]: unknown };
 
-// ============ Token 使用量 ============
+// ============ Token Usage ============
 
 export interface UsageInfo {
   input_tokens: number;
@@ -58,7 +58,7 @@ export interface UsageInfo {
   };
 }
 
-// ============ 工具执行结果详情 ============
+// ============ Tool Execution Result Details ============
 
 export interface ToolUseResult {
   status: 'completed' | 'error' | 'cancelled';
@@ -82,7 +82,7 @@ export interface ToolUseResult {
   };
 }
 
-// ============ 消息类型 ============
+// ============ Message Type ============
 
 export interface Message {
   role: 'user' | 'assistant';
@@ -93,7 +93,7 @@ export interface Message {
   stop_sequence?: string | null;
 }
 
-// ============ 日志条目分类 ============
+// ============ Log Entry Categories ============
 
 export type EntryCategory =
   | 'USER_INPUT'
@@ -110,19 +110,19 @@ export type EntryCategory =
   | 'FILE_HISTORY'
   | 'UNKNOWN';
 
-// ============ 日志条目 ============
+// ============ Log Entry ============
 
 export interface LogEntry extends ActionEnhancedEntry {
-  // 核心标识
+  // Core identity fields.
   uuid: string;
   parentUuid: string | null;
   type: string;
   timestamp: string;
 
-  // 消息内容
+  // Message payload.
   message?: Message;
 
-  // 会话元数据
+  // Session metadata.
   sessionId?: string;
   version?: string;
   cwd?: string;
@@ -131,20 +131,20 @@ export interface LogEntry extends ActionEnhancedEntry {
   entrypoint?: string;
   userType?: string;
 
-  // Agent/Tool 相关
+  // Agent and tool metadata.
   isSidechain?: boolean;
   promptId?: string;
   toolUseResult?: ToolUseResult;
   sourceToolAssistantUUID?: string;
 
-  // 分类（解析时添加）
+  // Derived category assigned during parsing.
   _category?: EntryCategory;
 
-  // 平行分叉相关 (Visual Fork)
+  // Visual fork metadata.
   isForked?: boolean;
   forkBranchId?: string;
 
-  // 兼容旧版本字段
+  // Legacy compatibility fields.
   isMeta?: boolean;
   permissionMode?: string;
   snapshot?: {
@@ -157,7 +157,7 @@ export interface LogEntry extends ActionEnhancedEntry {
   messageCount?: number;
 }
 
-// ============ 解析结果 ============
+// ============ Parse Result ============
 
 export interface ToolCall {
   id: string;
@@ -198,7 +198,7 @@ export interface ParsedLogData {
   }>;
 }
 
-// ============ 向后兼容类型别名 ============
+// ============ Backward-Compatible Type Aliases ============
 
 export type UsageData = UsageInfo;
 export type MessageContent = ContentBlock;

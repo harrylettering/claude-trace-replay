@@ -41,10 +41,10 @@ Output language rule:
     onResetCliAnalysis?.();
   }, [onResetCliAnalysis]);
 
-  // 基础规则提取 (启发式)
+  // Heuristic rule extraction.
   const lessons: Lesson[] = useMemo(() => extractLessons(data.entries), [data.entries]);
 
-  // 导出复盘文档
+  // Export the retrospective report.
   const exportRetrospective = () => {
     const timestamp = new Date().toLocaleString('en-US');
     let content = `# Claude Session Retrospective\n\nGenerated: ${timestamp}\n\n---\n\n## Terminal Analysis Summary\n\n${cliResult || 'No terminal analysis available yet'}\n\n---\n\n## Automatically Extracted Rules\n\n`;
@@ -57,7 +57,7 @@ Output language rule:
       });
     }
 
-    // 下载文件
+    // Trigger the download.
     const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -105,7 +105,7 @@ Output language rule:
       </div>
 
       <div className="flex-1 space-y-6 overflow-y-auto pr-2 custom-scrollbar">
-        {/* CLI 复盘展示区 */}
+        {/* CLI retrospective panel */}
         {activeTab === 'cli' && (
           <div className="space-y-4 animate-in fade-in duration-500">
             <div className="space-y-4">
@@ -189,7 +189,7 @@ Output language rule:
           </div>
         )}
 
-        {/* 自动规则提取 */}
+        {/* Automatically extracted rules */}
         {activeTab === 'rules' && (
           <div className="space-y-4 animate-in fade-in duration-500">
             <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Error Log Collection</h3>
@@ -201,7 +201,7 @@ Output language rule:
             ) : (
               lessons.map((lesson) => (
                 <div key={lesson.id} className="mb-4">
-                  {/* 错误卡片 */}
+                  {/* Error card */}
                   {lesson.entry?.parsedAction && (
                     <ActionCardRenderer action={lesson.entry.parsedAction} />
                   )}

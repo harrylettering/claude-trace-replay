@@ -32,7 +32,7 @@ export default function App() {
   const [claudeCliResult, setClaudeCliResult] = useState('')
   const [claudeCliError, setClaudeCliError] = useState<string | null>(null)
 
-  // --- WebSocket 实时监听状态 ---
+  // --- WebSocket live watch state ---
   const [isWsConnected, setIsWsConnected] = useState(false)
   const [discoveryList, setDiscoveryList] = useState<any[]>([])
   const [manualPath, setManualPath] = useState('')
@@ -46,7 +46,7 @@ export default function App() {
     setClaudeCliError(null)
   }, [])
 
-  // 建立 WebSocket 连接
+  // Establish the WebSocket connection.
   useEffect(() => {
     const ws = new WebSocket('ws://localhost:4000')
     wsRef.current = ws
@@ -133,7 +133,7 @@ export default function App() {
     }
   }, [isWsConnected])
 
-  // 增量更新逻辑
+  // Incremental update logic.
   const updateLogDataIncrementally = useCallback((newEntry: LogEntry) => {
     setLogData(prev => {
       if (!prev) {
@@ -182,7 +182,7 @@ export default function App() {
           <p className="text-slate-400 text-lg">Automatically discover active sessions from the last 24 hours, or enter a path manually.</p>
         </div>
 
-        {/* 自动发现列表 */}
+        {/* Auto-discovered session list */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {discoveryList.map(session => (
             <button
@@ -243,7 +243,7 @@ export default function App() {
           )}
         </div>
 
-        {/* 底部双模式入口 */}
+        {/* Bottom dual-mode entry points */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-10">
             <div className="p-8 rounded-3xl border border-slate-800 bg-slate-900/20 backdrop-blur-md relative group">
               <div className="flex items-center gap-3 mb-6">

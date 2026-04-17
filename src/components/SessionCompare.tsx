@@ -99,14 +99,14 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
   const [loadingA, setLoadingA] = useState(false);
   const [loadingB, setLoadingB] = useState(false);
 
-  // AI 对比分析状态
+  // AI comparison analysis state.
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzeResult, setAnalyzeResult] = useState('');
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const [isWsConnected, setIsWsConnected] = useState(false);
 
-  // 建立 WebSocket 连接
+  // Establish the WebSocket connection.
   useEffect(() => {
     const ws = new WebSocket('ws://localhost:4000');
     wsRef.current = ws;
@@ -165,7 +165,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
           data: result.data,
           name: file.name,
         });
-        // 清除之前的分析结果
+        // Clear the previous analysis result.
         setAnalyzeResult('');
         setAnalyzeError(null);
       } catch (err) {
@@ -188,11 +188,11 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
     setAnalyzeError(null);
   }, []);
 
-  // 运行 AI 对比分析
+  // Run AI comparison analysis.
   const runCompareAnalysis = useCallback(() => {
     if (!sessionA || !sessionB || !wsRef.current || !isWsConnected) return;
 
-    // 压缩两个会话
+    // Compress both sessions before sending them to the backend.
     const compressedA = compressLogEntries(sessionA.data.entries);
     const compressedB = compressLogEntries(sessionB.data.entries);
 
@@ -214,9 +214,9 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
         <p className="text-slate-400">Load two sessions and compare them side by side</p>
       </div>
 
-      {/* 会话加载区域 */}
+      {/* Session loading area */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* 会话 A */}
+        {/* Session A */}
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -268,7 +268,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
           )}
         </div>
 
-        {/* 会话 B */}
+        {/* Session B */}
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -321,7 +321,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
         </div>
       </div>
 
-      {/* AI 对比分析按钮 */}
+      {/* AI comparison trigger */}
       {bothLoaded && (
         <div className="bg-gradient-to-r from-indigo-900/50 to-purple-900/50 rounded-xl border border-indigo-500/30 p-6">
           <div className="flex items-center justify-between mb-4">
@@ -386,10 +386,10 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
         </div>
       )}
 
-      {/* 对比结果 */}
+      {/* Comparison results */}
       {bothLoaded ? (
         <div className="space-y-6">
-          {/* 总体统计 */}
+          {/* Overall stats */}
           <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <BarChart3 className="w-5 h-5" />
@@ -429,7 +429,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
             </div>
           </div>
 
-          {/* Token 对比 */}
+          {/* Token comparison */}
           <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Zap className="w-5 h-5" />
@@ -460,7 +460,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
             </div>
           </div>
 
-          {/* 工具对比 */}
+          {/* Tool comparison */}
           <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Settings className="w-5 h-5" />
@@ -510,7 +510,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
             </div>
           </div>
 
-          {/* 模型对比 */}
+          {/* Model comparison */}
           <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Settings className="w-5 h-5" />

@@ -18,7 +18,7 @@ interface StatCard {
 export function SessionOverview({ data }: SessionOverviewProps) {
   const { stats } = data;
 
-  // 使用 useMemo 缓存卡片数据
+  // Cache card data with useMemo.
   const cards: StatCard[] = useMemo(() => [
     {
       title: 'Total Messages',
@@ -71,7 +71,7 @@ export function SessionOverview({ data }: SessionOverviewProps) {
     },
   ], [stats]);
 
-  // 辅助函数：获取图标颜色类名
+  // Helper for choosing the icon color class.
   const getIconColorClass = (color: string) => {
     return color.replace('from-', 'text-').replace(' to-', '-500').split(' ')[0];
   };
@@ -83,7 +83,7 @@ export function SessionOverview({ data }: SessionOverviewProps) {
         <p className="text-slate-400">Complete statistics for this Claude Code session</p>
       </div>
 
-      {/* 统计卡片 */}
+      {/* Summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card, idx) => (
           <div key={idx} className="bg-slate-800 rounded-xl p-5 border border-slate-700">
@@ -103,7 +103,7 @@ export function SessionOverview({ data }: SessionOverviewProps) {
         ))}
       </div>
 
-      {/* 使用的模型 */}
+      {/* Models used */}
       {stats.modelsUsed.length > 0 && (
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
           <h3 className="text-lg font-semibold mb-4">Models Used</h3>

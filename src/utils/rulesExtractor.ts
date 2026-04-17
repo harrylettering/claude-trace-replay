@@ -14,14 +14,14 @@ export interface Lesson {
 export function extractLessons(entries: LogEntry[]): Lesson[] {
   const lessons: Lesson[] = [];
   
-  // 遍历寻找 [错误指令] -> [修复动作] -> [成功验证] 的模式
+  // Look for the pattern: failed command -> fix action -> successful validation.
   for (let i = 0; i < entries.length - 2; i++) {
     const current = entries[i].parsedAction;
     
-    // 1. 发现报错指令
+    // 1. Find a failed terminal command.
     if (current?.type === 'TerminalCommand' && current.exitCode !== 0 && current.exitCode !== -1) {
       
-      // 2. 寻找后续的 CodeWrite (修复动作)
+      // 2. Look for a follow-up CodeWrite action as the fix.
       let fixAction: AgentAction | undefined;
       let fixIndex = -1;
       
@@ -33,7 +33,7 @@ export function extractLessons(entries: LogEntry[]): Lesson[] {
         }
       }
       
-      // 3. 寻找修复后的成功验证
+      // 3. Look for a successful validation after the fix.
       if (fixAction && fixIndex !== -1) {
         let successFound = false;
         for (let k = fixIndex + 1; k < Math.min(fixIndex + 5, entries.length); k++) {
@@ -50,7 +50,7 @@ export function extractLessons(entries: LogEntry[]): Lesson[] {
             errorCommand: current.command,
             errorMessage: current.stderr || current.output,
             fixDescription: (fixAction as any).instruction || 'Applied code changes',
-            suggestedRule: `当运行 "${current.command}" 遇到类似错误时，应优先检查并执行: ${(fixAction as any).instruction || '对应的修复逻辑'}。`,
+            suggestedRule: `When running "${current.command}" and encountering a similar error, first check and apply: ${(fixAction as any).instruction || 'the corresponding fix logic'}.`,
             severity: 'medium',
             entry: entries[i]
           });

@@ -43,19 +43,19 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [expandedDetails, setExpandedDetails] = useState<Set<string>>(new Set());
 
-  // 使用 useMemo 缓存树形构建
+  // Cache the tree build with useMemo.
   const { flatNodes, messageMap } = useMemo(() => {
     const messageMap = new Map<string, TreeNode>();
     const childSet = new Set<string>();
 
-    // 第一步：为所有有 uuid 的 entry 创建节点
+    // Step 1: create a node for every entry that has a UUID.
     entries.forEach(entry => {
       if (entry.uuid) {
         messageMap.set(entry.uuid, { ...entry, children: [] });
       }
     });
 
-    // 第二步：建立父子关系
+    // Step 2: connect parent-child relationships.
     entries.forEach(entry => {
       if (entry.uuid && entry.parentUuid && messageMap.has(entry.parentUuid)) {
         messageMap.get(entry.parentUuid)!.children.push(messageMap.get(entry.uuid)!);
@@ -63,7 +63,7 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
       }
     });
 
-    // 第三步：不是任何节点子节点的 entry 就是根节点
+    // Step 3: entries that are not children of any other node become roots.
     const rootMessages: TreeNode[] = [];
     entries.forEach(entry => {
       if (entry.uuid && !childSet.has(entry.uuid)) {
@@ -71,7 +71,7 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
       }
     });
 
-    // 第四步：如果仍然没有根节点（例如所有 entry 都没有 uuid），将所有 entry 作为扁平列表
+    // Step 4: if no roots exist (for example, no entries have UUIDs), fall back to a flat list.
     if (rootMessages.length === 0 && entries.length > 0) {
       entries.forEach(entry => {
         rootMessages.push({ ...entry, children: [] });
@@ -85,7 +85,7 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
     return { flatNodes, messageMap, rootMessages };
   }, [entries]);
 
-  // 使用 useMemo 过滤可见节点
+  // Cache the visible node filtering.
   const visibleNodes = useMemo(() => {
     const result: FlatNode[] = [];
     let skipUntilDepth: number | null = null;
@@ -103,7 +103,7 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
     return result;
   }, [flatNodes, collapsed, messageMap]);
 
-  // 使用 useCallback 优化事件处理
+  // Memoize event handlers.
   const toggleCollapse = useCallback((key: string) => {
     setCollapsed(prev => {
       const next = new Set(prev);
@@ -227,7 +227,7 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
         </div>
       </div>
 
-      {/* 图例 */}
+      {/* Legend */}
       <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
         <h3 className="font-semibold mb-3 text-sm">Legend</h3>
         <div className="flex flex-wrap gap-4">

@@ -27,7 +27,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export function TokenDashboard({ data }: TokenDashboardProps) {
   const { tokenUsage, stats } = data;
 
-  // 使用 useMemo 缓存累计数据计算
+  // Cache cumulative data calculations with useMemo.
   const cumulativeData = useMemo(() => {
     return tokenUsage.reduce((acc, curr, index) => {
       const prev = acc[index - 1] || { cumulativeInput: 0, cumulativeOutput: 0, cumulativeTotal: 0 };
@@ -42,7 +42,7 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
     }, [] as Array<any>);
   }, [tokenUsage]);
 
-  // 使用 useMemo 缓存每次请求的数据
+  // Cache per-request data with useMemo.
   const perRequestData = useMemo(() => {
     return tokenUsage.map(d => ({ ...d, time: new Date(d.timestamp).toLocaleTimeString() }));
   }, [tokenUsage]);
@@ -54,7 +54,7 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
         <p className="text-slate-400">Detailed token consumption analysis</p>
       </div>
 
-      {/* 汇总卡片 */}
+      {/* Summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
           <div className="flex items-center gap-3 mb-3">
@@ -85,7 +85,7 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
         </div>
       </div>
 
-      {/* 每次请求的 Token 使用 */}
+      {/* Per-request token usage */}
       {tokenUsage.length > 0 && (
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
           <h3 className="text-lg font-semibold mb-4">Per-Request Token Usage</h3>
@@ -104,7 +104,7 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
         </div>
       )}
 
-      {/* 累计 Token 使用 */}
+      {/* Cumulative token usage */}
       {cumulativeData.length > 0 && (
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
           <h3 className="text-lg font-semibold mb-4">Cumulative Token Usage</h3>

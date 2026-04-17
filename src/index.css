@@ -3,9 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 赛博科技风全局变量 */
+/* Global cyberpunk-style variables */
 :root {
-  /* 主色调 */
+  /* Primary palette */
   --cyber-primary: #4f46e5;
   --cyber-secondary: #8b5cf6;
   --cyber-accent: #06b6d4;
@@ -13,7 +13,7 @@
   --cyber-glow-secondary: rgba(139, 92, 246, 0.4);
   --cyber-glow-accent: rgba(6, 182, 212, 0.4);
 
-  /* 状态色 */
+  /* Status colors */
   --cyber-success: #10b981;
   --cyber-error: #ef4444;
   --cyber-warning: #f59e0b;
@@ -22,24 +22,24 @@
   --cyber-glow-error: rgba(239, 68, 68, 0.4);
   --cyber-glow-warning: rgba(245, 158, 11, 0.4);
 
-  /* 背景色 */
+  /* Background colors */
   --cyber-bg: #020617;
   --cyber-bg-light: #0f172a;
   --cyber-bg-card: rgba(15, 23, 42, 0.8);
   --cyber-border: rgba(148, 163, 184, 0.2);
 
-  /* 字体 */
+  /* Fonts */
   --font-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 
-  /* 效果 */
+  /* Effects */
   --cyber-glow: 0 0 15px var(--cyber-glow-primary);
   --cyber-glow-hover: 0 0 25px var(--cyber-glow-primary);
   --cyber-glow-error: 0 0 15px var(--cyber-glow-error);
   --cyber-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 全局噪点纹理背景 */
+/* Global noise texture background */
 body::before {
   content: '';
   position: fixed;
@@ -98,7 +98,7 @@ body::after {
   z-index: 2;
 }
 
-/* 滚动条赛博风格 */
+/* Cyber-style scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -118,7 +118,7 @@ body::after {
   background: linear-gradient(to bottom, var(--cyber-secondary), var(--cyber-accent));
 }
 
-/* 全局动画定义 */
+/* Global animation definitions */
 @keyframes pulse-glow {
   0%, 100% {
     box-shadow: var(--cyber-glow);
@@ -170,7 +170,7 @@ body::after {
   }
 }
 
-/* 卡片基础样式 */
+/* Base card styling */
 .cyber-card {
   background: var(--cyber-bg-card);
   border: 1px solid var(--cyber-border);
@@ -203,13 +203,13 @@ body::after {
   opacity: 1;
 }
 
-/* 错误卡片样式 */
+/* Error card styling */
 .cyber-card-error {
   border-color: var(--cyber-error);
   animation: pulse-error 2s ease-in-out infinite;
 }
 
-/* 按钮赛博风格 */
+/* Cyber-style buttons */
 .cyber-btn {
   background: linear-gradient(135deg, var(--cyber-primary), var(--cyber-secondary));
   border: none;
@@ -243,7 +243,7 @@ body::after {
   left: 100%;
 }
 
-/* Markdown 样式 */
+/* Markdown styling */
 .markdown-content {
   line-height: 1.7;
 }
@@ -315,7 +315,7 @@ body::after {
   text-shadow: 0 0 8px var(--cyber-glow-accent);
 }
 
-/* 渐变色文字 */
+/* Gradient text */
 .gradient-text {
   background: linear-gradient(135deg, var(--cyber-primary), var(--cyber-secondary), var(--cyber-accent));
   background-size: 200% 200%;
@@ -325,7 +325,7 @@ body::after {
   background-clip: text;
 }
 
-/* 入场动画 */
+/* Entrance animation */
 .stagger-reveal > * {
   animation: slide-up 0.5s ease forwards;
   opacity: 0;

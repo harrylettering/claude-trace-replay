@@ -1,4 +1,4 @@
-// 简易的 IndexedDB 封装，用于存储庞大的 Base64 截图，防止 React 状态树 OOM
+// Lightweight IndexedDB wrapper for large Base64 screenshots to avoid bloating the React state tree.
 
 const DB_NAME = 'ClaudeObserverDB';
 const STORE_NAME = 'images';
@@ -50,7 +50,7 @@ export async function getImage(id: string): Promise<string | null> {
   });
 }
 
-// 可选：清理过期图片以释放磁盘空间
+// Optional helper for clearing stored images and reclaiming disk space.
 export async function clearAllImages(): Promise<void> {
   const db = await getDB();
   return new Promise((resolve, reject) => {

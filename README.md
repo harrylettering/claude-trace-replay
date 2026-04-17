@@ -1,11 +1,21 @@
 # Claude Log Analyzer
 
 <p align="center">
-  <strong>Visual analytics for Claude Code session logs.</strong>
+  <strong>Turn raw Claude Code logs into something you can actually understand.</strong>
 </p>
 
 <p align="center">
-  Turn Claude Code JSONL logs into timelines, token insights, agent-flow playback, prompt retrospectives, and session comparisons.
+  Replay agent behavior, inspect tool calls, spot token spikes, compare sessions, and figure out why an AI coding run went great or sideways.
+</p>
+
+<p align="center">
+  <a href="https://github.com/harrylettering/claude-log-analyzer/stargazers">Star on GitHub</a>
+  ·
+  <a href="#quick-start">Quick Start</a>
+  ·
+  <a href="#screenshots">Screenshots</a>
+  ·
+  <a href="#why-people-star-this">Why People Star This</a>
 </p>
 
 <p align="center">
@@ -16,54 +26,65 @@
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" />
 </p>
 
+![Claude Log Analyzer Overview](docs/screenshots/session-overview.png)
+
+## Why People Star This
+
+Most Claude Code session logs are technically rich and visually painful.
+
+This project turns `.jsonl` logs into a visual debugging and review workspace so you can:
+
+- See what the agent actually did, in order
+- Understand which tool calls consumed time and tokens
+- Replay agent-to-tool handoffs instead of reading raw event blocks
+- Compare two sessions to learn what changed
+- Review prompt quality and collaboration patterns after a run
+
+If you use Claude Code seriously, this helps you move from "I have a log file" to "I know what happened."
+
+## What Makes It Useful
+
+- **Agent Flow Replay**: watch the call graph animate step by step around the main agent
+- **Current Step Context**: inspect what is happening right now, not just the final output
+- **Searchable Timeline**: browse tool calls, thoughts, diffs, file reads, terminal commands, and results
+- **Token Analytics**: identify expensive turns and usage spikes fast
+- **Session Compare**: diff two runs across messages, tokens, tools, and models
+- **AI Retrospective**: surface strengths, weaknesses, and next-step improvements
+- **Prompt Review**: inspect prompt and collaboration quality after the fact
+
+## Built For
+
+- Developers debugging noisy Claude Code sessions
+- People reviewing long agent runs with many tools
+- Teams trying to understand why one prompt or workflow worked better than another
+- Anyone who wants to learn from real AI coding traces instead of guessing
+
 ## Demo
 
-https://github.com/user-attachments/assets/ab2f4640-be88-4c1f-aedf-dd353e46ef6a
-
-## Why This Exists
-
-Claude Code sessions can become long, tool-heavy, and hard to review from raw `.jsonl` files alone.
-Claude Log Analyzer gives those sessions a visual interface so you can understand what happened, where tokens went, which tools were used, how the agent moved through the task, and what can be improved next time.
-
-Use it to:
-
-- Debug slow or noisy Claude Code sessions
-- Review tool calls, tool results, and parent-child message structure
-- Track token usage spikes across a session
-- Replay agent workflows step by step
-- Compare two sessions side by side
-- Extract prompt and collaboration improvement ideas
-
-## Highlights
-
-- **Agent Flow Replay**: animated call-and-return visualization centered on `Main Agent`
-- **Current Step Insight**: see who called whom and what happened at each step
-- **Timeline Inspection**: searchable, expandable session timeline with rich event cards
-- **Token Analytics**: per-request and aggregate token usage charts
-- **AI Retrospective**: generate strengths, weaknesses, and next-step recommendations
-- **Session Compare**: compare two Claude Code runs across messages, tokens, tools, and models
+- Overview video: [claude-log-analyzer-github.mp4](docs/screenshots/claude-log-analyzer-github.mp4)
+- Full demo clip: [claude-log-analyzer.mp4](docs/screenshots/claude-log-analyzer.mp4)
 
 ## Screenshots
 
-### Core Dashboards
+### Session Intelligence
 
 | Session Overview | Token Usage |
 | --- | --- |
 | ![Session Overview](docs/screenshots/session-overview.png) | ![Token Usage](docs/screenshots/token-usage.png) |
 
-| Session Timeline | Conversation Flow |
+| Session Timeline | AI Analysis |
 | --- | --- |
-| ![Session Timeline](docs/screenshots/session-timeline.png) | ![Conversation Flow](docs/screenshots/conversation-flow.png) |
+| ![Session Timeline](docs/screenshots/session-timeline.png) | ![AI Analysis](docs/screenshots/ai-analysis.png) |
 
-| Session Compare | AI Analysis |
+### Flow Visualization
+
+| Conversation Flow | Agent Flow |
 | --- | --- |
-| ![Session Compare](docs/screenshots/session-compare.png) | ![AI Analysis](docs/screenshots/ai-analysis.png) |
+| ![Conversation Flow](docs/screenshots/conversation-flow.png) | ![Agent Flow Bash Return](docs/screenshots/agent-flow-bash.png) |
 
-### Agent Flow
-
-| Tool Return to Main Agent | Assistant Return to Main Agent |
+| Session Compare | Agent Flow Assistant Return |
 | --- | --- |
-| ![Agent Flow Bash Return](docs/screenshots/agent-flow-bash.png) | ![Agent Flow Assistant Return](docs/screenshots/agent-flow-assistant.png) |
+| ![Session Compare](docs/screenshots/session-compare.png) | ![Agent Flow Assistant Return](docs/screenshots/agent-flow-assistant.png) |
 
 ## Quick Start
 
@@ -80,11 +101,10 @@ cd claude-log-analyzer
 npm install
 ```
 
-### Run Locally
+### Run
 
 ```bash
-./start-backend.sh
-./start-frontend.sh
+./start.sh
 ```
 
 Open `http://localhost:3000`.
@@ -101,31 +121,44 @@ npm run build
 npm run preview
 ```
 
-## How It Works
+## In 30 Seconds
 
-1. Load a Claude Code `.jsonl` session log.
-2. The parser normalizes entries into messages, tool calls, token usage, parent-child relationships, and derived analysis data.
-3. The UI exposes synchronized views so you can inspect the same session from different angles.
-4. Analysis modules generate summaries, prompt guidance, and reusable collaboration patterns from the parsed session.
+1. Open the app locally.
+2. Load a Claude Code `.jsonl` log.
+3. Jump between timeline, token, flow, compare, and analysis views.
+4. Find the exact step where the run slowed down, got noisy, or went off track.
 
 ## Main Views
 
-| View | What It Helps You Understand |
+| View | What You Learn |
 | --- | --- |
-| Session Overview | High-level stats for messages, tokens, duration, models, and tool calls |
-| Session Timeline | Chronological actions, searchable messages, diffs, and tool results |
-| Agent Flow | Animated agent/tool call relationships and current-step context |
-| Conversation Flow | Parent-child message hierarchy and conversation depth |
-| Token Usage | Token trends, spikes, and per-request usage |
-| AI Analysis | Retrospective insights and recommendations |
-| Prompt Optimizer | Prompt quality review and improvement ideas |
-| Session Compare | Side-by-side comparison across two sessions |
+| Session Overview | High-level stats for tokens, messages, models, duration, and tools |
+| Session Timeline | Chronological actions, tool usage, diffs, and results |
+| Agent Flow | Animated handoffs between user, main agent, assistant, and tools |
+| Conversation Flow | Parent-child structure and message depth |
+| Token Usage | Spikes, cost-heavy turns, and usage trends |
+| AI Analysis | Retrospective insights and suggested improvements |
+| Prompt Optimizer | Prompt quality review and collaboration guidance |
+| Session Compare | What changed between two runs |
 | Real-Time Log | Raw event stream inspection |
+
+## Why It Exists
+
+Claude Code sessions can become long, tool-heavy, and hard to audit from raw logs alone.
+
+This project exists to make those sessions reviewable:
+
+- for debugging
+- for performance tuning
+- for prompt iteration
+- for agent workflow learning
+- for sharing and comparing runs with others
 
 ## Supported Log Data
 
-The project is built around Claude Code session logs in `.jsonl` format.
-Typical entries include:
+Claude Log Analyzer is built around Claude Code `.jsonl` session logs.
+
+Typical entry types include:
 
 - `user`
 - `assistant`
@@ -162,26 +195,18 @@ Common fields used by the parser include:
 ```text
 claude-log-analyzer/
 ├── docs/
-│   └── screenshots/          # README demo images
+│   └── screenshots/          # README media and product visuals
 ├── src/
-│   ├── components/           # UI modules and dashboards
+│   ├── components/           # Dashboards and visualization UI
 │   ├── hooks/                # Playback and interaction hooks
 │   ├── types/                # Domain types
-│   ├── utils/                # Parsing, analysis, and data helpers
+│   ├── utils/                # Parsing, analysis, and helper logic
 │   ├── App.tsx               # Application shell
 │   ├── main.tsx              # Entry point
 │   └── index.css             # Global styling
 ├── package.json
 └── README.md
 ```
-
-## Roadmap
-
-- Add a short Agent Flow demo GIF to the README hero section
-- Provide anonymized sample logs for first-time users
-- Improve large-session performance and virtualization
-- Add more layout modes for complex agent/tool flows
-- Add export presets for reports and retrospectives
 
 ## Development
 
@@ -192,10 +217,27 @@ npm run preview   # Preview the production build locally
 npm run lint      # Run ESLint
 ```
 
+## Roadmap
+
+- Ship a stronger README hero with a short looping demo
+- Add anonymized sample logs so first-time users can explore instantly
+- Improve large-session performance and visualization density
+- Add more flow layout modes for complex agent chains
+- Add export presets for reports and retrospectives
+
 ## Contributing
 
 Contributions are welcome.
-If you want to add a parser improvement, visualization, sample log, or UI polish, please open an issue or pull request with enough context to reproduce the behavior.
+
+Good contribution areas:
+
+- parser improvements
+- UI polish
+- performance work for large logs
+- new analysis panels
+- sample datasets and reproducible bug cases
+
+If this project helped you understand Claude Code sessions faster, a GitHub Star really helps other people find it.
 
 ## License
 
