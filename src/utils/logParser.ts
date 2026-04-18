@@ -158,6 +158,58 @@ function setParsedActionWithPriority(entry: LogEntry, newAction: AgentAction) {
   }
 }
 
+function extractExitCodeFromResult(result: unknown): number | null {
+  if (typeof result === 'number' && Number.isInteger(result)) {
+    return result;
+  }
+
+  if (typeof result === 'string') {
+    const match = result.match(/exit code\s+(-?\d+)/i) || result.match(/\bexit[_ ]?code\b\s*[:=]?\s*(-?\d+)/i);
+    return match ? Number(match[1]) : null;
+  }
+
+  if (Array.isArray(result)) {
+    for (const item of result) {
+      const exitCode = extractExitCodeFromResult(item);
+      if (exitCode !== null) return exitCode;
+    }
+    return null;
+  }
+
+  if (result && typeof result === 'object') {
+    const record = result as Record<string, unknown>;
+    const directCandidates = [record.exitCode, record.exit_code, record.code];
+
+    for (const candidate of directCandidates) {
+      if (typeof candidate === 'number' && Number.isInteger(candidate)) {
+        return candidate;
+      }
+      if (typeof candidate === 'string' && /^-?\d+$/.test(candidate.trim())) {
+        return Number(candidate);
+      }
+    }
+
+    for (const value of Object.values(record)) {
+      const exitCode = extractExitCodeFromResult(value);
+      if (exitCode !== null) return exitCode;
+    }
+  }
+
+  return null;
+}
+
+function stringifyTerminalResult(result: unknown): string {
+  if (typeof result === 'string') return result;
+  if (result && typeof result === 'object' && !Array.isArray(result)) {
+    const record = result as Record<string, unknown>;
+    const stdout = typeof record.stdout === 'string' ? record.stdout : '';
+    const stderr = typeof record.stderr === 'string' ? record.stderr : '';
+    const combined = [stdout, stderr].filter(Boolean).join(stdout && stderr ? '\n' : '');
+    if (combined) return combined;
+  }
+  return JSON.stringify(result, null, 2);
+}
+
 function updateAgentActionWithResult(action: AgentAction, result: any, isError: boolean, entryId: string) {
   if (Array.isArray(result)) {
      const imageBlock = result.find(b => b.type === 'image' && b.source && b.source.data);
@@ -167,13 +219,19 @@ function updateAgentActionWithResult(action: AgentAction, result: any, isError: 
         if (action.type === 'ScreenCapture') action.imageId = imageId;
      }
   }
-  const resultText = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+  const resultText = stringifyTerminalResult(result);
 
   // 1. Terminal command result.
   if (action.type === 'TerminalCommand') {
     action.output = resultText;
-    action.exitCode = isError ? 1 : 0;
-    if (isError) action.stderr = resultText;
+    action.exitCode = extractExitCodeFromResult(result) ?? (isError ? 1 : 0);
+    if (isError) {
+      if (result && typeof result === 'object' && !Array.isArray(result) && typeof (result as Record<string, unknown>).stderr === 'string') {
+        action.stderr = (result as Record<string, unknown>).stderr as string;
+      } else {
+        action.stderr = resultText;
+      }
+    }
   }
 
   // 2. File read result.
@@ -206,6 +264,7 @@ export function categorizeEntry(entry: LogEntry): EntryCategory {
     const content = entry.message?.content;
     if (typeof content === 'string') return 'USER_INPUT';
     if (Array.isArray(content)) {
+      if (content.some((b) => b.type === 'tool_result' && Boolean((b as ToolResultBlock).is_error))) return 'TOOL_ERROR';
       if (content.some((b) => b.type === 'tool_result')) return 'TOOL_RESULT';
       if (content.some((b) => b.type === 'image')) return 'USER_INPUT_WITH_IMAGE';
       return 'USER_INPUT';
@@ -260,6 +319,10 @@ function processToolResult(contentItem: ContentBlock): { toolUseId: string; cont
     return { toolUseId: result.tool_use_id, content: result.content, isError: Boolean(result.is_error) };
   }
   return null;
+}
+
+function stringifyResultContent(content: unknown): string {
+  return typeof content === 'string' ? content : JSON.stringify(content, null, 2);
 }
 
 // ============ Main Parse Function ============
@@ -343,6 +406,12 @@ export function parseLog(content: string): ParseResult {
           const result = processToolResult(item);
           if (result?.toolUseId) {
             hasToolResult = true;
+            setParsedActionWithPriority(entry, {
+              type: 'TaskResult',
+              toolUseId: result.toolUseId,
+              content: stringifyResultContent(result.content),
+              isError: result.isError
+            });
             const toolCall = pendingToolCalls.get(result.toolUseId);
             if (toolCall) {
               toolCall.result = result.content;
@@ -355,11 +424,10 @@ export function parseLog(content: string): ParseResult {
               }
             } else {
               // If no matching tool call is found, emit a standalone TaskResult action.
-              const resultText = typeof result.content === 'string' ? result.content : JSON.stringify(result.content, null, 2);
               setParsedActionWithPriority(entry, {
                 type: 'TaskResult',
                 toolUseId: result.toolUseId,
-                content: resultText,
+                content: stringifyResultContent(result.content),
                 isError: result.isError
               });
             }

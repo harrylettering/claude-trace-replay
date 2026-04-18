@@ -126,8 +126,21 @@ function matchesTokenRange(entry: LogEntry, tokenRange: {
   return true;
 }
 
+function hasParsedActionError(entry: LogEntry): boolean {
+  const action = entry.parsedAction;
+  if (!action) return false;
+
+  if (action.type === 'TaskResult') {
+    return Boolean(action.isError);
+  }
+
+  return false;
+}
+
 // Check whether the entry includes an error.
 function hasErrors(entry: LogEntry): boolean {
+  if (entry._category === 'TOOL_ERROR' || hasParsedActionError(entry)) return true;
+
   const content = entry.message?.content;
   if (!Array.isArray(content)) return false;
 
