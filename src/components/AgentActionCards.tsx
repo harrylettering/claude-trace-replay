@@ -152,10 +152,10 @@ const TerminalCard: React.FC<{ action: Extract<AgentAction, { type: 'TerminalCom
   const isPending = action.exitCode === -1;
   
   return (
-    <div className={`mt-3 rounded-xl border overflow-hidden ${isError ? 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'border-slate-700 bg-slate-900/50'}`}>
-      <div className="bg-slate-800 px-3 py-2 flex items-center gap-2 border-b border-slate-700/50">
-        <Terminal className={`w-4 h-4 ${isError ? 'text-red-400' : 'text-slate-400'}`} />
-        <span className="text-xs font-mono text-slate-300 flex-1 truncate">{action.command}</span>
+    <div className={`mt-3 rounded-xl border overflow-hidden ${isError ? 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'border-border bg-background/50'}`}>
+      <div className="bg-surface px-3 py-2 flex items-center gap-2 border-b border-border/50">
+        <Terminal className={`w-4 h-4 ${isError ? 'text-red-400' : 'text-muted'}`} />
+        <span className="text-xs font-mono text-content-secondary flex-1 truncate">{action.command}</span>
         {isPending && <span className="text-[10px] text-blue-400 animate-pulse uppercase tracking-wider font-semibold">Running</span>}
         {!isPending && (
           <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${isError ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
@@ -164,7 +164,7 @@ const TerminalCard: React.FC<{ action: Extract<AgentAction, { type: 'TerminalCom
         )}
       </div>
       <div className="bg-[#0c0c0c] p-4 overflow-x-auto max-h-[400px] custom-scrollbar">
-        <pre className={`text-xs font-mono whitespace-pre-wrap leading-relaxed ${isError ? 'text-red-400' : 'text-slate-300'}`}>
+        <pre className={`text-xs font-mono whitespace-pre-wrap leading-relaxed ${isError ? 'text-red-400' : 'text-content-secondary'}`}>
           {action.stderr || action.output || (isPending ? 'Waiting for command to complete...' : '(No output returned)')}
         </pre>
       </div>
@@ -174,14 +174,14 @@ const TerminalCard: React.FC<{ action: Extract<AgentAction, { type: 'TerminalCom
 
 const DiffCard: React.FC<{ action: Extract<AgentAction, { type: 'CodeWrite' }> }> = ({ action }) => {
   return (
-    <div className="mt-3 rounded-xl border border-slate-700 overflow-hidden shadow-2xl bg-slate-900/50">
-      <div className="bg-slate-800/80 px-4 py-3 flex flex-col gap-2 border-b border-slate-700">
+    <div className="mt-3 rounded-xl border border-border overflow-hidden shadow-2xl bg-background/50">
+      <div className="bg-surface/80 px-4 py-3 flex flex-col gap-2 border-b border-border">
         <div className="flex items-center gap-2">
            <FileCode2 className="w-5 h-5 text-blue-400" />
-           <span className="text-sm font-black text-slate-200 font-mono tracking-tight">{action.filePath}</span>
+           <span className="text-sm font-black text-content font-mono tracking-tight">{action.filePath}</span>
         </div>
         {action.instruction && (
-          <span className="text-[10px] text-slate-500 border-l-2 border-blue-500/50 pl-2 ml-1 italic font-medium">
+          <span className="text-[10px] text-muted border-l-2 border-blue-500/50 pl-2 ml-1 italic font-medium">
             {action.instruction}
           </span>
         )}
@@ -223,7 +223,7 @@ const DeleteCard: React.FC<{ action: Extract<AgentAction, { type: 'CodeDelete' }
       </div>
       <div className="flex-1 min-w-0">
         <h4 className="text-[10px] font-black text-red-500/80 uppercase tracking-[0.2em] mb-1">Destructive Action: Delete</h4>
-        <p className="text-sm font-black text-slate-100 font-mono break-all">{action.filePath}</p>
+        <p className="text-sm font-black text-content font-mono break-all">{action.filePath}</p>
       </div>
     </div>
     {action.instruction && (
@@ -242,8 +242,8 @@ const MoveCard: React.FC<{ action: Extract<AgentAction, { type: 'CodeMove' }> }>
     </div>
     <div className="flex flex-col gap-3 ml-12">
       <div className="space-y-1">
-        <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">From</span>
-        <div className="text-xs font-mono text-slate-500 line-through opacity-40 break-all">{action.sourcePath}</div>
+        <span className="text-[9px] font-black text-muted uppercase tracking-widest">From</span>
+        <div className="text-xs font-mono text-muted line-through opacity-40 break-all">{action.sourcePath}</div>
       </div>
       <div className="space-y-1">
         <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">To</span>
@@ -267,8 +267,8 @@ const SearchCard: React.FC<{ action: Extract<AgentAction, { type: 'CodeSearch' }
         <div className="flex-1">
           <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-1">Contextual Exploration</h4>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
-             <span className="text-xs font-black text-slate-100 bg-black/40 px-3 py-1 rounded-lg border border-amber-500/20 shadow-inner">"{action.query}"</span>
-             {action.path && <span className="text-[10px] text-slate-500 italic font-medium">in {action.path}</span>}
+             <span className="text-xs font-black text-content bg-black/40 px-3 py-1 rounded-lg border border-amber-500/20 shadow-inner">"{action.query}"</span>
+             {action.path && <span className="text-[10px] text-muted italic font-medium">in {action.path}</span>}
              {action.results && (
                <span className="text-[9px] font-black text-amber-300/70 bg-amber-900/30 px-2 py-0.5 rounded-full">
                  {showResults ? 'Hide Results' : `${action.results.length} matches`}
@@ -380,7 +380,7 @@ const ComputerUseCard: React.FC<{ action: Extract<AgentAction, { type: 'Computer
       <div className="p-5 flex flex-col gap-3 relative z-10">
         {action.coordinate && (
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest w-20">Target (X, Y)</span>
+            <span className="text-[10px] font-black text-muted uppercase tracking-widest w-20">Target (X, Y)</span>
             <div className="text-sm font-mono font-bold text-pink-300 bg-black/30 px-3 py-1.5 rounded-lg border border-pink-500/20 shadow-inner flex items-center gap-4">
                <span>[ {action.coordinate[0]} , {action.coordinate[1]} ]</span>
                <div className="relative w-4 h-4 flex items-center justify-center">
@@ -393,8 +393,8 @@ const ComputerUseCard: React.FC<{ action: Extract<AgentAction, { type: 'Computer
         
         {action.text && (
           <div className="flex items-start gap-3 mt-1">
-             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest w-20 mt-1">Input Text</span>
-             <div className="flex-1 bg-black/40 rounded-xl p-3 border border-pink-500/20 font-mono text-xs text-slate-300 shadow-inner break-all">
+             <span className="text-[10px] font-black text-muted uppercase tracking-widest w-20 mt-1">Input Text</span>
+             <div className="flex-1 bg-black/40 rounded-xl p-3 border border-pink-500/20 font-mono text-xs text-content-secondary shadow-inner break-all">
                {action.text}
              </div>
           </div>

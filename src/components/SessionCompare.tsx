@@ -47,7 +47,7 @@ function StatCard({
   const diffPercent = numA > 0 ? (diff / numA) * 100 : 0;
 
   const getDiffIcon = () => {
-    if (diff === 0) return <Minus className="w-4 h-4 text-slate-400" />;
+    if (diff === 0) return <Minus className="w-4 h-4 text-content-secondary" />;
     const isBetter = isHigherBetter ? diff > 0 : diff < 0;
     if (isBetter) {
       return <TrendingUp className="w-4 h-4 text-green-400" />;
@@ -56,26 +56,26 @@ function StatCard({
   };
 
   const getDiffClass = () => {
-    if (diff === 0) return 'text-slate-400';
+    if (diff === 0) return 'text-content-secondary';
     const isBetter = isHigherBetter ? diff > 0 : diff < 0;
     return isBetter ? 'text-green-400' : 'text-red-400';
   };
 
   return (
-    <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-      <div className="text-sm text-slate-400 mb-2">{label}</div>
+    <div className="bg-surface rounded-lg p-4 border border-border">
+      <div className="text-sm text-content-secondary mb-2">{label}</div>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <div className="text-2xl font-bold text-blue-400">{formatFn(valueA)}</div>
-          <div className="text-xs text-slate-500 mt-1">Session A</div>
+          <div className="text-xs text-muted mt-1">Session A</div>
         </div>
         <div>
           <div className="text-2xl font-bold text-purple-400">{formatFn(valueB)}</div>
-          <div className="text-xs text-slate-500 mt-1">Session B</div>
+          <div className="text-xs text-muted mt-1">Session B</div>
         </div>
       </div>
       {typeof valueA === 'number' && typeof valueB === 'number' && (
-        <div className="mt-3 pt-3 border-t border-slate-700 flex items-center gap-2">
+        <div className="mt-3 pt-3 border-t border-border flex items-center gap-2">
           {getDiffIcon()}
           <span className={`text-sm font-medium ${getDiffClass()}`}>
             {diff > 0 ? '+' : ''}{diff !== 0 ? formatFn(diff) : 'No change'}
@@ -211,13 +211,13 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
           <BarChart3 className="w-6 h-6" />
           Session Compare
         </h2>
-        <p className="text-slate-400">Load two sessions and compare them side by side</p>
+        <p className="text-content-secondary">Load two sessions and compare them side by side</p>
       </div>
 
       {/* Session loading area */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Session A */}
-        <div className="bg-slate-800 rounded-xl border border-slate-700 p-4">
+        <div className="bg-surface rounded-xl border border-border p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-blue-500" />
@@ -226,7 +226,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
             {sessionA && (
               <button
                 onClick={() => clearSession('a')}
-                className="p-1 hover:bg-slate-700 rounded"
+                className="p-1 hover:bg-surface-hover rounded"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -235,17 +235,17 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
 
           {sessionA ? (
             <div className="space-y-3">
-              <div className="text-sm text-slate-300 bg-slate-900/50 rounded-lg p-3">
-                <FileText className="w-4 h-4 inline mr-2 text-slate-400" />
+              <div className="text-sm text-content bg-background/50 rounded-lg p-3">
+                <FileText className="w-4 h-4 inline mr-2 text-content-secondary" />
                 {sessionA.name}
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="bg-slate-900/50 rounded-lg p-2">
-                  <div className="text-slate-500 text-xs">Messages</div>
+                <div className="bg-background/50 rounded-lg p-2">
+                  <div className="text-muted text-xs">Messages</div>
                   <div className="font-semibold">{sessionA.data.stats.totalMessages}</div>
                 </div>
-                <div className="bg-slate-900/50 rounded-lg p-2">
-                  <div className="text-slate-500 text-xs">Token</div>
+                <div className="bg-background/50 rounded-lg p-2">
+                  <div className="text-muted text-xs">Token</div>
                   <div className="font-semibold">{formatTokens(sessionA.data.stats.totalTokens)}</div>
                 </div>
               </div>
@@ -254,12 +254,12 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
             <button
               onClick={() => handleLoadSession('a')}
               disabled={loadingA}
-              className="w-full py-8 border-2 border-dashed border-slate-600 rounded-lg hover:border-blue-500 hover:bg-blue-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-8 border-2 border-dashed border-border rounded-lg hover:border-blue-500 hover:bg-blue-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingA ? (
-                <div className="text-slate-400">Loading...</div>
+                <div className="text-content-secondary">Loading...</div>
               ) : (
-                <div className="text-slate-400">
+                <div className="text-content-secondary">
                   <Upload className="w-8 h-8 mx-auto mb-2" />
                   Click to load Session A
                 </div>
@@ -269,7 +269,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
         </div>
 
         {/* Session B */}
-        <div className="bg-slate-800 rounded-xl border border-slate-700 p-4">
+        <div className="bg-surface rounded-xl border border-border p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-purple-500" />
@@ -278,7 +278,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
             {sessionB && (
               <button
                 onClick={() => clearSession('b')}
-                className="p-1 hover:bg-slate-700 rounded"
+                className="p-1 hover:bg-surface-hover rounded"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -287,17 +287,17 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
 
           {sessionB ? (
             <div className="space-y-3">
-              <div className="text-sm text-slate-300 bg-slate-900/50 rounded-lg p-3">
-                <FileText className="w-4 h-4 inline mr-2 text-slate-400" />
+              <div className="text-sm text-content bg-background/50 rounded-lg p-3">
+                <FileText className="w-4 h-4 inline mr-2 text-content-secondary" />
                 {sessionB.name}
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="bg-slate-900/50 rounded-lg p-2">
-                  <div className="text-slate-500 text-xs">Messages</div>
+                <div className="bg-background/50 rounded-lg p-2">
+                  <div className="text-muted text-xs">Messages</div>
                   <div className="font-semibold">{sessionB.data.stats.totalMessages}</div>
                 </div>
-                <div className="bg-slate-900/50 rounded-lg p-2">
-                  <div className="text-slate-500 text-xs">Token</div>
+                <div className="bg-background/50 rounded-lg p-2">
+                  <div className="text-muted text-xs">Token</div>
                   <div className="font-semibold">{formatTokens(sessionB.data.stats.totalTokens)}</div>
                 </div>
               </div>
@@ -306,12 +306,12 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
             <button
               onClick={() => handleLoadSession('b')}
               disabled={loadingB}
-              className="w-full py-8 border-2 border-dashed border-slate-600 rounded-lg hover:border-purple-500 hover:bg-purple-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-8 border-2 border-dashed border-border rounded-lg hover:border-purple-500 hover:bg-purple-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingB ? (
-                <div className="text-slate-400">Loading...</div>
+                <div className="text-content-secondary">Loading...</div>
               ) : (
-                <div className="text-slate-400">
+                <div className="text-content-secondary">
                   <Upload className="w-8 h-8 mx-auto mb-2" />
                   Click to load Session B
                 </div>
@@ -331,13 +331,13 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
               </div>
               <div>
                 <h3 className="text-lg font-semibold">AI Comparison</h3>
-                <p className="text-sm text-slate-400">Let AI judge which session performed better</p>
+                <p className="text-sm text-content-secondary">Let AI judge which session performed better</p>
               </div>
             </div>
             {analyzeResult && !isAnalyzing && (
               <button
                 onClick={runCompareAnalysis}
-                className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1.5"
+                className="px-3 py-1.5 bg-surface-hover hover:bg-border text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1.5"
               >
                 <RefreshCw className="w-3 h-3" />
                 Run Again
@@ -349,7 +349,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
             <button
               onClick={runCompareAnalysis}
               disabled={!isWsConnected}
-              className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-slate-600 disabled:to-slate-600 text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:cursor-not-allowed"
             >
               <Sparkles className="w-4 h-4" />
               {isWsConnected ? 'Start AI Comparison' : 'Waiting for connection...'}
@@ -361,7 +361,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
               <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
               <div>
                 <p className="text-sm font-medium text-indigo-400 animate-pulse">AI is comparing the sessions...</p>
-                <p className="text-xs text-slate-500">Claude is evaluating quality and efficiency across both sessions</p>
+                <p className="text-xs text-muted">Claude is evaluating quality and efficiency across both sessions</p>
               </div>
             </div>
           )}
@@ -371,14 +371,14 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
               <AlertCircle className="w-5 h-5 text-red-400" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-red-400">Analysis failed</p>
-                <p className="text-xs text-slate-400">{analyzeError}</p>
+                <p className="text-xs text-content-secondary">{analyzeError}</p>
               </div>
             </div>
           )}
 
           {analyzeResult && !isAnalyzing && (
-            <div className="mt-4 p-4 bg-slate-900/50 rounded-xl border border-slate-700">
-              <div className="markdown-content text-slate-300">
+            <div className="mt-4 p-4 bg-background/50 rounded-xl border border-border">
+              <div className="markdown-content text-content">
                 <ReactMarkdown>{analyzeResult}</ReactMarkdown>
               </div>
             </div>
@@ -390,7 +390,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
       {bothLoaded ? (
         <div className="space-y-6">
           {/* Overall stats */}
-          <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+          <div className="bg-surface rounded-xl border border-border p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <BarChart3 className="w-5 h-5" />
               Overall Comparison
@@ -430,7 +430,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
           </div>
 
           {/* Token comparison */}
-          <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+          <div className="bg-surface rounded-xl border border-border p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Zap className="w-5 h-5" />
               Token Usage Comparison
@@ -461,14 +461,14 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
           </div>
 
           {/* Tool comparison */}
-          <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+          <div className="bg-surface rounded-xl border border-border p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Settings className="w-5 h-5" />
               Tool Usage Comparison
             </h3>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
-                <h4 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
+                <h4 className="text-sm font-medium text-content-secondary mb-3 flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-blue-500" />
                   {sessionA.name}
                 </h4>
@@ -476,10 +476,10 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
                   {Array.from(new Map(
                     sessionA.data.toolCalls.map(t => [t.name, t])
                   ).values()).map((tool, idx) => (
-                    <div key={idx} className="bg-slate-900/50 rounded-lg p-3 text-sm">
+                    <div key={idx} className="bg-background/50 rounded-lg p-3 text-sm">
                       <div className="flex items-center justify-between">
                         <span className="font-medium">{tool.name}</span>
-                        <span className="text-slate-400">
+                        <span className="text-content-secondary">
                           {sessionA.data.toolCalls.filter(t => t.name === tool.name).length} times
                         </span>
                       </div>
@@ -488,7 +488,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
                 </div>
               </div>
               <div>
-                <h4 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
+                <h4 className="text-sm font-medium text-content-secondary mb-3 flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-purple-500" />
                   {sessionB.name}
                 </h4>
@@ -496,10 +496,10 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
                   {Array.from(new Map(
                     sessionB.data.toolCalls.map(t => [t.name, t])
                   ).values()).map((tool, idx) => (
-                    <div key={idx} className="bg-slate-900/50 rounded-lg p-3 text-sm">
+                    <div key={idx} className="bg-background/50 rounded-lg p-3 text-sm">
                       <div className="flex items-center justify-between">
                         <span className="font-medium">{tool.name}</span>
-                        <span className="text-slate-400">
+                        <span className="text-content-secondary">
                           {sessionB.data.toolCalls.filter(t => t.name === tool.name).length} times
                         </span>
                       </div>
@@ -511,14 +511,14 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
           </div>
 
           {/* Model comparison */}
-          <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+          <div className="bg-surface rounded-xl border border-border p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Settings className="w-5 h-5" />
               Models Used
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-slate-900/50 rounded-lg p-4">
-                <div className="text-xs text-slate-500 mb-2">Session A</div>
+              <div className="bg-background/50 rounded-lg p-4">
+                <div className="text-xs text-muted mb-2">Session A</div>
                 <div className="flex flex-wrap gap-2">
                   {sessionA.data.stats.modelsUsed.length > 0 ? (
                     sessionA.data.stats.modelsUsed.map((model, idx) => (
@@ -527,12 +527,12 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
                       </span>
                     ))
                   ) : (
-                    <span className="text-slate-500 text-sm">No model data</span>
+                    <span className="text-muted text-sm">No model data</span>
                   )}
                 </div>
               </div>
-              <div className="bg-slate-900/50 rounded-lg p-4">
-                <div className="text-xs text-slate-500 mb-2">Session B</div>
+              <div className="bg-background/50 rounded-lg p-4">
+                <div className="text-xs text-muted mb-2">Session B</div>
                 <div className="flex flex-wrap gap-2">
                   {sessionB.data.stats.modelsUsed.length > 0 ? (
                     sessionB.data.stats.modelsUsed.map((model, idx) => (
@@ -541,7 +541,7 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
                       </span>
                     ))
                   ) : (
-                    <span className="text-slate-500 text-sm">No model data</span>
+                    <span className="text-muted text-sm">No model data</span>
                   )}
                 </div>
               </div>
@@ -549,9 +549,9 @@ export function SessionCompare({ defaultSession }: SessionCompareProps) {
           </div>
         </div>
       ) : (
-        <div className="bg-slate-800 rounded-xl border border-slate-700 p-12 text-center">
-          <BarChart3 className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-          <p className="text-slate-400">Load two sessions to start comparing</p>
+        <div className="bg-surface rounded-xl border border-border p-12 text-center">
+          <BarChart3 className="w-12 h-12 text-muted mx-auto mb-4" />
+          <p className="text-content-secondary">Load two sessions to start comparing</p>
         </div>
       )}
     </div>

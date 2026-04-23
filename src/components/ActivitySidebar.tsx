@@ -38,7 +38,7 @@ function ActivityItem({ entry, isNew }: ActivityItemProps) {
     error: <XCircle className="w-3.5 h-3.5 text-red-400" />,
     spawn: <GitBranch className="w-3.5 h-3.5 text-purple-400" />,
     complete: <Sparkles className="w-3.5 h-3.5 text-cyan-400" />,
-  }[entry.type] ?? <Terminal className="w-3.5 h-3.5 text-slate-400" />
+  }[entry.type] ?? <Terminal className="w-3.5 h-3.5 text-content-secondary" />
 
   const time = new Date(entry.timestamp).toLocaleTimeString('en-US', {
     hour12: false,
@@ -50,8 +50,8 @@ function ActivityItem({ entry, isNew }: ActivityItemProps) {
   return (
     <div
       className={`
-        group relative px-3 py-2 border-b border-slate-800/50 transition-all duration-300
-        hover:bg-slate-800/30 cursor-pointer
+        group relative px-3 py-2 border-b border-border/50 transition-all duration-300
+        hover:bg-surface/30 cursor-pointer
         ${isNew ? 'animate-in slide-in-from-right-4 fade-in' : ''}
         ${entry.isError ? 'bg-red-500/5' : ''}
       `}
@@ -62,38 +62,38 @@ function ActivityItem({ entry, isNew }: ActivityItemProps) {
         <div className="flex-shrink-0 mt-0.5">{icon}</div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[9px] text-slate-600 font-mono">{time}</span>
+            <span className="text-[9px] text-muted font-mono">{time}</span>
             {entry.isError && (
               <span className="px-1 py-0.5 rounded text-[7px] font-black bg-red-500/20 text-red-400 uppercase tracking-wider">
                 Error
               </span>
             )}
           </div>
-          <div className="text-[11px] text-slate-300 font-mono leading-snug mt-0.5 break-all">
+          <div className="text-[11px] text-content font-mono leading-snug mt-0.5 break-all">
             {entry.message}
           </div>
           {entry.details && (
-            <div className="text-[9px] text-slate-500 mt-0.5 truncate">
+            <div className="text-[9px] text-muted mt-0.5 truncate">
               {expanded ? '▼ ' : '▶ '}{entry.details}
             </div>
           )}
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); handleCopy(); }}
-          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-700 rounded"
+          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-surface-hover rounded"
         >
           {copied ? (
             <CheckCheck className="w-3 h-3 text-emerald-400" />
           ) : (
-            <Copy className="w-3 h-3 text-slate-500" />
+            <Copy className="w-3 h-3 text-muted" />
           )}
         </button>
       </div>
 
       {/* Expanded details */}
       {expanded && entry.details && (
-        <div className="mt-2 p-2 rounded bg-slate-900/80 border border-slate-700/50">
-          <pre className="text-[9px] text-slate-400 font-mono whitespace-pre-wrap leading-relaxed">
+        <div className="mt-2 p-2 rounded bg-background/80 border border-border/50">
+          <pre className="text-[9px] text-content-secondary font-mono whitespace-pre-wrap leading-relaxed">
             {entry.details}
           </pre>
         </div>
@@ -154,7 +154,7 @@ function TypewriterStatus() {
   }, [])
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2 bg-slate-900/80 border-t border-slate-700/50">
+    <div className="flex items-center gap-2 px-3 py-2 bg-background/80 border-t border-border/50">
       <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
       <span className="text-[11px] font-mono text-cyan-300">
         {displayedText}
@@ -225,17 +225,17 @@ export function ActivitySidebar({ maxHeight = 'calc(100vh - 350px)' }: ActivityS
   ]
 
   return (
-    <div className="flex flex-col bg-[#0a0a0c] border-l border-slate-800 h-full">
+    <div className="flex flex-col bg-background border-l border-border h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800 bg-slate-900/50">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-surface/50">
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded bg-cyan-500/20 flex items-center justify-center">
             <Terminal className="w-3 h-3 text-cyan-400" />
           </div>
-          <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
+          <span className="text-[10px] font-black text-content uppercase tracking-widest">
             Activity Log
           </span>
-          <span className="text-[8px] text-slate-600 bg-slate-800 px-1.5 py-0.5 rounded">
+          <span className="text-[8px] text-muted bg-surface px-1.5 py-0.5 rounded">
             {activityLog.length}
           </span>
         </div>
@@ -245,7 +245,7 @@ export function ActivitySidebar({ maxHeight = 'calc(100vh - 350px)' }: ActivityS
           <button
             onClick={() => setFilter(null)}
             className={`px-1.5 py-0.5 rounded text-[8px] font-bold transition-all ${
-              !filter ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-500 hover:text-slate-300'
+              !filter ? 'bg-cyan-500/20 text-cyan-400' : 'text-muted hover:text-content'
             }`}
           >
             All
@@ -255,7 +255,7 @@ export function ActivitySidebar({ maxHeight = 'calc(100vh - 350px)' }: ActivityS
               key={opt.type}
               onClick={() => setFilter(filter === opt.type ? null : opt.type)}
               className={`px-1.5 py-0.5 rounded text-[8px] font-bold transition-all ${
-                filter === opt.type ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-500 hover:text-slate-300'
+                filter === opt.type ? 'bg-cyan-500/20 text-cyan-400' : 'text-muted hover:text-content'
               }`}
             >
               {opt.label}
@@ -265,17 +265,17 @@ export function ActivitySidebar({ maxHeight = 'calc(100vh - 350px)' }: ActivityS
       </div>
 
       {/* Auto-scroll toggle */}
-      <div className="flex items-center justify-between px-3 py-1 bg-slate-900/30 border-b border-slate-800/50">
-        <span className="text-[9px] text-slate-500">Auto-scroll</span>
+      <div className="flex items-center justify-between px-3 py-1 bg-surface/30 border-b border-border/50">
+        <span className="text-[9px] text-muted">Auto-scroll</span>
         <button
           onClick={() => setAutoScroll(!autoScroll)}
           className={`w-8 h-4 rounded-full transition-all relative ${
-            autoScroll ? 'bg-cyan-500/30' : 'bg-slate-700'
+            autoScroll ? 'bg-cyan-500/30' : 'bg-surface-hover'
           }`}
         >
           <div
             className={`absolute top-0.5 w-3 h-3 rounded-full transition-all ${
-              autoScroll ? 'left-4 bg-cyan-400' : 'left-0.5 bg-slate-400'
+              autoScroll ? 'left-4 bg-cyan-400' : 'left-0.5 bg-content-secondary'
             }`}
           />
         </button>
@@ -297,7 +297,7 @@ export function ActivitySidebar({ maxHeight = 'calc(100vh - 350px)' }: ActivityS
         ))}
 
         {filteredLog.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-32 text-slate-600">
+          <div className="flex flex-col items-center justify-center h-32 text-muted">
             <Terminal className="w-8 h-8 mb-2 opacity-30" />
             <span className="text-xs">No activity yet</span>
           </div>

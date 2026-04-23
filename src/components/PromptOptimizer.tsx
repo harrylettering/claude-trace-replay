@@ -97,13 +97,13 @@ Output language rule:
           </div>
           <div>
             <h2 className="text-xl font-black text-white tracking-tight italic">BRAIN<span className="text-indigo-500">INSIGHTS</span></h2>
-            <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em]">Neural Experience Protocol</p>
+            <p className="text-[9px] text-muted font-black uppercase tracking-[0.2em]">Neural Experience Protocol</p>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex p-1 bg-slate-950/80 rounded-xl border border-slate-800/50 backdrop-blur-sm">
+      <div className="flex p-1 bg-background/80 rounded-xl border border-border/50 backdrop-blur-sm">
         {[
           { id: 'cli', label: 'AI Analysis', icon: <Terminal className="w-3 h-3" /> },
           { id: 'rules', label: 'Error Log', icon: <Zap className="w-3 h-3" /> }
@@ -114,7 +114,7 @@ Output language rule:
             className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
               activeTab === tab.id
                 ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-900/30'
-                : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
+                : 'text-muted hover:text-content hover:bg-surface/50'
             }`}
           >
             {tab.icon}
@@ -129,21 +129,21 @@ Output language rule:
           <div className="space-y-4 animate-in fade-in duration-500">
             <div className="space-y-4">
               <div className="cyber-card p-4">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">
+                <label className="text-[10px] font-black text-content-secondary uppercase tracking-widest block mb-2">
                   Custom Analysis Instructions (Optional)
                 </label>
                 <textarea
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
                   placeholder='Optional: add custom instructions, e.g. "Focus on tool failures" or "Summarize code changes". Leave empty to use the default retrospective prompt.'
-                  className="w-full h-[140px] bg-black/40 border border-slate-700 rounded-xl p-3 text-sm text-slate-200 font-mono resize-none focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                  className="w-full h-[140px] bg-surface border border-border rounded-xl p-3 text-sm text-content font-mono resize-none focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 />
                 <details className="mt-2 group">
-                  <summary className="cursor-pointer text-[9px] text-slate-500 hover:text-slate-300 font-bold uppercase tracking-tight">
+                  <summary className="cursor-pointer text-[9px] text-muted hover:text-content font-bold uppercase tracking-tight">
                     Default prompt preview
                   </summary>
-                  <pre className="mt-2 whitespace-pre-wrap rounded-lg border border-slate-800 bg-black/30 p-3 text-[10px] leading-relaxed text-slate-500">
+                  <pre className="mt-2 whitespace-pre-wrap rounded-lg border border-border bg-surface/50 p-3 text-[10px] leading-relaxed text-muted">
                     {defaultPrompt}
                   </pre>
                 </details>
@@ -166,7 +166,7 @@ Output language rule:
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest animate-pulse">Streaming from Terminal...</p>
-                    <p className="text-[9px] text-slate-500 font-bold uppercase">Claude is analyzing the current live log in real time</p>
+                    <p className="text-[9px] text-muted font-bold uppercase">Claude is analyzing the current live log in real time</p>
                   </div>
                </div>
             )}
@@ -179,8 +179,8 @@ Output language rule:
             )}
             
             {!isCliAnalyzing && !cliResult && !cliError && (
-              <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 p-5 text-center">
-                <p className="text-xs text-slate-500">
+              <div className="rounded-2xl border border-border/70 bg-background/40 p-5 text-center">
+                <p className="text-xs text-muted">
                   Run the analysis to generate a retrospective. The generated answer will appear here and will not be written back into the instruction box.
                 </p>
               </div>
@@ -191,13 +191,13 @@ Output language rule:
                 <div className="flex justify-end mb-2">
                   <button
                     onClick={runAnalysis}
-                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-[9px] font-black rounded-lg transition-all uppercase tracking-widest flex items-center gap-1.5"
+                    className="px-3 py-1.5 bg-surface hover:bg-surface-hover text-white text-[9px] font-black rounded-lg transition-all uppercase tracking-widest flex items-center gap-1.5"
                   >
                     <RefreshCw className="w-2.5 h-2.5" />
                     Run Again
                   </button>
                 </div>
-                <div className="cyber-card p-6 shadow-2xl text-slate-300 relative group markdown-content">
+                <div className="cyber-card p-6 shadow-2xl text-content-secondary relative group markdown-content">
                   <div className="absolute top-4 right-4 opacity-10">
                      <Terminal className="w-10 h-10" />
                   </div>
@@ -211,11 +211,11 @@ Output language rule:
         {/* Automatically extracted rules */}
         {activeTab === 'rules' && (
           <div className="space-y-4 animate-in fade-in duration-500">
-            <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Error Log Collection</h3>
+            <h3 className="text-[10px] font-black text-muted uppercase tracking-[0.2em]">Error Log Collection</h3>
             {errorEntries.length === 0 ? (
-              <div className="py-20 text-center border-2 border-dashed border-slate-800 rounded-3xl bg-slate-900/20">
-                <Info className="w-8 h-8 text-slate-700 mx-auto mb-3" />
-                <p className="text-slate-500 text-sm font-medium px-10">No failed tool executions were found in this session.</p>
+              <div className="py-20 text-center border-2 border-dashed border-border rounded-3xl bg-surface/20">
+                <Info className="w-8 h-8 text-muted mx-auto mb-3" />
+                <p className="text-muted text-sm font-medium px-10">No failed tool executions were found in this session.</p>
               </div>
             ) : (
               errorEntries.map((entry) => (

@@ -91,17 +91,17 @@ function ToolResultPreview({ node }: { node: FlowNode }) {
   return (
     <div className="mt-3">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+        <span className="text-[9px] font-black text-muted uppercase tracking-widest">
           Preview
         </span>
         {hasMore && (
-          <span className="text-[8px] text-slate-600">
+          <span className="text-[8px] text-muted">
             +{content.split('\n').length - 8} more lines
           </span>
         )}
       </div>
       <pre
-        className="text-[10px] font-mono text-slate-300 bg-black/40 rounded-lg p-3 overflow-x-auto leading-relaxed border border-slate-800/50"
+        className="text-[10px] font-mono text-content bg-black/40 rounded-lg p-3 overflow-x-auto leading-relaxed border border-border/50"
         style={{ maxHeight: 120 }}
       >
         {truncated || '(No output)'}
@@ -122,10 +122,10 @@ function StatsRow({ node }: { node: FlowNode }) {
   ]
 
   return (
-    <div className="flex items-center gap-3 mt-3 pt-3 border-t border-slate-800/50">
+    <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border/50">
       {items.filter(i => i.show).map(item => (
         <div key={item.label} className="flex items-center gap-1">
-          <span className="text-[8px] text-slate-500 uppercase tracking-wider">{item.label}</span>
+          <span className="text-[8px] text-muted uppercase tracking-wider">{item.label}</span>
           <span
             className="text-[10px] font-bold font-mono"
             style={{ color: item.error ? '#ef4444' : '#e2e8f0' }}
@@ -211,14 +211,14 @@ export function FloatingPanel({ node, position, onClose }: FloatingPanelProps) {
               >
                 {config.title}
               </div>
-              <div className="text-[9px] text-slate-500 font-mono">
+              <div className="text-[9px] text-muted font-mono">
                 {node.label}
               </div>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-slate-700/50 transition-colors text-slate-400 hover:text-white"
+            className="p-1 rounded-lg hover:bg-surface-hover/50 transition-colors text-content-secondary hover:text-white"
           >
             <X className="w-4 h-4" />
           </button>
@@ -230,8 +230,8 @@ export function FloatingPanel({ node, position, onClose }: FloatingPanelProps) {
           {node.content && (
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <ChevronRight className="w-3 h-3 text-slate-500" />
-                <span className="text-[9px] text-slate-400 font-mono truncate">
+                <ChevronRight className="w-3 h-3 text-muted" />
+                <span className="text-[9px] text-content-secondary font-mono truncate">
                   {node.content}
                 </span>
               </div>
@@ -240,11 +240,11 @@ export function FloatingPanel({ node, position, onClose }: FloatingPanelProps) {
 
           {/* LLM response preview */}
           {(node.thinking || node.responseText) && (
-            <div className="mt-2 p-3 rounded-lg bg-black/30 border border-slate-800/50">
+            <div className="mt-2 p-3 rounded-lg bg-black/30 border border-border/50">
               <div className="text-[8px] font-black text-blue-400 uppercase tracking-widest mb-1">
                 {node.thinking ? 'Thinking' : 'Response'}
               </div>
-              <div className="text-[10px] text-slate-400 font-mono leading-relaxed">
+              <div className="text-[10px] text-content-secondary font-mono leading-relaxed">
                 {(node.thinking ?? node.responseText ?? '').slice(0, 150)}
                 {(node.thinking ?? node.responseText ?? '').length > 150 && '...'}
               </div>
@@ -263,14 +263,14 @@ export function FloatingPanel({ node, position, onClose }: FloatingPanelProps) {
           {node.contextPct !== undefined && (
             <div className="mt-3">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[8px] text-slate-500 uppercase tracking-wider">
+                <span className="text-[8px] text-muted uppercase tracking-wider">
                   Context Usage
                 </span>
-                <span className="text-[9px] font-mono text-slate-400">
+                <span className="text-[9px] font-mono text-content-secondary">
                   {node.contextPct.toFixed(1)}%
                 </span>
               </div>
-              <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-surface rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all duration-500"
                   style={{
@@ -285,18 +285,18 @@ export function FloatingPanel({ node, position, onClose }: FloatingPanelProps) {
         </div>
 
         {/* Footer with timestamp */}
-        <div className="px-4 py-2 bg-black/30 flex items-center justify-between border-t border-slate-800/30">
+        <div className="px-4 py-2 bg-black/30 flex items-center justify-between border-t border-border/30">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3 text-slate-500" />
-              <span className="text-[8px] text-slate-500 font-mono">
+              <Clock className="w-3 h-3 text-muted" />
+              <span className="text-[8px] text-muted font-mono">
                 {new Date().toLocaleTimeString()}
               </span>
             </div>
             {node.model && (
               <div className="flex items-center gap-1">
-                <span className="text-[8px] text-slate-600">via</span>
-                <span className="text-[8px] text-slate-400 font-mono">{node.model.slice(0, 12)}</span>
+                <span className="text-[8px] text-muted">via</span>
+                <span className="text-[8px] text-content-secondary font-mono">{node.model.slice(0, 12)}</span>
               </div>
             )}
           </div>

@@ -103,22 +103,22 @@ export function AdvancedSearchFilter({
   }, [filters]);
 
   return (
-    <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+    <div className="bg-surface rounded-xl border border-border overflow-hidden">
       {/* Basic Search Bar */}
-      <div className="p-4 border-b border-slate-700">
+      <div className="p-4 border-b border-border">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search Input */}
           <div className="flex-1 min-w-[200px]">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
               <input
                 type="text"
                 placeholder="Search log content..."
                 value={filters.query}
                 onChange={(e) => updateFilter({ query: e.target.value })}
-                className={`w-full bg-slate-900 border rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 ${
+                className={`w-full bg-background border rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 ${
                   isRegexValid
-                    ? 'border-slate-600 focus:ring-blue-500'
+                    ? 'border-border focus:ring-blue-500'
                     : 'border-red-500 focus:ring-red-500'
                 }`}
               />
@@ -132,7 +132,7 @@ export function AdvancedSearchFilter({
           <select
             value={filters.searchMode}
             onChange={(e) => updateFilter({ searchMode: e.target.value as SearchMode })}
-            className="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {SEARCH_MODES.map(mode => (
               <option key={mode.value} value={mode.value}>{mode.label}</option>
@@ -145,15 +145,15 @@ export function AdvancedSearchFilter({
               type="checkbox"
               checked={filters.caseSensitive}
               onChange={(e) => updateFilter({ caseSensitive: e.target.checked })}
-              className="w-4 h-4 rounded border-slate-600 bg-slate-900 text-blue-500 focus:ring-blue-500"
+              className="w-4 h-4 rounded border-border bg-background text-blue-500 focus:ring-blue-500"
             />
-            <span className="text-sm text-slate-300">Case sensitive</span>
+            <span className="text-sm text-content">Case sensitive</span>
           </label>
 
           {/* Advanced Toggle */}
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors"
+            className="flex items-center gap-2 px-3 py-2 bg-surface-hover hover:bg-surface rounded-lg text-sm transition-colors"
           >
             <Filter className="w-4 h-4" />
             Advanced
@@ -174,8 +174,8 @@ export function AdvancedSearchFilter({
 
         {/* Search Stats */}
         <div className="mt-3 flex items-center gap-4 text-sm">
-          <span className="text-slate-400">
-            Showing <span className="text-white font-semibold">{resultCount}</span> / <span className="text-slate-300">{totalCount}</span>
+          <span className="text-content-secondary">
+            Showing <span className="text-content font-semibold">{resultCount}</span> / <span className="text-content">{totalCount}</span>
           </span>
           {hasActiveFilters && (
             <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded text-xs">
@@ -187,11 +187,11 @@ export function AdvancedSearchFilter({
 
       {/* Advanced Filters */}
       {showAdvanced && (
-        <div className="p-4 space-y-4 bg-slate-800/50">
+        <div className="p-4 space-y-4 bg-surface/50">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Message Types */}
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-slate-300 flex items-center gap-2">
+              <h4 className="text-sm font-medium text-content flex items-center gap-2">
                 <MessageSquare className="w-4 h-4" />
                 Message Types
               </h4>
@@ -203,7 +203,7 @@ export function AdvancedSearchFilter({
                     className={`px-2 py-1 text-xs rounded border transition-colors ${
                       filters.messageTypes.includes(type.value)
                         ? 'bg-blue-500/20 text-blue-400 border-blue-500/50'
-                        : 'bg-slate-700/50 text-slate-400 border-slate-600 hover:bg-slate-700'
+                        : 'bg-surface text-content-secondary border-border hover:bg-surface-hover'
                     }`}
                   >
                     {type.label}
@@ -215,7 +215,7 @@ export function AdvancedSearchFilter({
             {/* Tool Names */}
             {availableToolNames.length > 0 && (
               <div className="space-y-2">
-                <h4 className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                <h4 className="text-sm font-medium text-content flex items-center gap-2">
                   <Settings className="w-4 h-4" />
                   Tool Names
                 </h4>
@@ -227,7 +227,7 @@ export function AdvancedSearchFilter({
                       className={`px-2 py-1 text-xs rounded border transition-colors ${
                         filters.toolNames.includes(name)
                           ? 'bg-purple-500/20 text-purple-400 border-purple-500/50'
-                          : 'bg-slate-700/50 text-slate-400 border-slate-600 hover:bg-slate-700'
+                          : 'bg-surface text-content-secondary border-border hover:bg-surface-hover'
                       }`}
                     >
                       {name}
@@ -239,7 +239,7 @@ export function AdvancedSearchFilter({
 
             {/* Time Range */}
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-slate-300 flex items-center gap-2">
+              <h4 className="text-sm font-medium text-content flex items-center gap-2">
                 <Clock className="w-4 h-4" />
                 Time Range
               </h4>
@@ -250,7 +250,7 @@ export function AdvancedSearchFilter({
                   onChange={(e) => updateFilter({
                     timeRange: { ...filters.timeRange, startTime: e.target.value || undefined }
                   })}
-                  className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                  className="w-full bg-background border border-border rounded px-2 py-1.5 text-sm"
                 />
                 <input
                   type="datetime-local"
@@ -258,14 +258,14 @@ export function AdvancedSearchFilter({
                   onChange={(e) => updateFilter({
                     timeRange: { ...filters.timeRange, endTime: e.target.value || undefined }
                   })}
-                  className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                  className="w-full bg-background border border-border rounded px-2 py-1.5 text-sm"
                 />
               </div>
             </div>
 
             {/* Additional Flags */}
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-slate-300 flex items-center gap-2">
+              <h4 className="text-sm font-medium text-content flex items-center gap-2">
                 <Filter className="w-4 h-4" />
                 More Filters
               </h4>
@@ -275,41 +275,41 @@ export function AdvancedSearchFilter({
                     type="checkbox"
                     checked={filters.onlyWithErrors}
                     onChange={(e) => updateFilter({ onlyWithErrors: e.target.checked })}
-                    className="w-4 h-4 rounded border-slate-600 bg-slate-900 text-blue-500 focus:ring-blue-500"
+                    className="w-4 h-4 rounded border-border bg-background text-blue-500 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-slate-300">Only show errors</span>
+                  <span className="text-sm text-content">Only show errors</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={filters.onlyWithTools}
                     onChange={(e) => updateFilter({ onlyWithTools: e.target.checked })}
-                    className="w-4 h-4 rounded border-slate-600 bg-slate-900 text-blue-500 focus:ring-blue-500"
+                    className="w-4 h-4 rounded border-border bg-background text-blue-500 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-slate-300">Only show tool activity</span>
+                  <span className="text-sm text-content">Only show tool activity</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={filters.onlySidechain}
                     onChange={(e) => updateFilter({ onlySidechain: e.target.checked })}
-                    className="w-4 h-4 rounded border-slate-600 bg-slate-900 text-blue-500 focus:ring-blue-500"
+                    className="w-4 h-4 rounded border-border bg-background text-blue-500 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-slate-300">Only Sidechain</span>
+                  <span className="text-sm text-content">Only Sidechain</span>
                 </label>
               </div>
             </div>
           </div>
 
           {/* Token Range */}
-          <div className="pt-4 border-t border-slate-700">
-            <h4 className="text-sm font-medium text-slate-300 flex items-center gap-2 mb-3">
+          <div className="pt-4 border-t border-border">
+            <h4 className="text-sm font-medium text-content flex items-center gap-2 mb-3">
               <Zap className="w-4 h-4" />
               Token Range
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <label className="text-xs text-slate-400">Input Tokens</label>
+                <label className="text-xs text-content-secondary">Input Tokens</label>
                 <div className="flex gap-2">
                   <input
                     type="number"
@@ -321,7 +321,7 @@ export function AdvancedSearchFilter({
                         minInput: e.target.value ? Number(e.target.value) : undefined,
                       }
                     })}
-                    className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                    className="w-full bg-background border border-border rounded px-2 py-1.5 text-sm"
                   />
                   <input
                     type="number"
@@ -333,12 +333,12 @@ export function AdvancedSearchFilter({
                         maxInput: e.target.value ? Number(e.target.value) : undefined,
                       }
                     })}
-                    className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                    className="w-full bg-background border border-border rounded px-2 py-1.5 text-sm"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-xs text-slate-400">Output Tokens</label>
+                <label className="text-xs text-content-secondary">Output Tokens</label>
                 <div className="flex gap-2">
                   <input
                     type="number"
@@ -350,7 +350,7 @@ export function AdvancedSearchFilter({
                         minOutput: e.target.value ? Number(e.target.value) : undefined,
                       }
                     })}
-                    className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                    className="w-full bg-background border border-border rounded px-2 py-1.5 text-sm"
                   />
                   <input
                     type="number"
@@ -362,12 +362,12 @@ export function AdvancedSearchFilter({
                         maxOutput: e.target.value ? Number(e.target.value) : undefined,
                       }
                     })}
-                    className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                    className="w-full bg-background border border-border rounded px-2 py-1.5 text-sm"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-xs text-slate-400">Total Tokens</label>
+                <label className="text-xs text-content-secondary">Total Tokens</label>
                 <div className="flex gap-2">
                   <input
                     type="number"
@@ -379,7 +379,7 @@ export function AdvancedSearchFilter({
                         minTotal: e.target.value ? Number(e.target.value) : undefined,
                       }
                     })}
-                    className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                    className="w-full bg-background border border-border rounded px-2 py-1.5 text-sm"
                   />
                   <input
                     type="number"
@@ -391,7 +391,7 @@ export function AdvancedSearchFilter({
                         maxTotal: e.target.value ? Number(e.target.value) : undefined,
                       }
                     })}
-                    className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                    className="w-full bg-background border border-border rounded px-2 py-1.5 text-sm"
                   />
                 </div>
               </div>
