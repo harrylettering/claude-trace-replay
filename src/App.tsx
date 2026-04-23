@@ -10,6 +10,7 @@ import { ConversationFlow } from './components/ConversationFlow'
 import { SessionCompare } from './components/SessionCompare'
 import { PromptOptimizer } from './components/PromptOptimizer'
 import { AgentFlowView } from './components/AgentFlowView'
+import { ThemeToggle } from './components/ui/ThemeToggle'
 
 type ViewId = 'overview' | 'tokens' | 'timeline' | 'conversation' | 'compare' | 'prompt-optimizer' | 'agent-flow'
 
@@ -176,10 +177,10 @@ export default function App() {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
             <Activity className="w-3 h-3" /> Live Discovery
           </div>
-          <h2 className="text-4xl font-black text-white tracking-tighter italic">
+          <h2 className="text-4xl font-black text-[var(--text-primary)] tracking-tighter italic">
             CLAUDE<span className="text-blue-500">TRACE REPLAY</span>
           </h2>
-          <p className="text-slate-400 text-lg">Automatically discover active sessions from the last 24 hours, or enter a path manually.</p>
+          <p className="text-[var(--text-secondary)] text-lg">Automatically discover active sessions from the last 24 hours, or enter a path manually.</p>
         </div>
 
         {/* Auto-discovered session list */}
@@ -188,37 +189,37 @@ export default function App() {
             <button
               key={session.fullPath}
               onClick={() => startWatching(session.fullPath)}
-              className="flex flex-col text-left p-6 rounded-3xl border border-slate-800 bg-slate-900/40 hover:bg-slate-800/60 hover:border-blue-500/50 transition-all group relative overflow-hidden shadow-2xl backdrop-blur-sm"
+              className="flex flex-col text-left p-6 rounded-3xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/40 hover:bg-[var(--bg-tertiary)]/60 hover:border-blue-500/50 transition-all group relative overflow-hidden shadow-2xl backdrop-blur-sm"
             >
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              
+
               <div className="flex items-center justify-between mb-6">
                 <div className="p-3 rounded-2xl bg-blue-600/10 text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-all">
                   <Terminal className="w-6 h-6" />
                 </div>
                 <div className="text-right">
-                   <div className="text-[10px] font-black text-slate-500 uppercase">{new Date(session.lastUpdated).toLocaleDateString()}</div>
+                   <div className="text-[10px] font-black text-[var(--text-muted)] uppercase">{new Date(session.lastUpdated).toLocaleDateString()}</div>
                    <div className="text-xs font-bold text-blue-400">{new Date(session.lastUpdated).toLocaleTimeString()}</div>
                 </div>
               </div>
 
               <div className="mb-4">
                 <span className="text-[10px] font-black text-blue-500/80 uppercase tracking-widest block mb-1">Folder Context</span>
-                <h3 className="font-black text-slate-100 break-all text-sm leading-tight group-hover:text-blue-400 transition-colors">{session.folderName}</h3>
+                <h3 className="font-black text-[var(--text-primary)] break-all text-sm leading-tight group-hover:text-blue-400 transition-colors">{session.folderName}</h3>
               </div>
 
               <div className="mb-6 space-y-2">
                 <div>
-                  <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">JSONL File</span>
-                  <p className="text-[10px] text-slate-400 font-mono break-all bg-black/30 p-2 rounded-lg border border-slate-800/50">
+                  <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-1">JSONL File</span>
+                  <p className="text-[10px] text-[var(--text-secondary)] font-mono break-all bg-black/30 p-2 rounded-lg border border-[var(--border-default)]/50">
                     {session.id}
                   </p>
                 </div>
               </div>
-              
-              <div className="mt-auto pt-4 border-t border-slate-800/50 flex items-center justify-between">
+
+              <div className="mt-auto pt-4 border-t border-[var(--border-default)]/50 flex items-center justify-between">
                 <div className="flex gap-3">
-                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">JSONL</span>
+                   <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">JSONL</span>
                    <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{session.size}</span>
                 </div>
                 <div className="flex items-center gap-2 text-blue-500 font-black text-[10px] uppercase tracking-tighter group-hover:gap-3 transition-all">
@@ -227,15 +228,15 @@ export default function App() {
               </div>
             </button>
           ))}
-          
+
           {discoveryList.length === 0 && (
-            <div className="md:col-span-3 py-20 text-center border-2 border-dashed border-slate-800 rounded-3xl bg-slate-900/20">
-              <Search className="w-12 h-12 text-slate-800 mx-auto mb-4 animate-bounce" />
-              <p className="text-slate-500 text-lg font-bold">No active sessions found in the last 24 hours</p>
-              <p className="text-slate-600 text-sm mt-1">Make sure Claude has been started in your terminal and at least one message has been sent.</p>
-              <button 
+            <div className="md:col-span-3 py-20 text-center border-2 border-dashed border-[var(--border-default)] rounded-3xl bg-[var(--bg-secondary)]/20">
+              <Search className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4 animate-bounce" />
+              <p className="text-[var(--text-muted)] text-lg font-bold">No active sessions found in the last 24 hours</p>
+              <p className="text-[var(--text-muted)] text-sm mt-1">Make sure Claude has been started in your terminal and at least one message has been sent.</p>
+              <button
                 onClick={() => wsRef.current?.send(JSON.stringify({ type: 'get-discovery-list' }))}
-                className="mt-8 px-8 py-3 bg-slate-800 hover:bg-slate-700 text-white text-xs font-black rounded-full transition-all uppercase tracking-widest"
+                className="mt-8 px-8 py-3 bg-[var(--bg-tertiary)] hover:bg-[var(--border-default)] text-[var(--text-primary)] text-xs font-black rounded-full transition-all uppercase tracking-widest"
               >
                 Force Rescan
               </button>
@@ -245,22 +246,22 @@ export default function App() {
 
         {/* Bottom dual-mode entry points */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-10">
-            <div className="p-8 rounded-3xl border border-slate-800 bg-slate-900/20 backdrop-blur-md relative group">
+            <div className="p-8 rounded-3xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/20 backdrop-blur-md relative group">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 rounded-lg bg-orange-500/10 text-orange-500">
                    <HardDrive className="w-5 h-5" />
                 </div>
-                <h3 className="text-sm font-black text-slate-300 uppercase tracking-widest">Watch Specific Path</h3>
+                <h3 className="text-sm font-black text-[var(--text-secondary)] uppercase tracking-widest">Watch Specific Path</h3>
               </div>
               <div className="space-y-4">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={manualPath}
                   onChange={(e) => setManualPath(e.target.value)}
                   placeholder="Paste the absolute path to a .jsonl file..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-sm text-slate-300 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/20 transition-all placeholder:text-slate-700"
+                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-2xl px-5 py-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/20 transition-all placeholder:text-[var(--text-muted)]"
                 />
-                <button 
+                <button
                   onClick={() => startWatching(manualPath)}
                   disabled={!manualPath}
                   className="w-full py-4 bg-orange-600 hover:bg-orange-500 disabled:opacity-20 text-white rounded-2xl text-xs font-black transition-all shadow-xl shadow-orange-900/20 uppercase tracking-widest"
@@ -270,16 +271,16 @@ export default function App() {
               </div>
             </div>
 
-            <div className="p-8 rounded-3xl border border-slate-800 bg-slate-900/20 backdrop-blur-md relative group">
+            <div className="p-8 rounded-3xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/20 backdrop-blur-md relative group">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
                    <Upload className="w-5 h-5" />
                 </div>
-                <h3 className="text-sm font-black text-slate-300 uppercase tracking-widest">Offline Analysis</h3>
+                <h3 className="text-sm font-black text-[var(--text-secondary)] uppercase tracking-widest">Offline Analysis</h3>
               </div>
               <div className="h-full">
-                <FileUpload onFileLoad={handleFileLoad} isDark={true} disabled={isLoading} />
-                <p className="mt-4 text-[10px] text-slate-600 font-bold uppercase tracking-tight text-center">Drag a file here or click to select any JSONL file</p>
+                <FileUpload onFileLoad={handleFileLoad} disabled={isLoading} />
+                <p className="mt-4 text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-tight text-center">Drag a file here or click to select any JSONL file</p>
               </div>
             </div>
         </div>
@@ -323,14 +324,26 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 selection:bg-blue-500/30 font-sans">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] selection:bg-blue-500/30 font-sans">
       {/* Header */}
-      <header className="border-b px-6 py-4 flex items-center justify-between border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b px-6 py-4 flex items-center justify-between border-[var(--border-default)] bg-[var(--bg-primary)]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-blue-900/20">
             <Activity className="w-5 h-5 text-white" />
           </div>
-          <h1 className="text-lg font-black tracking-tight">Claude Trace Replay</h1>
+          <h1
+            className="text-lg font-black tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => {
+              setLogData(null)
+              setCurrentView('overview')
+              setError(null)
+              setIsLoading(false)
+              resetClaudeCliAnalysis()
+              wsRef.current?.send(JSON.stringify({ type: 'get-discovery-list' }))
+            }}
+          >
+            Claude Trace Replay
+          </h1>
           {isWsConnected ? (
             <div className="flex items-center gap-2 ml-4 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -344,6 +357,7 @@ export default function App() {
           )}
         </div>
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           {logData && (
             <button
               onClick={() => { setLogData(null); wsRef.current?.send(JSON.stringify({ type: 'get-discovery-list' })); }}
@@ -359,7 +373,7 @@ export default function App() {
       <div className="flex">
         {/* Sidebar */}
         {(logData || currentView === 'compare') && (
-          <aside className="w-56 border-r min-h-[calc(100vh-73px)] p-4 border-slate-800 bg-slate-900/50 sticky top-[73px]">
+          <aside className="w-56 border-r min-h-[calc(100vh-73px)] p-4 border-[var(--border-default)] bg-[var(--bg-secondary)]/50 sticky top-[73px]">
             <nav className="space-y-1.5">
               {navItems.map(item => {
                 if (!logData && item.id !== 'compare') return null;
@@ -370,7 +384,7 @@ export default function App() {
                     className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
                         currentView === item.id
                           ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40'
-                          : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                          : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
                     {item.icon}
@@ -387,7 +401,7 @@ export default function App() {
           {isLoading && (
             <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
               <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
-              <p className="text-slate-500 font-medium">Parsing data...</p>
+              <p className="text-[var(--text-muted)] font-medium">Parsing data...</p>
             </div>
           )}
 

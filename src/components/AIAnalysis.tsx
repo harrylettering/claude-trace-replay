@@ -63,19 +63,19 @@ function InsightCard({ insight }: { insight: Insight }) {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700/50">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-surface">
               {CATEGORY_LABELS[insight.category]}
             </span>
             <h4 className="font-semibold">{insight.title}</h4>
           </div>
-          <p className="text-sm text-slate-300">{insight.description}</p>
+          <p className="text-sm text-content">{insight.description}</p>
           {insight.details && (
-            <p className="text-xs text-slate-400 mt-2">{insight.details}</p>
+            <p className="text-xs text-content-secondary mt-2">{insight.details}</p>
           )}
           {insight.suggestions && insight.suggestions.length > 0 && (
             <div className="mt-3">
-              <p className="text-xs font-medium text-slate-400 mb-1">Suggestions:</p>
-              <ul className="list-disc list-inside text-xs text-slate-300 space-y-1">
+              <p className="text-xs font-medium text-content-secondary mb-1">Suggestions:</p>
+              <ul className="list-disc list-inside text-xs text-content space-y-1">
                 {insight.suggestions.map((suggestion, idx) => (
                   <li key={idx}>{suggestion}</li>
                 ))}
@@ -110,28 +110,28 @@ export function AIAnalysis({ data }: AIAnalysisProps) {
           </div>
           <div>
             <h2 className="text-2xl font-bold">AI Analysis</h2>
-            <p className="text-slate-400">Analyze the session automatically and surface useful insights</p>
+            <p className="text-content-secondary">Analyze the session automatically and surface useful insights</p>
           </div>
         </div>
       </div>
 
       {/* Overall Grade */}
-      <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+      <div className="bg-surface rounded-xl p-6 border border-border">
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="text-center">
             <div className={`text-6xl font-bold px-6 py-3 rounded-2xl border ${GRADE_COLORS[analysis.summary.overallGrade]}`}>
               {analysis.summary.overallGrade}
             </div>
-            <p className="text-slate-400 text-sm mt-2">Overall Grade</p>
+            <p className="text-content-secondary text-sm mt-2">Overall Grade</p>
           </div>
           <div className="flex-1 space-y-4">
             <div>
-              <h4 className="text-sm font-medium text-slate-400 mb-2 flex items-center gap-2">
+              <h4 className="text-sm font-medium text-content-secondary mb-2 flex items-center gap-2">
                 <Target className="w-4 h-4" /> Key Points
               </h4>
               <ul className="flex flex-wrap gap-2">
                 {analysis.summary.keyPoints.map((point, idx) => (
-                  <li key={idx} className="px-3 py-1 bg-slate-700/50 rounded-full text-sm">
+                  <li key={idx} className="px-3 py-1 bg-surface-hover rounded-full text-sm">
                     {point}
                   </li>
                 ))}
@@ -139,7 +139,7 @@ export function AIAnalysis({ data }: AIAnalysisProps) {
             </div>
             {analysis.summary.strengths.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-slate-400 mb-2 flex items-center gap-2">
+                <h4 className="text-sm font-medium text-content-secondary mb-2 flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-400" /> Strengths
                 </h4>
                 <ul className="space-y-1">
@@ -153,7 +153,7 @@ export function AIAnalysis({ data }: AIAnalysisProps) {
             )}
             {analysis.summary.improvements.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-slate-400 mb-2 flex items-center gap-2">
+                <h4 className="text-sm font-medium text-content-secondary mb-2 flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-amber-400" /> Improvements
                 </h4>
                 <ul className="space-y-1">
@@ -171,39 +171,39 @@ export function AIAnalysis({ data }: AIAnalysisProps) {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
+        <div className="bg-surface rounded-xl p-5 border border-border">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 rounded-lg bg-amber-500/10">
               <Zap className="w-5 h-5 text-amber-500" />
             </div>
-            <span className="text-slate-400 text-sm">Token Cost</span>
+            <span className="text-content-secondary text-sm">Token Cost</span>
           </div>
           <div className="text-2xl font-bold">${analysis.tokenAnalysis.estimatedCost.totalCost.toFixed(3)}</div>
         </div>
-        <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
+        <div className="bg-surface rounded-xl p-5 border border-border">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 rounded-lg bg-blue-500/10">
               <Clock className="w-5 h-5 text-blue-500" />
             </div>
-            <span className="text-slate-400 text-sm">Average Response</span>
+            <span className="text-content-secondary text-sm">Average Response</span>
           </div>
           <div className="text-2xl font-bold">{formatDuration(analysis.performance.avgTurnDuration)}</div>
         </div>
-        <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
+        <div className="bg-surface rounded-xl p-5 border border-border">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 rounded-lg bg-purple-500/10">
               <Settings className="w-5 h-5 text-purple-500" />
             </div>
-            <span className="text-slate-400 text-sm">Tool Types</span>
+            <span className="text-content-secondary text-sm">Tool Types</span>
           </div>
           <div className="text-2xl font-bold">{analysis.toolStats.length}</div>
         </div>
-        <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
+        <div className="bg-surface rounded-xl p-5 border border-border">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 rounded-lg bg-red-500/10">
               <XCircle className="w-5 h-5 text-red-500" />
             </div>
-            <span className="text-slate-400 text-sm">Error Rate</span>
+            <span className="text-content-secondary text-sm">Error Rate</span>
           </div>
           <div className="text-2xl font-bold">{(analysis.errors.errorRate * 100).toFixed(1)}%</div>
         </div>
@@ -214,7 +214,7 @@ export function AIAnalysis({ data }: AIAnalysisProps) {
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <AlertTriangle className="w-5 h-5" />
           Key Findings
-          <span className="text-sm text-slate-400 font-normal">
+          <span className="text-sm text-content-secondary font-normal">
             ({analysis.insights.length})
           </span>
         </h3>
@@ -261,7 +261,7 @@ export function AIAnalysis({ data }: AIAnalysisProps) {
               <InsightCard key={insight.id} insight={insight} />
             ))}
             {insightsBySeverity.infos.length > 5 && (
-              <p className="text-sm text-slate-500 text-center">
+              <p className="text-sm text-muted text-center">
                 {insightsBySeverity.infos.length - 5} more info items
               </p>
             )}
@@ -271,31 +271,31 @@ export function AIAnalysis({ data }: AIAnalysisProps) {
         {analysis.insights.length === 0 && (
           <div className="text-center py-12">
             <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-            <p className="text-slate-400">The session looks healthy. No issues were found.</p>
+            <p className="text-content-secondary">The session looks healthy. No issues were found.</p>
           </div>
         )}
       </div>
 
       {/* Tool Stats */}
       {topTools.length > 0 && (
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+        <div className="bg-surface rounded-xl p-6 border border-border">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Award className="w-5 h-5" /> Tool Usage
           </h3>
           <div className="space-y-3">
             {topTools.map((tool, idx) => (
-              <div key={tool.name} className="flex items-center justify-between p-3 bg-slate-900/50 rounded-lg">
+              <div key={tool.name} className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <span className="text-slate-500 text-sm w-6">#{idx + 1}</span>
+                  <span className="text-muted text-sm w-6">#{idx + 1}</span>
                   <div>
                     <div className="font-medium">{tool.name}</div>
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs text-muted">
                       {tool.avgDuration && `Avg ${formatDuration(tool.avgDuration)}`}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 text-sm">
-                  <span className="text-slate-400">{tool.count} times</span>
+                  <span className="text-content-secondary">{tool.count} times</span>
                   <span className={`px-2 py-0.5 rounded-full text-xs ${
                     tool.successRate >= 0.9 ? 'bg-green-500/20 text-green-400' :
                     tool.successRate >= 0.7 ? 'bg-amber-500/20 text-amber-400' :
@@ -312,29 +312,29 @@ export function AIAnalysis({ data }: AIAnalysisProps) {
 
       {/* Performance Details */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+        <div className="bg-surface rounded-xl p-6 border border-border">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <BarChart3 className="w-5 h-5" /> Performance Details
           </h3>
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
-              <span className="text-slate-400">Average Response Time</span>
+              <span className="text-content-secondary">Average Response Time</span>
               <span>{formatDuration(analysis.performance.avgTurnDuration)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Median Response</span>
+              <span className="text-content-secondary">Median Response</span>
               <span>{formatDuration(analysis.performance.medianTurnDuration)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Fastest Response</span>
+              <span className="text-content-secondary">Fastest Response</span>
               <span className="text-green-400">{formatDuration(analysis.performance.minTurnDuration)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Slowest Response</span>
+              <span className="text-content-secondary">Slowest Response</span>
               <span className="text-red-400">{formatDuration(analysis.performance.maxTurnDuration)}</span>
             </div>
             {analysis.performance.slowTurns.length > 0 && (
-              <div className="pt-2 border-t border-slate-700">
+              <div className="pt-2 border-t border-border">
                 <span className="text-amber-400 text-xs">
                   ⚠️ {analysis.performance.slowTurns.length} slow responses
                 </span>
@@ -343,34 +343,34 @@ export function AIAnalysis({ data }: AIAnalysisProps) {
           </div>
         </div>
 
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+        <div className="bg-surface rounded-xl p-6 border border-border">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Zap className="w-5 h-5" /> Token Details
           </h3>
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
-              <span className="text-slate-400">Avg Input / Turn</span>
+              <span className="text-content-secondary">Avg Input / Turn</span>
               <span>{formatTokens(Math.round(analysis.tokenAnalysis.avgInputTokensPerTurn))}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Avg Output / Turn</span>
+              <span className="text-content-secondary">Avg Output / Turn</span>
               <span>{formatTokens(Math.round(analysis.tokenAnalysis.avgOutputTokensPerTurn))}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Token Efficiency</span>
+              <span className="text-content-secondary">Token Efficiency</span>
               <span className={
                 analysis.tokenAnalysis.tokenEfficiency > 0.5 ? 'text-green-400' :
-                analysis.tokenAnalysis.tokenEfficiency < 0.1 ? 'text-red-400' : 'text-slate-300'
+                analysis.tokenAnalysis.tokenEfficiency < 0.1 ? 'text-red-400' : 'text-content'
               }>
                 {(analysis.tokenAnalysis.tokenEfficiency * 100).toFixed(1)}%
               </span>
             </div>
-            <div className="pt-2 border-t border-slate-700 space-y-2">
-              <div className="flex justify-between text-xs text-slate-500">
+            <div className="pt-2 border-t border-border space-y-2">
+              <div className="flex justify-between text-xs text-muted">
                 <span>Input Cost</span>
                 <span>${analysis.tokenAnalysis.estimatedCost.inputCost.toFixed(3)}</span>
               </div>
-              <div className="flex justify-between text-xs text-slate-500">
+              <div className="flex justify-between text-xs text-muted">
                 <span>Output Cost</span>
                 <span>${analysis.tokenAnalysis.estimatedCost.outputCost.toFixed(3)}</span>
               </div>

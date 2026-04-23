@@ -144,6 +144,7 @@ vite.config.ts.timestamp-*
 #claude
 .claude/
 .full-process/
+.omc
 
 #github
 .github/

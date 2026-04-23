@@ -3,40 +3,118 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Global cyberpunk-style variables */
+/* ===== Theme-aware CSS Variables ===== */
+/* Light theme (default) */
 :root {
-  /* Primary palette */
+  /* Background colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --bg-canvas: #f8fafc;
+
+  /* Text colors */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --text-inverse: #ffffff;
+
+  /* Border colors */
+  --border-default: #e2e8f0;
+  --border-muted: #f1f5f9;
+  --border-focus: #3b82f6;
+
+  /* Semantic colors (consistent across themes) */
+  --color-user: #3b82f6;
+  --color-assistant: #8b5cf6;
+  --color-system: #6b7280;
+  --color-tool: #f59e0b;
+  --color-error: #ef4444;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+
+  /* Fonts */
+  --font-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* Canvas colors */
+  --canvas-void: #f8fafc;
+  --canvas-holo-base: #0891b2;
+
+  /* Effects */
+  --glow-primary: 0 0 15px rgba(59, 130, 246, 0.2);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  color-scheme: light;
+}
+
+/* Dark theme */
+.dark {
+  /* Background colors */
+  --bg-primary: #020617;
+  --bg-secondary: #0f172a;
+  --bg-tertiary: #1e293b;
+  --bg-canvas: #050510;
+
+  /* Text colors */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #0f172a;
+
+  /* Border colors */
+  --border-default: #1e293b;
+  --border-muted: #0f172a;
+  --border-focus: #60a5fa;
+
+  /* Canvas colors */
+  --canvas-void: #050510;
+  --canvas-holo-base: #66ccff;
+
+  /* Effects */
+  --glow-primary: 0 0 15px rgba(79, 70, 229, 0.4);
+
+  color-scheme: dark;
+}
+
+/* ===== Cyberpunk variables with theme support ===== */
+/* Light theme (default) */
+:root {
+  --cyber-primary: #4f46e5;
+  --cyber-secondary: #8b5cf6;
+  --cyber-accent: #0891b2;
+  --cyber-glow-primary: rgba(79, 70, 229, 0.3);
+  --cyber-glow-secondary: rgba(139, 92, 246, 0.3);
+  --cyber-glow-accent: rgba(8, 145, 178, 0.3);
+  --cyber-success: #10b981;
+  --cyber-error: #ef4444;
+  --cyber-warning: #f59e0b;
+  --cyber-info: #3b82f6;
+  --cyber-glow-success: rgba(16, 185, 129, 0.3);
+  --cyber-glow-error: rgba(239, 68, 68, 0.3);
+  --cyber-glow-warning: rgba(245, 158, 11, 0.3);
+  --cyber-bg: var(--bg-primary);
+  --cyber-bg-light: var(--bg-secondary);
+  --cyber-bg-card: rgba(248, 250, 252, 0.9);
+  --cyber-border: rgba(8, 145, 178, 0.2);
+  --cyber-glow: 0 0 15px rgba(79, 70, 229, 0.2);
+  --cyber-glow-hover: 0 0 25px rgba(79, 70, 229, 0.3);
+  --cyber-glow-error: 0 0 15px rgba(239, 68, 68, 0.3);
+  --cyber-transition: var(--transition);
+}
+
+/* Dark theme cyber variables */
+.dark {
   --cyber-primary: #4f46e5;
   --cyber-secondary: #8b5cf6;
   --cyber-accent: #06b6d4;
   --cyber-glow-primary: rgba(79, 70, 229, 0.4);
   --cyber-glow-secondary: rgba(139, 92, 246, 0.4);
   --cyber-glow-accent: rgba(6, 182, 212, 0.4);
-
-  /* Status colors */
-  --cyber-success: #10b981;
-  --cyber-error: #ef4444;
-  --cyber-warning: #f59e0b;
-  --cyber-info: #3b82f6;
-  --cyber-glow-success: rgba(16, 185, 129, 0.4);
-  --cyber-glow-error: rgba(239, 68, 68, 0.4);
-  --cyber-glow-warning: rgba(245, 158, 11, 0.4);
-
-  /* Background colors */
-  --cyber-bg: #020617;
-  --cyber-bg-light: #0f172a;
   --cyber-bg-card: rgba(15, 23, 42, 0.8);
   --cyber-border: rgba(148, 163, 184, 0.2);
-
-  /* Fonts */
-  --font-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-
-  /* Effects */
-  --cyber-glow: 0 0 15px var(--cyber-glow-primary);
-  --cyber-glow-hover: 0 0 25px var(--cyber-glow-primary);
-  --cyber-glow-error: 0 0 15px var(--cyber-glow-error);
-  --cyber-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --cyber-glow: 0 0 15px rgba(79, 70, 229, 0.4);
+  --cyber-glow-hover: 0 0 25px rgba(79, 70, 229, 0.4);
 }
 
 /* Global noise texture background */
@@ -58,14 +136,19 @@ body::before {
   line-height: 1.6;
   font-weight: 400;
 
-  color-scheme: dark;
-  color: rgba(255, 255, 255, 0.9);
+  color-scheme: light;
+  color: var(--text-primary);
   background-color: var(--cyber-bg);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.dark {
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 * {
@@ -76,7 +159,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--cyber-bg) 0%, #0f172a 100%);
+  background: linear-gradient(135deg, var(--cyber-bg) 0%, var(--bg-secondary) 100%);
   position: relative;
 }
 

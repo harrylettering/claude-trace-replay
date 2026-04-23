@@ -124,11 +124,11 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-2">Conversation Flow</h2>
-        <p className="text-slate-400">Visualize message hierarchy and parent-child relationships ({flatNodes.length} total)</p>
+        <p className="text-content-secondary">Visualize message hierarchy and parent-child relationships ({flatNodes.length} total)</p>
       </div>
 
-      <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-        <div className="divide-y divide-slate-700/50">
+      <div className="bg-surface rounded-xl border border-border overflow-hidden">
+        <div className="divide-y divide-border/50">
           {visibleNodes.length > 0 ? visibleNodes.map((node) => {
             const key = node.entry.uuid || '';
             const hasChildren = (messageMap.get(key)?.children.length ?? 0) > 0;
@@ -143,12 +143,12 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
                   {/* Thread guide lines */}
                   {Array.from({ length: indentDepth }).map((_, i) => (
                     <div key={i} className="w-6 shrink-0 flex justify-center">
-                      <div className={`w-px h-full ${node.parentDepths[i] ? 'bg-slate-600' : 'bg-transparent'}`} />
+                      <div className={`w-px h-full ${node.parentDepths[i] ? 'bg-border' : 'bg-transparent'}`} />
                     </div>
                   ))}
                   {node.depth > MAX_DEPTH_INDENT && (
                     <div className="w-6 shrink-0 flex items-center justify-center">
-                      <span className="text-slate-500 text-xs">·</span>
+                      <span className="text-muted text-xs">·</span>
                     </div>
                   )}
 
@@ -157,7 +157,7 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
                     {/* Branch connector */}
                     {node.depth > 0 && (
                       <div className="flex flex-col items-center shrink-0 mt-1" style={{ width: 16 }}>
-                        <div className="w-3 h-3 border-b border-l border-slate-600 rounded-bl" />
+                        <div className="w-3 h-3 border-b border-l border-border rounded-bl" />
                       </div>
                     )}
 
@@ -174,13 +174,13 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
                           <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-400 text-xs rounded">Sidechain</span>
                         )}
                         {node.depth > 0 && (
-                          <span className="text-slate-600 text-xs flex items-center gap-0.5">
+                          <span className="text-muted text-xs flex items-center gap-0.5">
                             <GitBranch className="w-3 h-3" />Depth {node.depth}
                           </span>
                         )}
-                        <span className="text-slate-500 text-xs">{new Date(node.entry.timestamp).toLocaleTimeString()}</span>
+                        <span className="text-muted text-xs">{new Date(node.entry.timestamp).toLocaleTimeString()}</span>
                       </div>
-                      <p className="text-slate-400 text-sm mt-0.5 truncate">
+                      <p className="text-content-secondary text-sm mt-0.5 truncate">
                         {preview.length >= 80 ? preview + '...' : preview}
                       </p>
                     </div>
@@ -189,7 +189,7 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
                     <div className="flex items-center gap-1 shrink-0">
                       <button
                         onClick={() => toggleDetails(key)}
-                        className="p-1 hover:bg-slate-700 rounded text-slate-500 hover:text-slate-300"
+                        className="p-1 hover:bg-surface-hover rounded text-muted hover:text-content"
                         title="View details"
                       >
                         {isDetailExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
@@ -197,7 +197,7 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
                       {hasChildren && (
                         <button
                           onClick={() => toggleCollapse(key)}
-                          className="px-1.5 py-0.5 text-xs rounded bg-slate-700 hover:bg-slate-600 text-slate-400 hover:text-slate-200"
+                          className="px-1.5 py-0.5 text-xs rounded bg-surface hover:bg-surface-hover text-content-secondary hover:text-content"
                           title={isCollapsed ? 'Expand child messages' : 'Collapse child messages'}
                         >
                           {isCollapsed ? `+${messageMap.get(key)!.children.length}` : '−'}
@@ -209,9 +209,9 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
 
                 {/* Expanded detail */}
                 {isDetailExpanded && (
-                  <div className={`border-t border-slate-700/50 ${getNodeBorder(node.entry.type)}`}>
+                  <div className={`border-t border-border/50 ${getNodeBorder(node.entry.type)}`}>
                     <div style={{ paddingLeft: `${(indentDepth + (node.depth > 0 ? 1 : 0)) * 24 + 12}px` }} className="pr-4 py-3">
-                      <pre className="text-xs text-slate-400 overflow-auto max-h-64 bg-slate-900/60 p-3 rounded">
+                      <pre className="text-xs text-content-secondary overflow-auto max-h-64 bg-background/60 p-3 rounded">
                         {JSON.stringify(node.entry, null, 2)}
                       </pre>
                     </div>
@@ -220,7 +220,7 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
               </div>
             );
           }) : (
-            <div className="text-center py-12 text-slate-400">
+            <div className="text-center py-12 text-content-secondary">
               No structured conversation flow found
             </div>
           )}
@@ -228,7 +228,7 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
       </div>
 
       {/* Legend */}
-      <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+      <div className="bg-surface rounded-xl p-4 border border-border">
         <h3 className="font-semibold mb-3 text-sm">Legend</h3>
         <div className="flex flex-wrap gap-4">
           {[
@@ -239,12 +239,12 @@ export function ConversationFlow({ data }: ConversationFlowProps) {
           ].map(({ color, icon, label }) => (
             <div key={label} className="flex items-center gap-2">
               <div className={`w-5 h-5 rounded-full ${color} flex items-center justify-center`}>{icon}</div>
-              <span className="text-sm text-slate-300">{label}</span>
+              <span className="text-sm text-content-secondary">{label}</span>
             </div>
           ))}
           <div className="flex items-center gap-2">
-            <GitBranch className="w-4 h-4 text-slate-400" />
-            <span className="text-sm text-slate-300">Branch Depth</span>
+            <GitBranch className="w-4 h-4 text-muted" />
+            <span className="text-sm text-content-secondary">Branch Depth</span>
           </div>
         </div>
       </div>

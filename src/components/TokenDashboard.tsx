@@ -11,8 +11,8 @@ interface TokenDashboardProps {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-lg">
-        <p className="text-slate-400 text-sm mb-2">{label}</p>
+      <div className="bg-surface border border-border rounded-lg p-3 shadow-lg">
+        <p className="text-content-secondary text-sm mb-2">{label}</p>
         {payload.map((entry: any, index: number) => (
           <p key={index} style={{ color: entry.color }} className="text-sm">
             {entry.name}: {formatTokens(entry.value)}
@@ -51,35 +51,35 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-2">Token Usage</h2>
-        <p className="text-slate-400">Detailed token consumption analysis</p>
+        <p className="text-content-secondary">Detailed token consumption analysis</p>
       </div>
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
+        <div className="bg-surface rounded-xl p-5 border border-border">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 rounded-lg bg-blue-500/10">
               <ArrowDown className="w-5 h-5 text-blue-500" />
             </div>
-            <span className="text-slate-400">Input Tokens</span>
+            <span className="text-content-secondary">Input Tokens</span>
           </div>
           <div className="text-3xl font-bold text-blue-400">{formatTokens(stats.inputTokens)}</div>
         </div>
-        <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
+        <div className="bg-surface rounded-xl p-5 border border-border">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 rounded-lg bg-purple-500/10">
               <ArrowUp className="w-5 h-5 text-purple-500" />
             </div>
-            <span className="text-slate-400">Output Tokens</span>
+            <span className="text-content-secondary">Output Tokens</span>
           </div>
           <div className="text-3xl font-bold text-purple-400">{formatTokens(stats.outputTokens)}</div>
         </div>
-        <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
+        <div className="bg-surface rounded-xl p-5 border border-border">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 rounded-lg bg-amber-500/10">
               <Zap className="w-5 h-5 text-amber-500" />
             </div>
-            <span className="text-slate-400">Total Tokens</span>
+            <span className="text-content-secondary">Total Tokens</span>
           </div>
           <div className="text-3xl font-bold text-amber-400">{formatTokens(stats.totalTokens)}</div>
         </div>
@@ -87,7 +87,7 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
 
       {/* Per-request token usage */}
       {tokenUsage.length > 0 && (
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+        <div className="bg-surface rounded-xl p-6 border border-border">
           <h3 className="text-lg font-semibold mb-4">Per-Request Token Usage</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={perRequestData}>
@@ -106,7 +106,7 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
 
       {/* Cumulative token usage */}
       {cumulativeData.length > 0 && (
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+        <div className="bg-surface rounded-xl p-6 border border-border">
           <h3 className="text-lg font-semibold mb-4">Cumulative Token Usage</h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={cumulativeData}>
@@ -133,9 +133,9 @@ export function TokenDashboard({ data }: TokenDashboardProps) {
       )}
 
       {tokenUsage.length === 0 && (
-        <div className="bg-slate-800 rounded-xl p-8 border border-slate-700 text-center">
-          <Zap className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-          <p className="text-slate-400">No token usage data was found for this session</p>
+        <div className="bg-surface rounded-xl p-8 border border-border text-center">
+          <Zap className="w-12 h-12 text-muted mx-auto mb-4" />
+          <p className="text-content-secondary">No token usage data was found for this session</p>
         </div>
       )}
     </div>

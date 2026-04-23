@@ -109,22 +109,22 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
         onClick={onClose}
       />
 
-      <div className="relative bg-slate-800 rounded-2xl border border-slate-700 shadow-2xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-slate-700">
+      <div className="relative bg-surface rounded-2xl border border-border shadow-2xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden">
+        <div className="flex items-center justify-between p-6 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-blue-500/10">
               <Server className="w-5 h-5 text-blue-500" />
             </div>
             <div>
               <h2 className="text-lg font-semibold">API Settings</h2>
-              <p className="text-sm text-slate-400">Configure an LLM API for deeper analysis</p>
+              <p className="text-sm text-content-secondary">Configure an LLM API for deeper analysis</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-surface-hover rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-slate-400" />
+            <X className="w-5 h-5 text-content-secondary" />
           </button>
         </div>
 
@@ -134,57 +134,57 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
             {configs.map((config) => (
               <div
                 key={config.id}
-                className={`bg-slate-700/50 rounded-lg border p-4 ${
-                  editingId === config.id ? 'border-blue-500' : 'border-slate-600'
+                className={`bg-surface-hover/50 rounded-lg border p-4 ${
+                  editingId === config.id ? 'border-blue-500' : 'border-border'
                 }`}
               >
                 {editingId === config.id ? (
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-1">
+                        <label className="block text-sm font-medium text-content mb-1">
                           Name
                         </label>
                         <input
                           type="text"
                           value={editingConfig.name || ''}
                           onChange={(e) => setEditingConfig({ ...editingConfig, name: e.target.value })}
-                          className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
+                          className="w-full px-3 py-2 bg-background border border-border rounded-lg text-content focus:outline-none focus:border-blue-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-1">
+                        <label className="block text-sm font-medium text-content mb-1">
                           Model
                         </label>
                         <input
                           type="text"
                           value={editingConfig.model || ''}
                           onChange={(e) => setEditingConfig({ ...editingConfig, model: e.target.value })}
-                          className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
+                          className="w-full px-3 py-2 bg-background border border-border rounded-lg text-content focus:outline-none focus:border-blue-500"
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1">
+                      <label className="block text-sm font-medium text-content mb-1">
                         API URL
                       </label>
                       <input
                         type="text"
                         value={editingConfig.baseURL || ''}
                         onChange={(e) => setEditingConfig({ ...editingConfig, baseURL: e.target.value })}
-                        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500 font-mono text-sm"
+                        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-content focus:outline-none focus:border-blue-500 font-mono text-sm"
                         placeholder="https://api.openai.com/v1"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1">
+                      <label className="block text-sm font-medium text-content mb-1">
                         API Key
                       </label>
                       <input
                         type="password"
                         value={editingConfig.apiKey || ''}
                         onChange={(e) => setEditingConfig({ ...editingConfig, apiKey: e.target.value })}
-                        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500 font-mono text-sm"
+                        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-content focus:outline-none focus:border-blue-500 font-mono text-sm"
                       />
                     </div>
                     {errors.length > 0 && (
@@ -209,7 +209,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                           setEditingId(null);
                           setEditingConfig({});
                         }}
-                        className="px-3 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors"
+                        className="px-3 py-2 bg-surface-hover hover:bg-surface rounded-lg transition-colors"
                       >
                         Cancel
                       </button>
@@ -227,7 +227,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                             </span>
                           )}
                         </div>
-                        <div className="text-sm text-slate-400 space-y-1">
+                        <div className="text-sm text-content-secondary space-y-1">
                           <div className="flex items-center gap-2">
                             <Server className="w-3 h-3" />
                             <span className="font-mono">{config.baseURL}</span>
@@ -258,7 +258,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                           <button
                             onClick={() => handleTest(config)}
                             disabled={isTesting === config.id}
-                            className="p-1.5 hover:bg-slate-600 rounded text-slate-400 hover:text-white transition-colors"
+                            className="p-1.5 hover:bg-surface-hover rounded text-content-secondary hover:text-white transition-colors"
                             title="Test connection"
                           >
                             {isTesting === config.id ? (
@@ -269,7 +269,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                           </button>
                           <button
                             onClick={() => handleEdit(config)}
-                            className="p-1.5 hover:bg-slate-600 rounded text-slate-400 hover:text-white transition-colors"
+                            className="p-1.5 hover:bg-surface-hover rounded text-content-secondary hover:text-white transition-colors"
                             title="Edit"
                           >
                             <Save className="w-4 h-4" />
@@ -277,7 +277,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                           {!config.isDefault && (
                             <button
                               onClick={() => handleSetDefault(config.id)}
-                              className="p-1.5 hover:bg-slate-600 rounded text-slate-400 hover:text-white transition-colors"
+                              className="p-1.5 hover:bg-surface-hover rounded text-content-secondary hover:text-white transition-colors"
                               title="Set as default"
                             >
                               <Check className="w-4 h-4" />
@@ -285,7 +285,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                           )}
                           <button
                             onClick={() => handleDelete(config.id)}
-                            className="p-1.5 hover:bg-red-600/20 rounded text-slate-400 hover:text-red-400 transition-colors"
+                            className="p-1.5 hover:bg-red-600/20 rounded text-content-secondary hover:text-red-400 transition-colors"
                             title="Delete"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -300,55 +300,55 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
 
             {/* 新增配置 */}
             {editingId === 'new' && (
-              <div className="bg-slate-700/50 rounded-lg border border-blue-500 p-4">
+              <div className="bg-surface-hover/50 rounded-lg border border-blue-500 p-4">
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1">
+                      <label className="block text-sm font-medium text-content mb-1">
                         Name
                       </label>
                       <input
                         type="text"
                         value={editingConfig.name || ''}
                         onChange={(e) => setEditingConfig({ ...editingConfig, name: e.target.value })}
-                        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
+                        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-content focus:outline-none focus:border-blue-500"
                         placeholder="My API"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1">
+                      <label className="block text-sm font-medium text-content mb-1">
                         Model
                       </label>
                       <input
                         type="text"
                         value={editingConfig.model || ''}
                         onChange={(e) => setEditingConfig({ ...editingConfig, model: e.target.value })}
-                        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
+                        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-content focus:outline-none focus:border-blue-500"
                         placeholder="gpt-4-turbo-preview"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">
+                    <label className="block text-sm font-medium text-content mb-1">
                       API URL
                     </label>
                     <input
                       type="text"
                       value={editingConfig.baseURL || ''}
                       onChange={(e) => setEditingConfig({ ...editingConfig, baseURL: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500 font-mono text-sm"
+                      className="w-full px-3 py-2 bg-background border border-border rounded-lg text-content focus:outline-none focus:border-blue-500 font-mono text-sm"
                       placeholder="https://api.openai.com/v1"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">
+                    <label className="block text-sm font-medium text-content mb-1">
                       API Key
                     </label>
                     <input
                       type="password"
                       value={editingConfig.apiKey || ''}
                       onChange={(e) => setEditingConfig({ ...editingConfig, apiKey: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500 font-mono text-sm"
+                      className="w-full px-3 py-2 bg-background border border-border rounded-lg text-content focus:outline-none focus:border-blue-500 font-mono text-sm"
                     />
                   </div>
                   {errors.length > 0 && (
@@ -373,7 +373,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
                         setEditingId(null);
                         setEditingConfig({});
                       }}
-                      className="px-3 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors"
+                      className="px-3 py-2 bg-surface-hover hover:bg-surface rounded-lg transition-colors"
                     >
                       Cancel
                     </button>
@@ -386,7 +386,7 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
             {editingId === null && (
               <button
                 onClick={handleAdd}
-                className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-slate-600 hover:border-slate-500 rounded-lg text-slate-400 hover:text-slate-300 transition-colors"
+                className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-border hover:border-content-secondary rounded-lg text-content-secondary hover:text-content transition-colors"
               >
                 <Plus className="w-5 h-5" />
                 Add API Configuration
@@ -395,12 +395,12 @@ export function APISettings({ isOpen, onClose }: APISettingsProps) {
           </div>
 
           {/* 说明 */}
-          <div className="mt-6 p-4 bg-slate-700/30 rounded-lg">
-            <h3 className="text-sm font-medium text-slate-300 mb-2">Supported APIs</h3>
-            <p className="text-sm text-slate-400">
+          <div className="mt-6 p-4 bg-surface-hover/30 rounded-lg">
+            <h3 className="text-sm font-medium text-content mb-2">Supported APIs</h3>
+            <p className="text-sm text-content-secondary">
               Any service compatible with the OpenAI Chat Completions API format can be used, including:
             </p>
-            <ul className="text-sm text-slate-400 mt-2 space-y-1 list-disc list-inside">
+            <ul className="text-sm text-content-secondary mt-2 space-y-1 list-disc list-inside">
               <li>OpenAI (GPT-4, GPT-3.5)</li>
               <li>Anthropic Claude (through a compatibility layer)</li>
               <li>Azure OpenAI Service</li>

@@ -80,13 +80,13 @@ export function SessionOverview({ data }: SessionOverviewProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-2">Session Overview</h2>
-        <p className="text-slate-400">Complete statistics for this Claude Code session</p>
+        <p className="text-content-secondary">Complete statistics for this Claude Code session</p>
       </div>
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card, idx) => (
-          <div key={idx} className="bg-slate-800 rounded-xl p-5 border border-slate-700">
+          <div key={idx} className="bg-surface rounded-xl p-5 border border-border">
             <div className="flex items-center justify-between mb-3">
               <div className={`p-2 rounded-lg bg-gradient-to-br ${card.color} opacity-10`}>
                 <div className={getIconColorClass(card.color)}>
@@ -95,9 +95,9 @@ export function SessionOverview({ data }: SessionOverviewProps) {
               </div>
             </div>
             <div className="text-2xl font-bold mb-1">{card.value}</div>
-            <div className="text-slate-400 text-sm">{card.title}</div>
+            <div className="text-content-secondary text-sm">{card.title}</div>
             {card.subtitle && (
-              <div className="text-slate-500 text-xs mt-1">{card.subtitle}</div>
+              <div className="text-muted text-xs mt-1">{card.subtitle}</div>
             )}
           </div>
         ))}
@@ -105,7 +105,7 @@ export function SessionOverview({ data }: SessionOverviewProps) {
 
       {/* Models used */}
       {stats.modelsUsed.length > 0 && (
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+        <div className="bg-surface rounded-xl p-6 border border-border">
           <h3 className="text-lg font-semibold mb-4">Models Used</h3>
           <div className="flex flex-wrap gap-2">
             {stats.modelsUsed.map((model, idx) => (

@@ -5,11 +5,11 @@ import { clsx } from 'clsx';
 
 interface FileUploadProps {
   onFileLoad: (content: string) => void;
-  isDark: boolean;
+  isDark?: boolean; // Deprecated: kept for backward compatibility
   disabled?: boolean;
 }
 
-export function FileUpload({ onFileLoad, isDark, disabled = false }: FileUploadProps) {
+export function FileUpload({ onFileLoad, disabled = false }: FileUploadProps) {
   const handleDrop = useCallback((e: React.DragEvent) => {
     if (disabled) return;
     e.preventDefault();
@@ -44,14 +44,8 @@ export function FileUpload({ onFileLoad, isDark, disabled = false }: FileUploadP
       className={clsx(
         "border-2 border-dashed rounded-lg p-6 text-center transition-colors",
         disabled
-          ? "border-slate-700 bg-slate-800/50 cursor-not-allowed opacity-60"
-          : "cursor-pointer",
-        !disabled && isDark
-          ? "border-slate-600 hover:border-blue-500 hover:bg-slate-700/30"
-          : "",
-        !disabled && !isDark
-          ? "border-slate-300 hover:border-blue-500 hover:bg-slate-50"
-          : ""
+          ? "border-border bg-surface/50 cursor-not-allowed opacity-60"
+          : "cursor-pointer border-border hover:border-blue-500 hover:bg-surface-hover"
       )}
     >
       <input
@@ -67,14 +61,14 @@ export function FileUpload({ onFileLoad, isDark, disabled = false }: FileUploadP
         className={clsx("cursor-pointer", disabled && "cursor-not-allowed")}
       >
         {disabled ? (
-          <Loader2 className={clsx("w-8 h-8 mx-auto mb-2 animate-spin", isDark ? "text-slate-500" : "text-slate-400")} />
+          <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin text-muted" />
         ) : (
-          <Upload className={clsx("w-8 h-8 mx-auto mb-2", isDark ? "text-slate-400" : "text-slate-500")} />
+          <Upload className="w-8 h-8 mx-auto mb-2 text-muted" />
         )}
-        <div className={clsx("text-sm font-medium", isDark ? "text-slate-300" : "text-slate-700")}>
+        <div className="text-sm font-medium text-content-secondary">
           {disabled ? "Processing..." : "Click or drag to upload"}
         </div>
-        <div className={clsx("text-xs mt-1", isDark ? "text-slate-500" : "text-slate-400")}>
+        <div className="text-xs mt-1 text-muted">
           .jsonl, .json, .log
         </div>
       </label>
