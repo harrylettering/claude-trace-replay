@@ -202,6 +202,13 @@ export default function App() {
                 </div>
               </div>
 
+              {session.sessionName && (
+                <div className="mb-4">
+                  <span className="text-[10px] font-black text-emerald-500/80 uppercase tracking-widest block mb-1">Session Name</span>
+                  <h3 className="font-black text-emerald-400 break-all text-base leading-tight group-hover:text-emerald-300 transition-colors">{session.sessionName}</h3>
+                </div>
+              )}
+
               <div className="mb-4">
                 <span className="text-[10px] font-black text-blue-500/80 uppercase tracking-widest block mb-1">Folder Context</span>
                 <h3 className="font-black text-slate-100 break-all text-sm leading-tight group-hover:text-blue-400 transition-colors">{session.folderName}</h3>
@@ -288,7 +295,48 @@ export default function App() {
   }
 
   const renderView = () => {
-    if (currentView === 'compare') return <SessionCompare defaultSession={logData || undefined} />
+    if (currentView === 'compare') {
+      return (
+        <SessionCompare
+          defaultSession={logData || undefined}
+          discoveryList={discoveryList}
+          onLoadDiscoverySession={async (path: string) => {
+            return new Promise((resolve, reject) => {
+              if (!wsRef.current || !isWsConnected) {
+                reject(new Error('WebSocket not connected'))
+                return
+              }
+
+              const handleMessage = (event: MessageEvent) => {
+                try {
+                  const { type, payload } = JSON.parse(event.data)
+                  if (type === 'session-content') {
+                    wsRef.current?.removeEventListener('message', handleMessage)
+                    resolve(payload.content)
+                  } else if (type === 'session-content-error') {
+                    wsRef.current?.removeEventListener('message', handleMessage)
+                    reject(new Error(payload.error))
+                  }
+                } catch (e) {
+                  // Ignore parse errors
+                }
+              }
+
+              wsRef.current.addEventListener('message', handleMessage)
+              wsRef.current.send(JSON.stringify({
+                type: 'load-session-content',
+                data: { path }
+              }))
+
+              setTimeout(() => {
+                wsRef.current?.removeEventListener('message', handleMessage)
+                reject(new Error('Timeout loading session'))
+              }, 10000)
+            })
+          }}
+        />
+      )
+    }
     if (currentView === 'agent-flow') return (
       <div className="h-[calc(100vh-73px-64px)] flex flex-col">
         <AgentFlowView data={logData} />
