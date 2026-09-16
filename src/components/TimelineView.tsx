@@ -14,6 +14,12 @@ import { AdvancedSearchFilter } from './AdvancedSearchFilter';
 import { detectLoop } from '../utils/loopDetector';
 import { PromptOptimizer } from './PromptOptimizer';
 import { ActionCardRenderer } from './AgentActionCards';
+import {
+  describeLocalZone,
+  formatLocalTime,
+  formatTimestampTooltip,
+  spansMultipleLocalDays,
+} from '../utils/timeFormat';
 
 const OVERSCAN_COUNT = 3;
 const BASE_ITEM_HEIGHT = 150; // Base item height
@@ -335,6 +341,7 @@ const TimelineEntry = memo(function TimelineEntry({
   onToggle,
   totalItems,
   density,
+  showDate,
   onMeasure,
 }: {
   item: DisplayTimelineItem;
@@ -343,6 +350,8 @@ const TimelineEntry = memo(function TimelineEntry({
   onToggle: (key: string) => void;
   totalItems: number;
   density: TimelineDensity;
+  /** Prefix the local date — set when the session crosses midnight. */
+  showDate: boolean;
   onMeasure?: (index: number, height: number) => void;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -419,8 +428,11 @@ const TimelineEntry = memo(function TimelineEntry({
                 )}
               </div>
               <div className="flex items-center gap-3 shrink-0">
-                <span className="text-slate-500 font-mono text-[10px]">
-                  {new Date(entry.timestamp).toLocaleTimeString()}
+                <span
+                  className="text-slate-500 font-mono text-[10px] tabular-nums"
+                  title={formatTimestampTooltip(entry.timestamp)}
+                >
+                  {formatLocalTime(entry.timestamp, { withDate: showDate })}
                 </span>
                 {groupedCount > 1 && (
                   <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-cyan-300">
@@ -511,8 +523,11 @@ const TimelineEntry = memo(function TimelineEntry({
                               {getActionSummary(groupEntry).title}
                             </p>
                           </div>
-                          <span className="text-[10px] font-mono text-slate-500">
-                            {new Date(groupEntry.timestamp).toLocaleTimeString()}
+                          <span
+                            className="text-[10px] font-mono text-slate-500 tabular-nums"
+                            title={formatTimestampTooltip(groupEntry.timestamp)}
+                          >
+                            {formatLocalTime(groupEntry.timestamp, { withDate: showDate })}
                           </span>
                         </div>
                         {groupEntry.parsedAction && (
@@ -566,6 +581,7 @@ interface TimelineListProps {
   onToggleExpand: (key: string) => void;
   containerHeight: number;
   density: TimelineDensity;
+  showDate: boolean;
 }
 
 // Virtual list with dynamic row heights. Only rows near the viewport are
@@ -576,6 +592,7 @@ function VirtualTimelineList({
   onToggleExpand,
   containerHeight,
   density,
+  showDate,
 }: TimelineListProps) {
   const [scrollTop, setScrollTop] = useState(0);
   // Measured heights keyed by row key, so they survive re-filtering and the
@@ -693,6 +710,7 @@ function VirtualTimelineList({
           onToggle={onToggleExpand}
           totalItems={items.length}
           density={density}
+          showDate={showDate}
           onMeasure={handleMeasure}
         />
       </div>
@@ -723,6 +741,7 @@ function PlainTimelineList({
   onToggleExpand,
   containerHeight,
   density,
+  showDate,
 }: TimelineListProps) {
   return (
     <div
@@ -738,6 +757,7 @@ function PlainTimelineList({
           onToggle={onToggleExpand}
           totalItems={items.length}
           density={density}
+          showDate={showDate}
         />
       ))}
     </div>
@@ -806,6 +826,14 @@ export function TimelineView({ data, cliResult, isCliAnalyzing, cliError, onRunC
 
   const displayItems = useMemo(() => buildDisplayItems(entriesWithKeys, density), [entriesWithKeys, density]);
 
+  // Decided over the whole session, not the filtered rows, so narrowing a
+  // filter to one afternoon doesn't make the dates flicker off and on.
+  const showDate = useMemo(
+    () => spansMultipleLocalDays((data?.entries || []).map((entry) => entry.timestamp)),
+    [data?.entries]
+  );
+  const firstTimestamp = data?.entries?.find((entry) => entry.timestamp)?.timestamp;
+
   // Detect whether the agent appears to be stuck in a loop.
   const loopWarning = useMemo(() => {
     try {
@@ -836,6 +864,12 @@ export function TimelineView({ data, cliResult, isCliAnalyzing, cliError, onRunC
               <h2 className="text-2xl font-bold mb-2">Session Timeline</h2>
               <p className="text-slate-400 text-sm">
                 Track each action and reasoning step from the AI coding session
+                <span
+                  className="ml-2 text-slate-500 text-xs"
+                  title="The log records UTC; times here are converted to this browser's time zone. Hover a time to see the original value."
+                >
+                  · Times in {describeLocalZone(firstTimestamp)}
+                </span>
                 {displayItems.length > VIRTUALIZE_THRESHOLD && (
                   <span className="ml-2 text-amber-500/70 text-xs">
                     (virtualized list over {entriesWithKeys.length.toLocaleString()} entries)
@@ -897,6 +931,7 @@ export function TimelineView({ data, cliResult, isCliAnalyzing, cliError, onRunC
                 onToggleExpand={toggleExpand}
                 containerHeight={Math.max(listHeight, 200)}
                 density={density}
+                showDate={showDate}
               />
             );
           })()

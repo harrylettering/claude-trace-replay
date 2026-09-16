@@ -15,6 +15,7 @@ import type { SearchFilters, MessageTypeFilter, SearchMode } from '../types/sear
 import { DEFAULT_FILTERS } from '../types/search';
 import { getToolNames, isValidRegex } from '../utils/searchFilter';
 import type { LogEntry } from '../types/log';
+import { describeLocalZone } from '../utils/timeFormat';
 
 interface AdvancedSearchFilterProps {
   entries: LogEntry[];
@@ -288,6 +289,7 @@ export function AdvancedSearchFilter({
               <h4 className="text-sm font-medium text-slate-300 flex items-center gap-2">
                 <Clock className="w-4 h-4" />
                 Time Range
+                <span className="text-xs font-normal text-slate-500">{describeLocalZone()}</span>
               </h4>
               <div className="space-y-2">
                 <input
